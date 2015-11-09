@@ -1,0 +1,153 @@
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="1133" measuredH="829" mockupW="900" mockupH="800">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="233" y="29" w="900" h="800" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <borderStyle>square</borderStyle>
+        <text>A%20Web%20Page%0Ahttps%3A//ids.tacc.utexas.edu/projects</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="__group__" x="279" y="165" w="789" h="102" measuredW="789" measuredH="102" zOrder="1" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Canvas" x="0" y="0" w="789" h="102" measuredW="100" measuredH="70" zOrder="0" locked="false" isInGroup="1">
+          <controlProperties>
+            <borderColor>14540253</borderColor>
+            <color>16777215</color>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Image" x="15" y="8" w="-1" h="-1" measuredW="414" measuredH="80" zOrder="1" locked="false" isInGroup="1">
+          <controlProperties>
+            <src>https%3A//www.nsf.gov/images/head.gif</src>
+            <text/>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Title" x="421" y="30" w="-1" h="-1" measuredW="340" measuredH="43" zOrder="2" locked="false" isInGroup="1">
+          <controlProperties>
+            <text>Identifier%20Services</text>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="2" controlTypeID="com.balsamiq.mockups::Canvas" x="233" y="101" w="900" h="60" measuredW="100" measuredH="70" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>0</color>
+      </controlProperties>
+    </control>
+    <control controlID="3" controlTypeID="com.balsamiq.mockups::Button" x="279" y="118" w="-1" h="-1" measuredW="80" measuredH="28" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>0</color>
+        <size>20</size>
+        <text>HOME</text>
+      </controlProperties>
+    </control>
+    <control controlID="4" controlTypeID="com.balsamiq.mockups::Button" x="861" y="117" w="-1" h="-1" measuredW="117" measuredH="28" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>0</color>
+        <size>20</size>
+        <text>Hello%20User</text>
+      </controlProperties>
+    </control>
+    <control controlID="5" controlTypeID="com.balsamiq.mockups::Button" x="986" y="117" w="85" h="28" measuredW="85" measuredH="28" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>0</color>
+        <size>20</size>
+        <text>Logout</text>
+      </controlProperties>
+    </control>
+    <control controlID="16" controlTypeID="com.balsamiq.mockups::Canvas" x="233" y="753" w="900" h="51" measuredW="100" measuredH="70" zOrder="6" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>0</color>
+      </controlProperties>
+    </control>
+    <control controlID="17" controlTypeID="com.balsamiq.mockups::Paragraph" x="280" y="759" w="803" h="36" measuredW="275" measuredH="80" zOrder="7" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>16777215</color>
+        <text>%A92011-2014%20Texas%20Advanced%20Computing%20Center%2C%20The%20University%20of%20Texas%20at%20Austin%20%0AOffice%20of%20the%20Vice%20President%20for%20Research%0A%20%0AContact%20%7C%20Feedback%20%7C%20Jobs%0AReport%20a%20Security%20Issue</text>
+      </controlProperties>
+    </control>
+    <control controlID="18" controlTypeID="com.balsamiq.mockups::MultilineButton" x="300" y="644" w="-1" h="-1" measuredW="135" measuredH="66" zOrder="9" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>11982760</color>
+        <href>New%20Project%26bm%3BNew%20Project.bmml%26bm%3BNew%20Project.bmml%26bm%3BNew%20Project.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2267%2C615%2C202%2C681%22%20href%3D%22New%2520Project.bmml%22%20alt%3D%22New%20Project%22%20id%3D%2218%22/%3E</map>
+        <text>Create%20Project</text>
+      </controlProperties>
+    </control>
+    <control controlID="22" controlTypeID="com.balsamiq.mockups::MultilineButton" x="300" y="314" w="150" h="120" measuredW="96" measuredH="95" zOrder="10" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>16770457</color>
+        <text>Project%20A%0AProject%20A%20has%209%20objects%2C%0A16%20links%0Aand%205%20Identifiers</text>
+      </controlProperties>
+    </control>
+    <control controlID="23" controlTypeID="com.balsamiq.mockups::FieldSet" x="279" y="282" w="225" h="445" measuredW="200" measuredH="170" zOrder="8" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Your%20Project%20List</text>
+      </controlProperties>
+    </control>
+    <control controlID="24" controlTypeID="com.balsamiq.mockups::MultilineButton" x="300" y="444" w="150" h="120" measuredW="95" measuredH="95" zOrder="11" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Project%20B%0AProject%20A%20has%209%20objects%2C%0A16%20links%0Aand%205%20Identifiers</text>
+      </controlProperties>
+    </control>
+    <control controlID="26" controlTypeID="com.balsamiq.mockups::FieldSet" x="517" y="282" w="282" h="445" measuredW="200" measuredH="170" zOrder="12" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Quick%20View</text>
+      </controlProperties>
+    </control>
+    <control controlID="30" controlTypeID="com.balsamiq.mockups::Tree" x="531" y="305" w="253" h="324" measuredW="300" measuredH="264" zOrder="13" locked="false" isInGroup="-1">
+      <controlProperties>
+        <hrefs>%2CSpecimen%26bm%3BSpecimen.bmml%26bm%3BSpecimen.bmml%26bm%3BSpecimen.bmml%2CProcesses%26bm%3BProcesses.bmml%26bm%3BProcesses.bmml%26bm%3BProcesses.bmml%2CProcesses%26bm%3BProcesses.bmml%26bm%3BProcesses.bmml%26bm%3BProcesses.bmml%2CFiles%26bm%3BFiles.bmml%26bm%3BFiles.bmml%26bm%3BFiles.bmml%2CProcesses%26bm%3BProcesses.bmml%26bm%3BProcesses.bmml%26bm%3BProcesses.bmml%2CFiles%26bm%3BFiles.bmml%26bm%3BFiles.bmml%26bm%3BFiles.bmml%2C%2C%2C%2C%2C</hrefs>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22298%2C303%2C551%2C324%22%20href%3D%22Specimen.bmml%22%20alt%3D%22Specimen%22%20id%3D%2230%22/%3E%3Carea%20shape%3D%22rect%22%20coords%3D%22298%2C324%2C551%2C345%22%20href%3D%22Processes.bmml%22%20alt%3D%22Processes%22%20id%3D%2230%22/%3E%3Carea%20shape%3D%22rect%22%20coords%3D%22298%2C345%2C551%2C366%22%20href%3D%22Processes.bmml%22%20alt%3D%22Processes%22%20id%3D%2230%22/%3E%3Carea%20shape%3D%22rect%22%20coords%3D%22298%2C366%2C551%2C387%22%20href%3D%22Files.bmml%22%20alt%3D%22Files%22%20id%3D%2230%22/%3E%3Carea%20shape%3D%22rect%22%20coords%3D%22298%2C387%2C551%2C408%22%20href%3D%22Processes.bmml%22%20alt%3D%22Processes%22%20id%3D%2230%22/%3E%3Carea%20shape%3D%22rect%22%20coords%3D%22298%2C408%2C551%2C429%22%20href%3D%22Files.bmml%22%20alt%3D%22Files%22%20id%3D%2230%22/%3E</map>
+        <text>Project%20A%0A.Specimen%0A..Process%20A%0A...Input%0A....F%20File1.stff%0A...Output%0A....F%20File2.stff%0A..Process%20B%0A...Input%0A....F%20File1.stff%0A...Output%0A....F%20File2.stff</text>
+      </controlProperties>
+    </control>
+    <control controlID="31" controlTypeID="com.balsamiq.mockups::Button" x="531" y="644" w="-1" h="-1" measuredW="107" measuredH="27" zOrder="14" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>Add%20Specimen%26bm%3BAdd%20Specimen.bmml%26bm%3BAdd%20Specimen.bmml%26bm%3BAdd%20Specimen.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22298%2C615%2C405%2C642%22%20href%3D%22Add%2520Specimen.bmml%22%20alt%3D%22Add%20Specimen%22%20id%3D%2231%22/%3E</map>
+        <text>Add%20Specimen</text>
+      </controlProperties>
+    </control>
+    <control controlID="32" controlTypeID="com.balsamiq.mockups::Button" x="531" y="684" w="-1" h="-1" measuredW="77" measuredH="27" zOrder="15" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>Files%26bm%3BFiles.bmml%26bm%3BFiles.bmml%26bm%3BFiles.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22298%2C655%2C375%2C682%22%20href%3D%22Files.bmml%22%20alt%3D%22Files%22%20id%3D%2232%22/%3E</map>
+        <text>Add%20Data</text>
+      </controlProperties>
+    </control>
+    <control controlID="33" controlTypeID="com.balsamiq.mockups::Button" x="687" y="644" w="-1" h="-1" measuredW="97" measuredH="27" zOrder="16" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>Add%20Process%26bm%3BAdd%20Process.bmml%26bm%3BAdd%20Process.bmml%26bm%3BAdd%20Process.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22454%2C615%2C551%2C642%22%20href%3D%22Add%2520Process.bmml%22%20alt%3D%22Add%20Process%22%20id%3D%2233%22/%3E</map>
+        <text>Add%20Process</text>
+      </controlProperties>
+    </control>
+    <control controlID="34" controlTypeID="com.balsamiq.mockups::Button" x="690" y="684" w="-1" h="-1" measuredW="94" measuredH="27" zOrder="17" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>Add%20System%26bm%3BAdd%20System.bmml%26bm%3BAdd%20System.bmml%26bm%3BAdd%20System.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22457%2C655%2C551%2C682%22%20href%3D%22Add%2520System.bmml%22%20alt%3D%22Add%20System%22%20id%3D%2234%22/%3E</map>
+        <text>Add%20System</text>
+      </controlProperties>
+    </control>
+    <control controlID="35" controlTypeID="com.balsamiq.mockups::MultilineButton" x="828" y="299" w="220" h="115" measuredW="103" measuredH="124" zOrder="20" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Get%20a%20DOI%0A%20%0A7%20of%209%20fields%20completed%0A%20%0A2%20more%20fields%20needed%20to%20request%20a%20DOI%20for%20everything%20you%20see%20on%20this%20page</text>
+      </controlProperties>
+    </control>
+    <control controlID="36" controlTypeID="com.balsamiq.mockups::List" x="828" y="429" w="220" h="104" measuredW="100" measuredH="126" zOrder="19" locked="false" isInGroup="-1">
+      <controlProperties>
+        <selectedIndex>0</selectedIndex>
+        <text>Item%20Needed%3A%20Metadata%20Thing%201%0AItem%20Needed%3A%20Metadata%20Thing%202</text>
+      </controlProperties>
+    </control>
+    <control controlID="37" controlTypeID="com.balsamiq.mockups::FieldSet" x="809" y="282" w="259" h="445" measuredW="200" measuredH="170" zOrder="18" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Indetifiers</text>
+      </controlProperties>
+    </control>
+    <control controlID="39" controlTypeID="com.balsamiq.mockups::Title" x="927" y="586" w="-1" h="-1" measuredW="23" measuredH="43" zOrder="21" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>%3F</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>
