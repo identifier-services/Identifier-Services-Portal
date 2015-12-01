@@ -34,8 +34,8 @@
     <control controlID="42" controlTypeID="com.balsamiq.mockups::Button" x="382" y="112" w="-1" h="-1" measuredW="119" measuredH="27" zOrder="5" locked="false" isInGroup="-1">
       <controlProperties>
         <color>0</color>
-        <href>IDS%20-%20Browse%20Public%20-%20Authenticated%26bm%3BIDS%20-%20Browse%20Public%20-%20Authenticated.bmml%26bm%3BIDS%20-%20Browse%20Public%20-%20Authenticated.bmml%26bm%3BIDS%20-%20Browse%20Public%20-%20Authenticated.bmml</href>
-        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22149%2C83%2C268%2C110%22%20href%3D%22IDS%2520-%2520Browse%2520Public%2520-%2520Authenticated.bmml%22%20alt%3D%22IDS%20-%20Browse%20Public%20-%20Authenticated%22%20id%3D%2242%22/%3E</map>
+        <href>IDS%20-%20Browse%20Public%20-%20Unauthenticated%26bm%3BIDS%20-%20Browse%20Public%20-%20Unauthenticated.bmml%26bm%3BIDS%20-%20Browse%20Public%20-%20Unauthenticated.bmml%26bm%3BIDS%20-%20Browse%20Public%20-%20Unauthenticated.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22149%2C83%2C268%2C110%22%20href%3D%22IDS%2520-%2520Browse%2520Public%2520-%2520Unauthenticated.bmml%22%20alt%3D%22IDS%20-%20Browse%20Public%20-%20Unauthenticated%22%20id%3D%2242%22/%3E</map>
         <text>Browse%20Projects</text>
       </controlProperties>
     </control>

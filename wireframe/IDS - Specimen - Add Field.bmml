@@ -1,6 +1,6 @@
-<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="1133" measuredH="1088" mockupW="900" mockupH="1059">
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="1133" measuredH="1198" mockupW="900" mockupH="1169">
   <controls>
-    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="233" y="29" w="900" h="1059" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="233" y="29" w="900" h="1169" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
       <controlProperties>
         <borderStyle>squareBreakline</borderStyle>
         <text>A%20Web%20Page%0Ahttps%3A//ids.tacc.utexas.edu</text>
@@ -78,6 +78,7 @@
     </control>
     <control controlID="78" controlTypeID="com.balsamiq.mockups::TextInput" x="304" y="320" w="545" h="-1" measuredW="74" measuredH="27" zOrder="10" locked="false" isInGroup="-1">
       <controlProperties>
+        <state>disabled</state>
         <text>Zea%20Mays</text>
       </controlProperties>
     </control>
@@ -87,20 +88,19 @@
         <text>%28required%29</text>
       </controlProperties>
     </control>
-    <control controlID="88" controlTypeID="com.balsamiq.mockups::Button" x="304" y="918" w="144" h="41" measuredW="141" measuredH="27" zOrder="12" locked="false" isInGroup="-1">
+    <control controlID="88" controlTypeID="com.balsamiq.mockups::Button" x="304" y="1062" w="144" h="41" measuredW="141" measuredH="27" zOrder="12" locked="false" isInGroup="-1">
       <controlProperties>
         <color>40463</color>
-        <href>IDS%20-%20Project%20-%20Overview%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml</href>
         <icon>check%7Csmall</icon>
-        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C889%2C215%2C930%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2288%22/%3E</map>
+        <state>disabled</state>
         <text>Save%20Specimen</text>
       </controlProperties>
     </control>
-    <control controlID="89" controlTypeID="com.balsamiq.mockups::Button" x="471" y="918" w="144" h="41" measuredW="64" measuredH="27" zOrder="13" locked="false" isInGroup="-1">
+    <control controlID="89" controlTypeID="com.balsamiq.mockups::Button" x="471" y="1062" w="144" h="41" measuredW="83" measuredH="27" zOrder="13" locked="false" isInGroup="-1">
       <controlProperties>
         <color>16777215</color>
-        <href>IDS%20-%20Project%20-%20Overview%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml</href>
-        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22238%2C889%2C382%2C930%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2289%22/%3E</map>
+        <icon>times%7Cxsmall</icon>
+        <state>disabled</state>
         <text>Cancel</text>
       </controlProperties>
     </control>
@@ -111,6 +111,7 @@
     </control>
     <control controlID="121" controlTypeID="com.balsamiq.mockups::TextInput" x="304" y="388" w="545" h="-1" measuredW="66" measuredH="27" zOrder="16" locked="false" isInGroup="-1">
       <controlProperties>
+        <state>disabled</state>
         <text>CML322</text>
       </controlProperties>
     </control>
@@ -127,6 +128,7 @@
     </control>
     <control controlID="124" controlTypeID="com.balsamiq.mockups::TextInput" x="304" y="456" w="545" h="-1" measuredW="37" measuredH="27" zOrder="19" locked="false" isInGroup="-1">
       <controlProperties>
+        <state>disabled</state>
         <text>leaf</text>
       </controlProperties>
     </control>
@@ -137,6 +139,7 @@
     </control>
     <control controlID="135" controlTypeID="com.balsamiq.mockups::TextInput" x="304" y="524" w="545" h="-1" measuredW="129" measuredH="27" zOrder="21" locked="false" isInGroup="-1">
       <controlProperties>
+        <state>disabled</state>
         <text>14%20day%20old%20seedling</text>
       </controlProperties>
     </control>
@@ -147,6 +150,7 @@
     </control>
     <control controlID="137" controlTypeID="com.balsamiq.mockups::TextInput" x="304" y="595" w="545" h="-1" measuredW="28" measuredH="27" zOrder="23" locked="false" isInGroup="-1">
       <controlProperties>
+        <state>disabled</state>
         <text>10</text>
       </controlProperties>
     </control>
@@ -157,6 +161,7 @@
     </control>
     <control controlID="139" controlTypeID="com.balsamiq.mockups::TextInput" x="304" y="663" w="545" h="-1" measuredW="52" measuredH="27" zOrder="25" locked="false" isInGroup="-1">
       <controlProperties>
+        <state>disabled</state>
         <text>diploid</text>
       </controlProperties>
     </control>
@@ -167,6 +172,7 @@
     </control>
     <control controlID="141" controlTypeID="com.balsamiq.mockups::TextInput" x="304" y="730" w="545" h="-1" measuredW="54" measuredH="27" zOrder="27" locked="false" isInGroup="-1">
       <controlProperties>
+        <state>disabled</state>
         <text>selfing</text>
       </controlProperties>
     </control>
@@ -177,16 +183,17 @@
     </control>
     <control controlID="143" controlTypeID="com.balsamiq.mockups::TextInput" x="304" y="797" w="545" h="-1" measuredW="68" measuredH="27" zOrder="29" locked="false" isInGroup="-1">
       <controlProperties>
+        <state>disabled</state>
         <text>2300%20Mb</text>
       </controlProperties>
     </control>
-    <control controlID="145" controlTypeID="com.balsamiq.mockups::Button" x="304" y="854" w="120" h="30" measuredW="95" measuredH="27" zOrder="30" locked="false" isInGroup="-1">
+    <control controlID="145" controlTypeID="com.balsamiq.mockups::Button" x="324" y="988" w="120" h="30" measuredW="102" measuredH="27" zOrder="30" locked="false" isInGroup="-1">
       <controlProperties>
         <color>2848996</color>
-        <href>IDS%20-%20Specimen%20-%20Add%20Field%26bm%3BIDS%20-%20Specimen%20-%20Add%20Field.bmml%26bm%3BIDS%20-%20Specimen%20-%20Add%20Field.bmml%26bm%3BIDS%20-%20Specimen%20-%20Add%20Field.bmml</href>
+        <href>IDS%20-%20Project%20-%20Specimen%26bm%3BIDS%20-%20Project%20-%20Specimen.bmml%26bm%3BIDS%20-%20Project%20-%20Specimen.bmml%26bm%3BIDS%20-%20Project%20-%20Specimen.bmml</href>
         <icon>plus%7Cxsmall</icon>
-        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C825%2C191%2C855%22%20href%3D%22IDS%2520-%2520Specimen%2520-%2520Add%2520Field.bmml%22%20alt%3D%22IDS%20-%20Specimen%20-%20Add%20Field%22%20id%3D%22145%22/%3E</map>
-        <text>Add%20Field</text>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2291%2C959%2C211%2C989%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Specimen.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Specimen%22%20id%3D%22145%22/%3E</map>
+        <text>Save%20Field</text>
       </controlProperties>
     </control>
     <control controlID="146" controlTypeID="com.balsamiq.mockups::LinkBar" x="304" y="212" w="-1" h="-1" measuredW="200" measuredH="19" zOrder="31" locked="false" isInGroup="-1">
@@ -195,6 +202,65 @@
         <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C185%2C114%2C198%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%22146%22/%3E%3Carea%20shape%3D%22rect%22%20coords%3D%22132%2C185%2C183%2C198%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Edit.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Edit%22%20id%3D%22146%22/%3E</map>
         <selectedIndex>-1</selectedIndex>
         <text>Project%2C%20Abstract%2C%20Publications</text>
+      </controlProperties>
+    </control>
+    <control controlID="147" controlTypeID="com.balsamiq.mockups::Button" x="466" y="988" w="109" h="30" measuredW="83" measuredH="27" zOrder="32" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>16777215</color>
+        <href>IDS%20-%20Project%20-%20Specimen%26bm%3BIDS%20-%20Project%20-%20Specimen.bmml%26bm%3BIDS%20-%20Project%20-%20Specimen.bmml%26bm%3BIDS%20-%20Project%20-%20Specimen.bmml</href>
+        <icon>times%7Cxsmall</icon>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22233%2C959%2C342%2C989%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Specimen.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Specimen%22%20id%3D%22147%22/%3E</map>
+        <text>Cancel</text>
+      </controlProperties>
+    </control>
+    <control controlID="148" controlTypeID="com.balsamiq.mockups::Label" x="324" y="861" w="-1" h="-1" measuredW="35" measuredH="21" zOrder="33" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>0</color>
+        <text>Name</text>
+      </controlProperties>
+    </control>
+    <control controlID="149" controlTypeID="com.balsamiq.mockups::TextInput" x="324" y="885" w="504" h="-1" measuredW="49" measuredH="27" zOrder="34" locked="false" isInGroup="-1">
+      <controlProperties>
+        <state>up</state>
+        <text>Name</text>
+      </controlProperties>
+    </control>
+    <control controlID="150" controlTypeID="com.balsamiq.mockups::Label" x="324" y="922" w="-1" h="-1" measuredW="32" measuredH="21" zOrder="35" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>0</color>
+        <text>Value</text>
+      </controlProperties>
+    </control>
+    <control controlID="151" controlTypeID="com.balsamiq.mockups::TextInput" x="324" y="946" w="504" h="-1" measuredW="46" measuredH="27" zOrder="36" locked="false" isInGroup="-1">
+      <controlProperties>
+        <state>up</state>
+        <text>Value</text>
+      </controlProperties>
+    </control>
+    <control controlID="152" controlTypeID="com.balsamiq.mockups::Label" x="366" y="861" w="-1" h="-1" measuredW="58" measuredH="21" zOrder="37" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>6684672</color>
+        <text>%28required%29</text>
+      </controlProperties>
+    </control>
+    <control controlID="153" controlTypeID="com.balsamiq.mockups::HRule" x="304" y="840" w="545" h="-1" measuredW="100" measuredH="10" zOrder="38" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>13421772</color>
+      </controlProperties>
+    </control>
+    <control controlID="154" controlTypeID="com.balsamiq.mockups::VRule" x="842" y="843" w="-1" h="199" measuredW="10" measuredH="100" zOrder="40" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>13421772</color>
+      </controlProperties>
+    </control>
+    <control controlID="155" controlTypeID="com.balsamiq.mockups::VRule" x="303" y="842" w="-1" h="199" measuredW="10" measuredH="100" zOrder="39" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>13421772</color>
+      </controlProperties>
+    </control>
+    <control controlID="157" controlTypeID="com.balsamiq.mockups::HRule" x="305" y="1036" w="545" h="-1" measuredW="100" measuredH="10" zOrder="41" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>13421772</color>
       </controlProperties>
     </control>
   </controls>

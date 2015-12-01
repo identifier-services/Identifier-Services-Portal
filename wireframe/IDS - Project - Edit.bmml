@@ -14,6 +14,8 @@
     <control controlID="3" controlTypeID="com.balsamiq.mockups::Button" x="295" y="111" w="-1" h="-1" measuredW="56" measuredH="28" zOrder="2" locked="false" isInGroup="-1">
       <controlProperties>
         <color>0</color>
+        <href>IDS%20-%20Home%20-%20Authenticated%26bm%3BIDS%20-%20Home%20-%20Authenticated.bmml%26bm%3BIDS%20-%20Home%20-%20Authenticated.bmml%26bm%3BIDS%20-%20Home%20-%20Authenticated.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2262%2C82%2C118%2C110%22%20href%3D%22IDS%2520-%2520Home%2520-%2520Authenticated.bmml%22%20alt%3D%22IDS%20-%20Home%20-%20Authenticated%22%20id%3D%223%22/%3E</map>
         <size>20</size>
         <text>IDS</text>
       </controlProperties>
@@ -31,17 +33,23 @@
     <control controlID="41" controlTypeID="com.balsamiq.mockups::Button" x="852" y="112" w="-1" h="-1" measuredW="93" measuredH="27" zOrder="4" locked="false" isInGroup="-1">
       <controlProperties>
         <color>0</color>
+        <href>IDS%20-%20My%20Projects%26bm%3BIDS%20-%20My%20Projects.bmml%26bm%3BIDS%20-%20My%20Projects.bmml%26bm%3BIDS%20-%20My%20Projects.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22619%2C83%2C712%2C110%22%20href%3D%22IDS%2520-%2520My%2520Projects.bmml%22%20alt%3D%22IDS%20-%20My%20Projects%22%20id%3D%2241%22/%3E</map>
         <text>My%20Projects</text>
       </controlProperties>
     </control>
     <control controlID="42" controlTypeID="com.balsamiq.mockups::Button" x="382" y="112" w="-1" h="-1" measuredW="119" measuredH="27" zOrder="5" locked="false" isInGroup="-1">
       <controlProperties>
         <color>0</color>
+        <href>IDS%20-%20Browse%20Public%20-%20Authenticated%26bm%3BIDS%20-%20Browse%20Public%20-%20Authenticated.bmml%26bm%3BIDS%20-%20Browse%20Public%20-%20Authenticated.bmml%26bm%3BIDS%20-%20Browse%20Public%20-%20Authenticated.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22149%2C83%2C268%2C110%22%20href%3D%22IDS%2520-%2520Browse%2520Public%2520-%2520Authenticated.bmml%22%20alt%3D%22IDS%20-%20Browse%20Public%20-%20Authenticated%22%20id%3D%2242%22/%3E</map>
         <text>Browse%20Projects</text>
       </controlProperties>
     </control>
     <control controlID="43" controlTypeID="com.balsamiq.mockups::Image" x="351" y="114" w="28" h="20" measuredW="56" measuredH="40" zOrder="6" locked="false" isInGroup="-1">
       <controlProperties>
+        <href>IDS%20-%20Home%20-%20Authenticated%26bm%3BIDS%20-%20Home%20-%20Authenticated.bmml%26bm%3BIDS%20-%20Home%20-%20Authenticated.bmml%26bm%3BIDS%20-%20Home%20-%20Authenticated.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22118%2C85%2C146%2C105%22%20href%3D%22IDS%2520-%2520Home%2520-%2520Authenticated.bmml%22%20alt%3D%22IDS%20-%20Home%20-%20Authenticated%22%20id%3D%2243%22/%3E</map>
         <src>./assets/Screen%2520Shot%25202015-11-17%2520at%25201.05.16%2520PM.png</src>
         <text/>
       </controlProperties>
@@ -130,6 +138,8 @@
     <control controlID="89" controlTypeID="com.balsamiq.mockups::Button" x="471" y="749" w="144" h="41" measuredW="64" measuredH="27" zOrder="20" locked="false" isInGroup="-1">
       <controlProperties>
         <color>16777215</color>
+        <href>IDS%20-%20Project%20-%20Overview%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22238%2C720%2C382%2C761%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2289%22/%3E</map>
         <text>Cancel</text>
       </controlProperties>
     </control>
@@ -153,12 +163,16 @@
     <control controlID="94" controlTypeID="com.balsamiq.mockups::Button" x="760" y="749" w="144" h="41" measuredW="134" measuredH="27" zOrder="25" locked="false" isInGroup="-1">
       <controlProperties>
         <color>13369344</color>
+        <href>IDS%20-%20My%20Projects%26bm%3BIDS%20-%20My%20Projects.bmml%26bm%3BIDS%20-%20My%20Projects.bmml%26bm%3BIDS%20-%20My%20Projects.bmml</href>
         <icon>times%7Csmall</icon>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22527%2C720%2C671%2C761%22%20href%3D%22IDS%2520-%2520My%2520Projects.bmml%22%20alt%3D%22IDS%20-%20My%20Projects%22%20id%3D%2294%22/%3E</map>
         <text>Delete%20Project</text>
       </controlProperties>
     </control>
     <control controlID="95" controlTypeID="com.balsamiq.mockups::LinkBar" x="304" y="212" w="-1" h="-1" measuredW="200" measuredH="19" zOrder="26" locked="false" isInGroup="-1">
       <controlProperties>
+        <hrefs>IDS%20-%20Project%20-%20Overview%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%2C%2C</hrefs>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C185%2C114%2C198%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2295%22/%3E</map>
         <selectedIndex>1</selectedIndex>
         <text>Project%2C%20Abstract%2C%20Publications</text>
       </controlProperties>

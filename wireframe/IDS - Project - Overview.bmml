@@ -59,6 +59,8 @@
     </control>
     <control controlID="43" controlTypeID="com.balsamiq.mockups::Image" x="351" y="114" w="28" h="20" measuredW="56" measuredH="40" zOrder="8" locked="false" isInGroup="-1">
       <controlProperties>
+        <href>IDS%20-%20Home%20-%20Authenticated%26bm%3BIDS%20-%20Home%20-%20Authenticated.bmml%26bm%3BIDS%20-%20Home%20-%20Authenticated.bmml%26bm%3BIDS%20-%20Home%20-%20Authenticated.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22118%2C85%2C146%2C105%22%20href%3D%22IDS%2520-%2520Home%2520-%2520Authenticated.bmml%22%20alt%3D%22IDS%20-%20Home%20-%20Authenticated%22%20id%3D%2243%22/%3E</map>
         <src>./assets/Screen%2520Shot%25202015-11-17%2520at%25201.05.16%2520PM.png</src>
         <text/>
       </controlProperties>
@@ -239,7 +241,9 @@
     </control>
     <control controlID="113" controlTypeID="com.balsamiq.mockups::LinkBar" x="304" y="212" w="-1" h="-1" measuredW="200" measuredH="19" zOrder="38" locked="false" isInGroup="-1">
       <controlProperties>
-        <selectedIndex>1</selectedIndex>
+        <hrefs>%2CIDS%20-%20Project%20-%20Edit%26bm%3BIDS%20-%20Project%20-%20Edit.bmml%26bm%3BIDS%20-%20Project%20-%20Edit.bmml%26bm%3BIDS%20-%20Project%20-%20Edit.bmml%2C</hrefs>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22132%2C185%2C183%2C198%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Edit.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Edit%22%20id%3D%22113%22/%3E</map>
+        <selectedIndex>-1</selectedIndex>
         <text>Project%2C%20Abstract%2C%20Publications</text>
       </controlProperties>
     </control>
