@@ -148,22 +148,5 @@
         <text>Cancel</text>
       </controlProperties>
     </control>
-    <control controlID="69" controlTypeID="com.balsamiq.mockups::Label" x="304" y="521" w="-1" h="-1" measuredW="24" measuredH="21" zOrder="23" locked="false" isInGroup="-1">
-      <controlProperties>
-        <text>DOI</text>
-      </controlProperties>
-    </control>
-    <control controlID="70" controlTypeID="com.balsamiq.mockups::TextInput" x="304" y="545" w="600" h="-1" measuredW="42" measuredH="27" zOrder="24" locked="false" isInGroup="-1">
-      <controlProperties>
-        <borderColor>0</borderColor>
-        <color>16777215</color>
-        <text>%20DOI</text>
-      </controlProperties>
-    </control>
-    <control controlID="71" controlTypeID="com.balsamiq.mockups::Label" x="335" y="521" w="-1" h="-1" measuredW="453" measuredH="21" zOrder="25" locked="false" isInGroup="-1">
-      <controlProperties>
-        <text>%28If%20you%20have%20a%20Digital%20Object%20Identifier%20for%20this%20project%2C%20you%20may%20enter%20it%20here.%29</text>
-      </controlProperties>
-    </control>
   </controls>
 </mockup>

@@ -1,6 +1,6 @@
-<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="1133" measuredH="1088" mockupW="900" mockupH="1059">
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="1133" measuredH="1112" mockupW="900" mockupH="1083">
   <controls>
-    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="233" y="29" w="900" h="1059" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="233" y="29" w="900" h="1083" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
       <controlProperties>
         <borderStyle>squareBreakline</borderStyle>
         <text>A%20Web%20Page%0Ahttps%3A//ids.tacc.utexas.edu</text>
@@ -87,20 +87,20 @@
         <text>%28required%29</text>
       </controlProperties>
     </control>
-    <control controlID="88" controlTypeID="com.balsamiq.mockups::Button" x="304" y="918" w="144" h="41" measuredW="141" measuredH="27" zOrder="12" locked="false" isInGroup="-1">
+    <control controlID="88" controlTypeID="com.balsamiq.mockups::Button" x="304" y="985" w="144" h="41" measuredW="141" measuredH="27" zOrder="12" locked="false" isInGroup="-1">
       <controlProperties>
         <color>40463</color>
         <href>IDS%20-%20Project%20-%20Overview%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml</href>
         <icon>check%7Csmall</icon>
-        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C889%2C215%2C930%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2288%22/%3E</map>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C956%2C215%2C997%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2288%22/%3E</map>
         <text>Save%20Specimen</text>
       </controlProperties>
     </control>
-    <control controlID="89" controlTypeID="com.balsamiq.mockups::Button" x="471" y="918" w="144" h="41" measuredW="64" measuredH="27" zOrder="13" locked="false" isInGroup="-1">
+    <control controlID="89" controlTypeID="com.balsamiq.mockups::Button" x="471" y="985" w="144" h="41" measuredW="64" measuredH="27" zOrder="13" locked="false" isInGroup="-1">
       <controlProperties>
         <color>16777215</color>
         <href>IDS%20-%20Project%20-%20Overview%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml</href>
-        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22238%2C889%2C382%2C930%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2289%22/%3E</map>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22238%2C956%2C382%2C997%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2289%22/%3E</map>
         <text>Cancel</text>
       </controlProperties>
     </control>
@@ -180,12 +180,12 @@
         <text>2300%20Mb</text>
       </controlProperties>
     </control>
-    <control controlID="145" controlTypeID="com.balsamiq.mockups::Button" x="304" y="854" w="120" h="30" measuredW="95" measuredH="27" zOrder="30" locked="false" isInGroup="-1">
+    <control controlID="145" controlTypeID="com.balsamiq.mockups::Button" x="304" y="921" w="120" h="30" measuredW="95" measuredH="27" zOrder="30" locked="false" isInGroup="-1">
       <controlProperties>
         <color>2848996</color>
         <href>IDS%20-%20Specimen%20-%20Add%20Field%26bm%3BIDS%20-%20Specimen%20-%20Add%20Field.bmml%26bm%3BIDS%20-%20Specimen%20-%20Add%20Field.bmml%26bm%3BIDS%20-%20Specimen%20-%20Add%20Field.bmml</href>
         <icon>plus%7Cxsmall</icon>
-        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C825%2C191%2C855%22%20href%3D%22IDS%2520-%2520Specimen%2520-%2520Add%2520Field.bmml%22%20alt%3D%22IDS%20-%20Specimen%20-%20Add%20Field%22%20id%3D%22145%22/%3E</map>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C892%2C191%2C922%22%20href%3D%22IDS%2520-%2520Specimen%2520-%2520Add%2520Field.bmml%22%20alt%3D%22IDS%20-%20Specimen%20-%20Add%20Field%22%20id%3D%22145%22/%3E</map>
         <text>Add%20Field</text>
       </controlProperties>
     </control>
@@ -195,6 +195,16 @@
         <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C185%2C114%2C198%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%22146%22/%3E%3Carea%20shape%3D%22rect%22%20coords%3D%22132%2C185%2C183%2C198%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Edit.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Edit%22%20id%3D%22146%22/%3E</map>
         <selectedIndex>-1</selectedIndex>
         <text>Project%2C%20Abstract%2C%20Publications</text>
+      </controlProperties>
+    </control>
+    <control controlID="147" controlTypeID="com.balsamiq.mockups::Label" x="304" y="842" w="-1" h="-1" measuredW="151" measuredH="21" zOrder="32" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Existing%20Unique%20Identifier</text>
+      </controlProperties>
+    </control>
+    <control controlID="148" controlTypeID="com.balsamiq.mockups::TextInput" x="304" y="866" w="545" h="-1" measuredW="148" measuredH="27" zOrder="33" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>DOI%3A%2010.1111/gcb.55555</text>
       </controlProperties>
     </control>
   </controls>

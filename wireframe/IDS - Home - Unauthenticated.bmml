@@ -89,7 +89,7 @@
         <borderColor>15658734</borderColor>
         <color>15658734</color>
         <size>14</size>
-        <text>As%20data%20grows%20in%20size%20and%20complexity%2C%20there%20is%20a%20growing%20need%20for%20services%20to%20verify%2C%20track%2C%20and%20report%20events%20%28i.e.%20provenance%29%20in%20relation%20to%20identified%20datasets%20over%20time.%20Such%20services%20should%20start%20as%20early%20as%20possible%20in%20the%20life%20of%20a%20research%20project%20and%20be%20as%20much%20as%20possible%20automated.%20We%20have%20developed%20a%20set%20of%20proof%20of%20concepts/prototypes%20to%20achieve%20the%20following%20objectives%3A%201%29%20model%20identifiers%20to%20the%20lifecycle%20management%20of%20bio%20data%20including%20their%20transition%20into%20GUPIs%2C%202%29%20conduct%20automated%20verification%20of%20the%20data%20linked%20to%20GUPIs%20to%20track%20presence%20at%20registered%20locations%20and%20integrity%20and%20identity%20over%20time%2C%20and%203%29%20assess%20how%20collection%20creators%20that%20participate%20in%20the%20prototype%20development%20use%20identifiers%20and%20respond%20to%20identifier%20services.</text>
+        <text>The%20Identifier%20Services%20Portal%20provides%20a%20single%20place%20for%20researchers%20to%20manage%20global%20unique%20identifiers%20and%20track%20distributed%20datasets%20throughout%20the%20project%20lifecycle.%0A%20%0AData%20entry%20is%20simplified%20by%20a%20context%20sensitive%20interface%20that%20recalls%20relevant%20information%20related%20to%20existing%20project%20entities.%0A%20%0AManaging%20post-publication%20events%20is%20made%20easier%20by%20automated%20integrity%20and%20identity%20verification%20that%20will%20track%20registered%20data%20over%20time.%0A%20%0AThe%20portal%20intends%20to%20save%20you%20time%20and%20effort%20while%20encouraging%20data%20reuse%20and%20replication%3B%20browse%20public%20projects%2C%20or%20log%20in%20with%20your%20iPlant%20account%20to%20get%20started.</text>
       </controlProperties>
     </control>
     <control controlID="51" controlTypeID="com.balsamiq.mockups::Button" x="393" y="683" w="250" h="30" measuredW="178" measuredH="27" zOrder="14" locked="false" isInGroup="-1">
@@ -100,12 +100,12 @@
         <text>Browse%20Published%20Projects</text>
       </controlProperties>
     </control>
-    <control controlID="52" controlTypeID="com.balsamiq.mockups::Button" x="731" y="683" w="250" h="30" measuredW="130" measuredH="27" zOrder="15" locked="false" isInGroup="-1">
+    <control controlID="52" controlTypeID="com.balsamiq.mockups::Button" x="731" y="683" w="250" h="30" measuredW="131" measuredH="27" zOrder="15" locked="false" isInGroup="-1">
       <controlProperties>
         <color>2848996</color>
         <href>IDS%20-%20iPlant%20-%20Registration%26bm%3BIDS%20-%20iPlant%20-%20Registration.bmml%26bm%3BIDS%20-%20iPlant%20-%20Registration.bmml%26bm%3BIDS%20-%20iPlant%20-%20Registration.bmml</href>
         <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22498%2C654%2C748%2C684%22%20href%3D%22IDS%2520-%2520iPlant%2520-%2520Registration.bmml%22%20alt%3D%22IDS%20-%20iPlant%20-%20Registration%22%20id%3D%2252%22/%3E</map>
-        <text>Register%20of%20Log%20In</text>
+        <text>Register%20or%20Log%20In</text>
       </controlProperties>
     </control>
     <control controlID="53" controlTypeID="com.balsamiq.mockups::SubTitle" x="403" y="538" w="-1" h="-1" measuredW="230" measuredH="21" zOrder="16" locked="false" isInGroup="-1">

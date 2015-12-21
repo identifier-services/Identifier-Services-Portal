@@ -125,9 +125,9 @@
         <text>Maize%20AGPv2</text>
       </controlProperties>
     </control>
-    <control controlID="146" controlTypeID="com.balsamiq.mockups::Label" x="306" y="298" w="-1" h="-1" measuredW="83" measuredH="21" zOrder="20" locked="false" isInGroup="-1">
+    <control controlID="146" controlTypeID="com.balsamiq.mockups::Label" x="306" y="298" w="-1" h="-1" measuredW="82" measuredH="21" zOrder="20" locked="false" isInGroup="-1">
       <controlProperties>
-        <text>Anaylsis%20Type</text>
+        <text>Process%20Type</text>
       </controlProperties>
     </control>
     <control controlID="153" controlTypeID="com.balsamiq.mockups::ComboBox" x="304" y="323" w="122" h="-1" measuredW="101" measuredH="140" zOrder="14" locked="false" isInGroup="-1">
@@ -241,11 +241,15 @@
     </control>
     <control controlID="172" controlTypeID="com.balsamiq.mockups::Link" x="334" y="873" w="-1" h="-1" measuredW="45" measuredH="19" zOrder="37" locked="false" isInGroup="-1">
       <controlProperties>
+        <href>IDS%20-%20Data%20View%26bm%3BIDS%20-%20Data%20View.bmml%26bm%3BIDS%20-%20Data%20View.bmml%26bm%3BIDS%20-%20Data%20View.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22101%2C844%2C146%2C863%22%20href%3D%22IDS%2520-%2520Data%2520View.bmml%22%20alt%3D%22IDS%20-%20Data%20View%22%20id%3D%22172%22/%3E</map>
         <text>File1.file</text>
       </controlProperties>
     </control>
     <control controlID="173" controlTypeID="com.balsamiq.mockups::Link" x="334" y="1032" w="-1" h="-1" measuredW="48" measuredH="19" zOrder="38" locked="false" isInGroup="-1">
       <controlProperties>
+        <href>IDS%20-%20Data%20View%26bm%3BIDS%20-%20Data%20View.bmml%26bm%3BIDS%20-%20Data%20View.bmml%26bm%3BIDS%20-%20Data%20View.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22101%2C1003%2C149%2C1022%22%20href%3D%22IDS%2520-%2520Data%2520View.bmml%22%20alt%3D%22IDS%20-%20Data%20View%22%20id%3D%22173%22/%3E</map>
         <text>File2.file</text>
       </controlProperties>
     </control>

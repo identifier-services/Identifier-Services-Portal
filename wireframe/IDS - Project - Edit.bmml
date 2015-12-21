@@ -1,6 +1,6 @@
-<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="1133" measuredH="859" mockupW="900" mockupH="830">
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="1133" measuredH="972" mockupW="900" mockupH="943">
   <controls>
-    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="233" y="29" w="900" h="830" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="233" y="29" w="900" h="943" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
       <controlProperties>
         <borderStyle>squareBreakline</borderStyle>
         <text>A%20Web%20Page%0Ahttps%3A//ids.tacc.utexas.edu</text>
@@ -115,31 +115,31 @@
         <text>Variation%20of%20DNA%20methylation%20across%20diverse%20maize%20inbred%20lines.</text>
       </controlProperties>
     </control>
-    <control controlID="86" controlTypeID="com.balsamiq.mockups::Label" x="304" y="674" w="119" h="-1" measuredW="119" measuredH="21" zOrder="17" locked="false" isInGroup="-1">
+    <control controlID="86" controlTypeID="com.balsamiq.mockups::Label" x="304" y="751" w="119" h="-1" measuredW="119" measuredH="21" zOrder="17" locked="false" isInGroup="-1">
       <controlProperties>
         <text>Project%20cover%20image</text>
       </controlProperties>
     </control>
-    <control controlID="87" controlTypeID="com.balsamiq.mockups::Button" x="304" y="699" w="91" h="25" measuredW="91" measuredH="27" zOrder="18" locked="false" isInGroup="-1">
+    <control controlID="87" controlTypeID="com.balsamiq.mockups::Button" x="304" y="776" w="91" h="25" measuredW="91" measuredH="27" zOrder="18" locked="false" isInGroup="-1">
       <controlProperties>
         <color>15658734</color>
         <text>Choose%20File</text>
       </controlProperties>
     </control>
-    <control controlID="88" controlTypeID="com.balsamiq.mockups::Button" x="304" y="749" w="144" h="41" measuredW="125" measuredH="27" zOrder="19" locked="false" isInGroup="-1">
+    <control controlID="88" controlTypeID="com.balsamiq.mockups::Button" x="304" y="826" w="144" h="41" measuredW="125" measuredH="27" zOrder="19" locked="false" isInGroup="-1">
       <controlProperties>
         <color>40463</color>
         <href>IDS%20-%20Project%20-%20Overview%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml</href>
         <icon>check%7Csmall</icon>
-        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C720%2C215%2C761%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2288%22/%3E</map>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C797%2C215%2C838%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2288%22/%3E</map>
         <text>Save%20Project</text>
       </controlProperties>
     </control>
-    <control controlID="89" controlTypeID="com.balsamiq.mockups::Button" x="471" y="749" w="144" h="41" measuredW="64" measuredH="27" zOrder="20" locked="false" isInGroup="-1">
+    <control controlID="89" controlTypeID="com.balsamiq.mockups::Button" x="471" y="826" w="144" h="41" measuredW="64" measuredH="27" zOrder="20" locked="false" isInGroup="-1">
       <controlProperties>
         <color>16777215</color>
         <href>IDS%20-%20Project%20-%20Overview%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml</href>
-        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22238%2C720%2C382%2C761%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2289%22/%3E</map>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22238%2C797%2C382%2C838%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2289%22/%3E</map>
         <text>Cancel</text>
       </controlProperties>
     </control>
@@ -160,12 +160,12 @@
         <text>%28If%20you%20have%20a%20Digital%20Object%20Identifier%20for%20this%20project%2C%20you%20may%20enter%20it%20here.%29</text>
       </controlProperties>
     </control>
-    <control controlID="94" controlTypeID="com.balsamiq.mockups::Button" x="760" y="749" w="144" h="41" measuredW="134" measuredH="27" zOrder="25" locked="false" isInGroup="-1">
+    <control controlID="94" controlTypeID="com.balsamiq.mockups::Button" x="760" y="826" w="144" h="41" measuredW="134" measuredH="27" zOrder="25" locked="false" isInGroup="-1">
       <controlProperties>
         <color>13369344</color>
         <href>IDS%20-%20My%20Projects%26bm%3BIDS%20-%20My%20Projects.bmml%26bm%3BIDS%20-%20My%20Projects.bmml%26bm%3BIDS%20-%20My%20Projects.bmml</href>
         <icon>times%7Csmall</icon>
-        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22527%2C720%2C671%2C761%22%20href%3D%22IDS%2520-%2520My%2520Projects.bmml%22%20alt%3D%22IDS%20-%20My%20Projects%22%20id%3D%2294%22/%3E</map>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22527%2C797%2C671%2C838%22%20href%3D%22IDS%2520-%2520My%2520Projects.bmml%22%20alt%3D%22IDS%20-%20My%20Projects%22%20id%3D%2294%22/%3E</map>
         <text>Delete%20Project</text>
       </controlProperties>
     </control>
@@ -175,6 +175,19 @@
         <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C185%2C114%2C198%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2295%22/%3E</map>
         <selectedIndex>1</selectedIndex>
         <text>Project%2C%20Abstract%2C%20Publications</text>
+      </controlProperties>
+    </control>
+    <control controlID="96" controlTypeID="com.balsamiq.mockups::Label" x="304" y="671" w="-1" h="-1" measuredW="320" measuredH="21" zOrder="27" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Or%20you%20may%20request%20an%20identifier%20for%20the%20entire%20project.</text>
+      </controlProperties>
+    </control>
+    <control controlID="97" controlTypeID="com.balsamiq.mockups::Button" x="304" y="695" w="144" h="30" measuredW="130" measuredH="27" zOrder="28" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <href>IDS%20-%20Project%20-%20Overview%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml%26bm%3BIDS%20-%20Project%20-%20Overview.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%2271%2C666%2C215%2C696%22%20href%3D%22IDS%2520-%2520Project%2520-%2520Overview.bmml%22%20alt%3D%22IDS%20-%20Project%20-%20Overview%22%20id%3D%2297%22/%3E</map>
+        <text>Request%20Identifier</text>
       </controlProperties>
     </control>
   </controls>

@@ -141,9 +141,9 @@
         <text>Add%20Field</text>
       </controlProperties>
     </control>
-    <control controlID="146" controlTypeID="com.balsamiq.mockups::Label" x="306" y="298" w="-1" h="-1" measuredW="83" measuredH="21" zOrder="23" locked="false" isInGroup="-1">
+    <control controlID="146" controlTypeID="com.balsamiq.mockups::Label" x="306" y="298" w="-1" h="-1" measuredW="82" measuredH="21" zOrder="23" locked="false" isInGroup="-1">
       <controlProperties>
-        <text>Anaylsis%20Type</text>
+        <text>Process%20Type</text>
       </controlProperties>
     </control>
     <control controlID="153" controlTypeID="com.balsamiq.mockups::ComboBox" x="304" y="323" w="122" h="-1" measuredW="101" measuredH="140" zOrder="16" locked="false" isInGroup="-1">
