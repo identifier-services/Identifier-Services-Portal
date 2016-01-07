@@ -2,6 +2,19 @@
  ** Site Styles **
  *****************/
 
+/** nav bar **/
+
+.gravatar-nav {
+    border-radius: 50%;
+    margin: -10px 0px -10px 6px;
+}
+
+.glyphicon.glyphicon-log-out, .glyphicon-log-in, .glyphicon-user {
+    margin-left: 6px;
+}
+
+/** home page **/
+
 #ids-home-blurb {
     /* nothing */
 }
@@ -23,6 +36,30 @@
     margin-top: -20px;
     box-shadow: 0px 0px 3px #edecf7;
 }
+
+/** footer **/
+
+/* sticky footer stuff */
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 125px;
+}
+
+.site-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 125px;
+}
+
+/* end sticky footer stucc */
 
 .partners {
     margin-bottom: 1em;

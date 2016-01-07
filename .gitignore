@@ -1,2 +1,5 @@
-.DS_Store
-.py[cod]
+*.py[cod]
+*.DS_Store
+*__pycache__
+*config.py
+docker/
