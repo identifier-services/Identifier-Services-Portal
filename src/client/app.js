@@ -99,15 +99,27 @@ angular
             template: '<img class="gravatar-nav" alt="{{ name }}" height="{{ height }}"  width="{{ width }}" src="https://secure.gravatar.com/avatar/{{ emailHash }}.jpg?s={{ width }}&d={{ defaultImage }}">'
         };
     })
-    .factory('Account', function($http) {
-        console.log("Account factory");
-
+    .factory('User', function($auth) {
         return {
-            getProfile: function() {
-                return $http.get('/api/me');
+            firstName: function() {
+                if (!$auth.isAuthenticated()) { return; }
+                return $auth.getPayload()['firstname'];
             },
-            updateProfile: function(profileData) {
-                return $http.put('/api/me', profileData);
+            lastName: function() {
+                if (!$auth.isAuthenticated()) { return; }
+                return $auth.getPayload()['lastname'];
+            },
+            username: function() {
+                if (!$auth.isAuthenticated()) { return; }
+                return $auth.getPayload()['username'];
+            },
+            email: function() {
+                if (!$auth.isAuthenticated()) { return; }
+                return $auth.getPayload()['email'];
+            },
+            gravatarHash: function() {
+                if (!$auth.isAuthenticated()) { return; }
+                return $auth.getPayload()['gravatar_hash'];
             }
         };
     })
@@ -127,10 +139,16 @@ angular
                 }
             });
     })
-    .controller('ProfileCtrl', function($scope, $auth, toastr, Account) {
-
+    .controller('ProfileCtrl', function($scope, $auth, toastr, User) {
+        $scope.user = function() {
+            return User;
+        };
     })
-    .controller('NavbarCtrl', function($scope, $auth, $location, toastr) {
+    .controller('NavbarCtrl', function($scope, $auth, $location, toastr, User) {
+        $scope.user = function() {
+            return User;
+        };
+
         $scope.isAuthenticated = function() {
             return $auth.isAuthenticated();
         };
@@ -141,6 +159,8 @@ angular
                     if (provider == 'twitch')
                         provider = 'iPlant'
                     toastr.success('You have successfully signed in with ' + provider + '!');
+
+                    console.log("nav bar controller, authenticate, $auth.getPayload()", $auth.getPayload());
 
                     $location.path('/');
                 })
@@ -156,32 +176,4 @@ angular
                     }
                 });
         };
-        $scope.logout = function() {
-            if (!$auth.isAuthenticated()) { return; }
-            $auth.logout()
-                .then(function() {
-                    toastr.info('You have been logged out');
-                    $location.path('/');
-                });
-        };
-        $scope.firstName = function() {
-            if (!$auth.isAuthenticated()) { return; }
-            return $auth.getPayload()['firstname'];
-        };
-        $scope.lastName = function() {
-            if (!$auth.isAuthenticated()) { return; }
-            return $auth.getPayload()['lastname'];
-        };
-        $scope.username = function() {
-            if (!$auth.isAuthenticated()) { return; }
-            return $auth.getPayload()['username'];
-        };
-        $scope.email = function() {
-            if (!$auth.isAuthenticated()) { return; }
-            return $auth.getPayload()['email'];
-        };
-        $scope.gravatarHash = function() {
-            if (!$auth.isAuthenticated()) { return; }
-            return $auth.getPayload()['gravatar_hash'];
-        }
     });

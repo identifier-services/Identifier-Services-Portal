@@ -29,9 +29,7 @@
                 <li><a href="/#/signup/">Register<i class="glyphicon glyphicon-user"></i></a></li>
             </ul>
             <ul ng-if="isAuthenticated()" class="nav navbar-nav navbar-right">
-                <li><a ui-sref="profile">Welcome, {{firstName()}}<span gravatar name="{{firstName()}} {{lastName()}}" width="32" email-hash="{{gravatarHash()}}"></span></a></li>
-                <!-- <li><a ui-sref="profile">Welcome, {{firstName()}}<span gravatar name="{{firstName()}} {{lastName()}}" width="32" email-hash="{{gravatarHash()}}"></span></a></li> -->
-                <!-- <li><a ui-sref="profile">My Projects</a></li> -->
+                <li><a ui-sref="profile">Welcome, {{user().firstName()}}<span gravatar name="{{user().firstName()}} {{user().lastName()}}" width="32" email-hash="{{user().gravatarHash()}}"></span></a></li>
                 <li><a href="/#" ng-click="logout()">Logout<i class="glyphicon glyphicon-log-out"></i></a></li>
             </ul>
         </div><!-- /.nav-header -->
