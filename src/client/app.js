@@ -96,7 +96,7 @@ angular
                 //scope.defaultImage = 'https://somedomain.com/images/avatar.png';
                 scope.defaultImage = 'mm';
             },
-            template: '<img class="gravatar-nav" alt="{{ name }}" height="{{ height }}"  width="{{ width }}" src="https://secure.gravatar.com/avatar/{{ emailHash }}.jpg?s={{ width }}&d={{ defaultImage }}">'
+            template: '<img class="gravatar-nav-sm" alt="{{ name }}" height="{{ height }}"  width="{{ width }}" src="https://secure.gravatar.com/avatar/{{ emailHash }}.jpg?s={{ width }}&d={{ defaultImage }}">'
         };
     })
     .factory('User', function($auth) {
@@ -120,6 +120,10 @@ angular
             gravatarHash: function() {
                 if (!$auth.isAuthenticated()) { return; }
                 return $auth.getPayload()['gravatar_hash'];
+            },
+            city: function() {
+                if (!$auth.isAuthenticated()) { return; }
+                return 'some town';
             }
         };
     })
@@ -175,5 +179,14 @@ angular
                         toastr.error(error);
                     }
                 });
+        };
+
+        $scope.logout = function() {
+            if (!$auth.isAuthenticated()) { return; }
+            $auth.logout()
+                .then(function() {
+                    toastr.info('You have been logged out');
+                    $location.path('/');
+            });
         };
     });

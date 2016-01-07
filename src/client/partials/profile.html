@@ -1,11 +1,19 @@
 <div class="container">
-  <div class="row">
-      <div class="col-sm-6 col-md-5">
-          <span gravatar name="{{firstName()}} {{lastName()}}" width="32" email-hash="{{gravatarHash()}}"></span>
-          gravatar
-      </div>
-      <div class="col-sm-6 col-md-5 col-md-offset-2">
-          info
-      </div>
-  </div>
+    <div class="row">
+        <div class="col-sm-6 col-md-5 vcard">
+            <div class="row vcard-gravatar">
+                <span class="gravatar-profile-lg" gravatar name="{{user().firstName()}} {{user().lastName()}}" width="230" email-hash="{{user().gravatarHash()}}"></span>
+            </div>
+            <div class="row vcard-names">
+                <h1>{{user().firstName()}} {{user().lastName()}}</h1>
+                <h4>{{user().username()}}</h4>
+            </div>
+            <div class="row vcard-details">
+                <h4>{{user().email()}}</h4>
+                <h4>{{user().city()}}</h4>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-5 col-md-offset-2">
+    </div>
+    </div>
 </div>

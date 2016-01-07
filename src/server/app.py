@@ -155,5 +155,11 @@ def iplant():
 
     return jsonify(token=token)
 
+# @app.route('/api/me', methods=['POST'])
+# @login_required
+# def me():
+#     user_id = g.user_id
+#     return jsonify('userdata')
+
 if __name__=="__main__":
     run_app(app)

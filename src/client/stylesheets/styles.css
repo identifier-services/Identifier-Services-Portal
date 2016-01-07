@@ -4,9 +4,13 @@
 
 /** nav bar **/
 
-.gravatar-nav {
+.gravatar-nav-sm {
     border-radius: 50%;
     margin: -10px 0px -10px 6px;
+}
+
+.gravatar-profile-lg {
+    border-radius: 5%;
 }
 
 .glyphicon.glyphicon-log-out, .glyphicon-log-in, .glyphicon-user {
