@@ -73,7 +73,6 @@ def create_token(user):
         'username': profile['username'],
         'email': profile['email'],
         'gravatar_hash': hashlib.md5(profile['email'].lower().encode('utf-8')).hexdigest()
-        #'gravatar_hash': hashlib.md5('andrewbmagill@yahoo.com'.encode('utf-8')).hexdigest()
     }
     token = jwt.encode(payload, app.config['TOKEN_SECRET'])
     return token.decode('unicode_escape')
@@ -127,9 +126,9 @@ def iplant_config():
 
 @app.route('/auth/iplant', methods=['POST'])
 # we will rename this at some point
-def callback():
-    access_token_url = app.config['ACCESS_TOKEN_URL'] #'https://agave.iplantc.org/oauth2/token'
-    profile_api_url = app.config['PROFILE_API_URL'] #'https://agave.iplantc.org/profiles/v2/me'
+def iplant():
+    access_token_url = app.config['ACCESS_TOKEN_URL']
+    profile_api_url = app.config['PROFILE_API_URL']
 
     payload = dict(
         client_id=request.json['clientId'],
@@ -142,22 +141,17 @@ def callback():
     # Step 1. Exchange authorization code for access token.
     r = requests.post(access_token_url, data=payload)
     token = json.loads(r.text)
-    print(token)
 
     # Step 2. Retrieve information about the current user.
     headers = {'Authorization': 'Bearer {0}'.format(token['access_token'])}
     r = requests.get(profile_api_url, headers=headers)
     profile = json.loads(r.text)
 
-    print(profile)
-
     # Step 3. (optional) Link accounts.
     #
 
     # Step 4. Create a new account or return an existing one.
     token = create_token(profile)
-
-    print(token)
 
     return jsonify(token=token)
 
