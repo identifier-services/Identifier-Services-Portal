@@ -4,15 +4,15 @@ from django.contrib.auth import authenticate, login
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
-import os, logging requests, time
+import os, logging, requests, time
+
 
 logger = logging.getLogger(__name__)
 
-def login_options(request):
-    if request.user.is_authenticated():
-        messages.info(request, 'You are already logged in!')
-        return HttpResponseRedirect('/')
-    return render(request, 'ids/apps/auth/login.html')
+
+def login_prompt(request):
+    return render(request, 'ids_auth/login.html')
+
 
 def agave_oauth(request):
     tenant_base_url = getattr(settings, 'AGAVE_TENANT_BASEURL')
@@ -90,4 +90,4 @@ def agave_oauth_callback(request):
         next_uri = request.session.pop('next')
         return HttpResponseRedirect(next_uri)
     else:
-        return HttpResponseRedirect('/') # HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
+        return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)

@@ -1,1 +1,4 @@
-Django==1.9.1
+Django==1.9
+agavepy
+requests
+django-bootstrap3
