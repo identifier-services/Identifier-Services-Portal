@@ -42,16 +42,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    #'ids.apps.auth',
+    'ids.apps.auth',
 ]
 
-AUTHENTICATION_BACKENDS = (
-    # TODO, or not todo, will only use one i think
-)
+# AUTHENTICATION_BACKENDS = (
+#     # TODO, or not todo, will only use one i think
+# )
 
-CACHES = {
-    # TODO
-}
+# TODO CACHES = {
+# }
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',

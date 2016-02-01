@@ -4,10 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
-import logging
-import os
-import requests
-import time
+import os, logging requests, time
 
 logger = logging.getLogger(__name__)
 
@@ -93,4 +90,4 @@ def agave_oauth_callback(request):
         next_uri = request.session.pop('next')
         return HttpResponseRedirect(next_uri)
     else:
-        return HttpResponseRedirect('/')
+        return HttpResponseRedirect('/') # HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
