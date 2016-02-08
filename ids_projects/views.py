@@ -32,14 +32,17 @@ def index(request):
     return render(request, 'ids_projects/index.html', {'data':l})
 
 def create(request):
-    print request
-    print request.method
     if request.method == 'POST':
         form = ProjectForm(request.POST)
 
+        print dir(form.clean)
+        print dir(form.data)
+        print form.data
+        print form.clean()
+
         title = form.cleaned_data['title']
         inv_type = form.cleaned_data['investigation_type']
-        desc = form.cleaned_data['title']
+        desc = form.cleaned_data['description']
 
         body = {
             "name":"idsvc.project",
