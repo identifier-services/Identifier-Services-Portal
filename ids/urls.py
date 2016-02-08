@@ -19,5 +19,5 @@ urlpatterns = patterns(
     url(r'^auth/', include('ids_auth.urls', namespace='ids_auth')),
     url(r'^login/$', 'ids_auth.views.agave_oauth', name='login'),
     url(r'^logout/$','django.contrib.auth.views.logout', { 'next_page': '/' }, name='logout'),
-
+    url(r'^', include('ids_auth.urls', namespace='ids_auth')),
 )
