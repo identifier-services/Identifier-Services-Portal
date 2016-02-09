@@ -6,8 +6,65 @@
 
 {% block content %}
 <div class="container">
-    <h1>Projects</h1>
+    <div class="row">
+        <div class="col-xs-4">
+            <img class="img-responsive" src="/static/images/img2.jpg">
+        </div>
 
-    {{ data }}
+        <div class="col-xs-8">
+            <div class="row">
+                <div class="col-xs-8">
+                    <h2 id="projects-header">{{ project.value.title }}</h2>
+                </div>
+                <div class="col-xs-3">
+                    <a href="/projects/delete/{{project.uuid}}/" class="btn btn-warning">Delete Project</a>
+                </div>
+            </div>
+
+            <p><b>Type: </b>{{ project.value.investigation_type }}</p>
+            <p><b>Description: </b>{{ project.value.description }}</p>
+
+            <div class="row">
+                <div class="col-xs-8">
+                    <h3 id="projects-header">Datasets: </h3>
+                </div>
+                <div class="col-xs-3">
+                    <a href="/projects/{{project.uuid}}/dataset/" class="btn btn-primary">Add Dataset</a>
+                </div>
+            </div>
+
+            {% if datasets %}
+            <div class="row">
+                <div class="col-xs-4">
+                    <b>Type: </b>
+                </div>
+                <div class="col-xs-4">
+                    <b>Files: </b>
+                </div>
+                <div class="col-xs-4">
+                </div>
+            </div>
+            {% endif %}
+
+            {% for dataset in datasets %}
+            {{ dataset.value.dataset_type }}
+            <div class="row">
+                <div class="col-xs-4">
+                    {{ dataset.value.dataset_type }}
+                    process
+                </div>
+                <div class="col-xs-4">
+                    {% for file in files %}
+                        {{ file.value.name }} <br/>
+                    {% endfor %}
+                </div>
+                <div class="col-xs-4">
+                    <a href="/projects/dataset/{{dataset.uuid}}/data" class="btn btn-primary">Edit</a>
+                    <a href="/projects/dataset/{{dataset.uuid}}/delete" class="btn btn-warning">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %}

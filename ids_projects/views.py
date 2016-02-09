@@ -1,11 +1,12 @@
 from django.conf import settings
 from django.shortcuts import render
-from forms import ProjectForm
-
 from django.http import HttpResponse, HttpResponseRedirect
 from agavepy.agave import Agave, AgaveException
+import json, logging
+from forms import ProjectForm, SystemForm
 
-import json
+
+logger = logging.getLogger(__name__)
 
 def _client(request):
     token = request.session.get(getattr(settings, 'AGAVE_TOKEN_SESSION_ID'))
@@ -33,34 +34,31 @@ def index(request):
 
 def create(request):
     if request.method == 'POST':
+
         form = ProjectForm(request.POST)
 
-        print dir(form.clean)
-        print dir(form.data)
-        print form.data
-        print form.clean()
-
-        title = form.cleaned_data['title']
-        inv_type = form.cleaned_data['investigation_type']
-        desc = form.cleaned_data['description']
-
-        body = {
-            "name":"idsvc.project",
-            "value": {
-                "title":title,
-                "investigation_type":inv_type,
-                "description":desc,
-            }
-        }
-        a = _client(request)
-        try:
-            response = a.meta.addMetadata(body=body)
-        except Exception as e:
-            print "oops: {}".format(e)
-        else:
-            print "response: {}".format(response)
-
         if form.is_valid():
+
+            title = form.cleaned_data['title']
+            inv_type = form.cleaned_data['investigation_type']
+            desc = form.cleaned_data['description']
+
+            body = {
+                "name":"idsvc.project",
+                "value": {
+                    "title":title,
+                    "investigation_type":inv_type,
+                    "description":desc,
+                }
+            }
+            a = _client(request)
+            try:
+                response = a.meta.addMetadata(body=body)
+            except Exception as e:
+                logger.debug('no sir: %s' % e)
+            else:
+                print "response: {}".format(response)
+
             return HttpResponseRedirect('/projects/')
     # else:
     context = {
@@ -72,5 +70,96 @@ def create(request):
 def detail(request, uuid):
     a = _client(request)
     query = {'uuid':'{}'.format(uuid)}
-    l = a.meta.listMetadata(q=json.dumps(query))[0]
-    return render(request, 'ids_projects/detail.html', {'data':l})
+    project = a.meta.listMetadata(q=json.dumps(query))[0]
+
+    datasets_query = {'name':'idsvc.dataset','associationIds':'{}'.format(uuid)}
+    datasets = a.meta.listMetadata(q=json.dumps(datasets_query))
+
+    files = [{'value':{'name':'data.txt'}},{'value':{'name':'data.txt'}}]
+
+    return render(request,
+        'ids_projects/detail.html',
+        {
+            'project':project,
+            'datasets':datasets,
+            'files':files,
+        }
+    )
+
+def delete(request, uuid):
+    a = _client(request)
+    a.meta.deleteMetadata(uuid=uuid)
+    return HttpResponseRedirect('/projects/')
+
+def dataset(request, uuid):
+    if request.method == 'POST':
+        form = SystemForm(request.POST)
+
+        if form.is_valid():
+            choice = form.cleaned_data['system']
+            logger.debug(choice)
+            return HttpResponseRedirect('/projects/')
+
+    body = {
+        "name":"idsvc.dataset",
+        "associationIds": [uuid],
+        "value": {
+            "dataset_type:" : "process"
+        }
+    }
+    a = _client(request)
+    dataset = a.meta.addMetadata(body=body)
+
+    query = {'uuid':'{}'.format(uuid)}
+    project = a.meta.listMetadata(q=json.dumps(query))[0]
+
+    systems = a.systems.list(type='STORAGE')
+    system_choices = []
+    for system in systems:
+        choice_tuple = (system.name,system.name)
+        system_choices.append(choice_tuple)
+
+    return render(
+        request,
+        'ids_projects/dataset.html',
+        {
+            'project':project,
+            'dataset':dataset,
+            'systems':systems,
+            'form':SystemForm(system_choices)
+        }
+    )
+
+def data(request, uuid):
+    body = {
+        "name":"idsvc.data",
+        "associationIds": [uuid],
+        "value": {}
+    }
+    a = _client(request)
+    data = a.meta.addMetadata(body=body)
+
+    dataset_query = {'uuid':'{}'.format(uuid)}
+    dataset = a.meta.listMetadata(q=json.dumps(dataset_query))[0]
+
+    project_id = dataset.associationIds[0]
+
+    project_query = {'name':'idsvc.project','uuid':'{}'.format(project_id)}
+    project = a.meta.listMetadata(q=json.dumps(project_query))[0]
+
+    system = a.systems.get(systemId='data.iplantcollaborative.org')
+
+    query = {'uuid':'{}'.format(uuid)}
+    files = a.files.list(systemId='data.iplantcollaborative.org',filePath='amagill')
+
+    return render(
+        request,
+        'ids_projects/data.html',
+        {
+            'project':project,
+            'data':data,
+            'dataset':dataset,
+            'system':system,
+            'files':files
+        }
+    )

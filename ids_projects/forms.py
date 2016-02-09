@@ -13,14 +13,17 @@ class ProjectForm(forms.Form):
     investigation_type = forms.ChoiceField(choices=INV_TYPES, required=True)
     description = forms.CharField(max_length=255, widget=forms.Textarea, required=False)
 
-class ProjectForm1(forms.Form):
+class Specimen(forms.Form):
     title = forms.CharField(max_length=255)
     description = forms.CharField(max_length=-1, widget=forms.Textarea, required=False)
 
-class ProjectForm2(forms.Form):
-    title = forms.CharField(max_length=255)
-    description = forms.CharField(max_length=-1, widget=forms.Textarea, required=False)
+# class SystemForm(forms.Form):
+#     def __int__(self, *args, **kwargs):
+#         systems = kwargs.pop('systems')
+#         self.fields['system'] = forms.ChoiceField(choices=systems, required=True)
+#         super(SystemForm, self).__init__(*args, **kwargs)
 
-class ProjectForm3(forms.Form):
-    title = forms.CharField(max_length=255)
-    description = forms.CharField(max_length=-1, widget=forms.Textarea, required=False)
+class SystemForm(forms.Form):
+    def __init__(self, systems,  *args, **kwargs):
+        super(SystemForm, self).__init__(*args, **kwargs)
+        self.fields["system"] = forms.ChoiceField(widget=forms.RadioSelect, choices=systems)

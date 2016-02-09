@@ -21,12 +21,13 @@
                 <div class="panel-body">
                     <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
                     <p><h4>{{ item.value.title }}</h4>
-                    {{ item.value.description }}</p>
+                    <b>Type: </b>{{ item.value.investigation_type }}</p>
+                    <p><b>Description: </b>{{ item.value.description }}</p>
                     <a href="/projects/{{item.uuid}}" class="btn btn-primary">View Project</a>
                 </div>
             </div>
         </div>
-        {% endfor %}
+    {% endfor %}
     </div>
 </div>
 {% endblock %}
