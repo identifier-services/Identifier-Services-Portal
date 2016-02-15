@@ -2,26 +2,39 @@ from django import forms
 
 class ProjectForm(forms.Form):
     title = forms.CharField(max_length=255)
-    SEQUENCING = 'Sequencing'
-    ALIGNMENT = 'Alignment'
-    REQUESTED = 'Requested'
+    GENOMIC = 'Genomic'
     INV_TYPES = (
         ('', 'Choose One'),
-        (SEQUENCING,SEQUENCING),
-        (ALIGNMENT,ALIGNMENT),
+        (GENOMIC,GENOMIC),
     )
     investigation_type = forms.ChoiceField(choices=INV_TYPES, required=True)
     description = forms.CharField(max_length=255, widget=forms.Textarea, required=False)
 
-class Specimen(forms.Form):
-    title = forms.CharField(max_length=255)
-    description = forms.CharField(max_length=-1, widget=forms.Textarea, required=False)
-
-# class SystemForm(forms.Form):
-#     def __int__(self, *args, **kwargs):
-#         systems = kwargs.pop('systems')
-#         self.fields['system'] = forms.ChoiceField(choices=systems, required=True)
-#         super(SystemForm, self).__init__(*args, **kwargs)
+class DatasetForm(forms.Form):
+    SEQUENCING = 'Sequencing'
+    ALIGNMENT = 'Alignment'
+    ANALYSIS = 'Anlysis'
+    VAR_DETECT = 'Variant Detection'
+    VAR_CALLING = 'Variant Calling'
+    ANNOTATION = 'Annotation'
+    GWAS = 'GWAS'
+    OTHER = 'Other'
+    PROC_TYPES = (
+        ('', 'Choose One'),
+        (SEQUENCING,SEQUENCING),
+        (ALIGNMENT,ALIGNMENT),
+        (ANALYSIS, ANALYSIS),
+        (VAR_DETECT, VAR_DETECT),
+        (VAR_CALLING, VAR_CALLING),
+        (ANNOTATION, ANNOTATION),
+        (GWAS, GWAS),
+        (OTHER, OTHER),
+    )
+    process_type = forms.ChoiceField(choices=PROC_TYPES, required=True)
+    seq_method = forms.CharField(max_length=255)
+    seq_hardware = forms.CharField(max_length=255)
+    assem_method = forms.CharField(max_length=255)
+    ref_sequence = forms.CharField(max_length=255)
 
 class SystemForm(forms.Form):
     def __init__(self, systems,  *args, **kwargs):

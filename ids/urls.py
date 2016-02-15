@@ -15,6 +15,9 @@ urlpatterns = patterns(
     # projects
     url(r'^projects/', include('ids_projects.urls', namespace='ids_projects')),
 
+    # specimens
+    url(r'^specimens/', include('ids_specimens.urls', namespace='ids_specimens')),
+
     # auth
     url(r'^auth/', include('ids_auth.urls', namespace='ids_auth')),
     url(r'^login/$', 'ids_auth.views.agave_oauth', name='login'),

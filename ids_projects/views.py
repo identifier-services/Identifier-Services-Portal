@@ -1,6 +1,8 @@
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
+
 from agavepy.agave import Agave, AgaveException
 import json, logging
 from forms import ProjectForm, SystemForm
@@ -32,6 +34,7 @@ def index(request):
 
     return render(request, 'ids_projects/index.html', {'data':l})
 
+@login_required
 def create(request):
     if request.method == 'POST':
 
@@ -69,10 +72,18 @@ def create(request):
 
 def detail(request, uuid):
     a = _client(request)
-    query = {'uuid':'{}'.format(uuid)}
+    query = {'uuid':uuid}
     project = a.meta.listMetadata(q=json.dumps(query))[0]
 
-    datasets_query = {'name':'idsvc.dataset','associationIds':'{}'.format(uuid)}
+    specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(uuid)}
+    specimens = a.meta.listMetadata(q=json.dumps(specimens_query))
+
+    associatedIds = [uuid] # project id
+
+    for specimen in specimens:
+        associatedIds.append(specimen.uuid)
+
+    datasets_query = {'name':'idsvc.dataset','associationIds':associatedIds}
     datasets = a.meta.listMetadata(q=json.dumps(datasets_query))
 
     files = [{'value':{'name':'data.txt'}},{'value':{'name':'data.txt'}}]
@@ -81,16 +92,19 @@ def detail(request, uuid):
         'ids_projects/detail.html',
         {
             'project':project,
+            'specimens':specimens,
             'datasets':datasets,
             'files':files,
         }
     )
 
+@login_required
 def delete(request, uuid):
     a = _client(request)
     a.meta.deleteMetadata(uuid=uuid)
     return HttpResponseRedirect('/projects/')
 
+@login_required
 def dataset(request, uuid):
     if request.method == 'POST':
         form = SystemForm(request.POST)
@@ -110,7 +124,7 @@ def dataset(request, uuid):
     a = _client(request)
     dataset = a.meta.addMetadata(body=body)
 
-    query = {'uuid':'{}'.format(uuid)}
+    query = {'uuid':uuid}
     project = a.meta.listMetadata(q=json.dumps(query))[0]
 
     systems = a.systems.list(type='STORAGE')
@@ -130,6 +144,7 @@ def dataset(request, uuid):
         }
     )
 
+@login_required
 def data(request, uuid):
     body = {
         "name":"idsvc.data",
@@ -139,17 +154,17 @@ def data(request, uuid):
     a = _client(request)
     data = a.meta.addMetadata(body=body)
 
-    dataset_query = {'uuid':'{}'.format(uuid)}
+    dataset_query = {'uuid':uuid}
     dataset = a.meta.listMetadata(q=json.dumps(dataset_query))[0]
 
     project_id = dataset.associationIds[0]
 
-    project_query = {'name':'idsvc.project','uuid':'{}'.format(project_id)}
+    project_query = {'name':'idsvc.project','uuid':project_id}
     project = a.meta.listMetadata(q=json.dumps(project_query))[0]
 
     system = a.systems.get(systemId='data.iplantcollaborative.org')
 
-    query = {'uuid':'{}'.format(uuid)}
+    query = {'uuid':uuid}
     files = a.files.list(systemId='data.iplantcollaborative.org',filePath='amagill')
 
     return render(
