@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'ids_auth',
     'ids_projects',
     'ids_specimens',
+    'ids_datasets',
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -190,6 +191,10 @@ LOGGING = {
             'level': 'DEBUG',
         },
         'ids_specimens': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'ids_datasets': {
             'handlers': ['console'],
             'level': 'DEBUG',
         },

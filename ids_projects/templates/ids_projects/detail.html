@@ -51,6 +51,9 @@
                                     <p><a href="/specimens/{{project.uuid}}/create/" class="btn btn-primary">Add Data</a></p>
                                 </div>
                                 <div class="col-xs-2">
+                                    <p><a href="/specimens/edit/{{specimen.uuid}}/" class="btn btn-primary">Edit</a></p>
+                                </div>
+                                <div class="col-xs-2">
                                     <p><a href="/specimens/delete/{{specimen.uuid}}/" class="btn btn-danger">Delete Specimen</a></p>
                                 </div>
                             </div>
@@ -66,75 +69,38 @@
                     <h1 class="panel-title">Datasets</h1>
                 </div>
                 <div class="panel-body">
-                    {% if not specimen %}
+                    {% if not datasets %}
                     <p>No dataset yet.</p>
+                    {% else %}
+                    {% for dataset in datasets %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h1 class="panel-title">{{ dataset.value.process_type }}</h1>
+                        </div>
+                        <div class="panel-body">
+                            <p><b>Process Type</b> {{ dataset.value.process_type }}</p>
+                            <p><b>Sequence Method</b> {{ dataset.value.sequence_method }}</p>
+                            <p><b>Sequence Hardware</b> {{ dataset.value.sequence_hardware }}</p>
+                            <p><b>Reference Sequence</b> {{ dataset.value.reference_sequence }}</p>
+                            <div class="row">
+                                <div class="col-xs-4">
+                                    <p><a href="/datasets/{{project.uuid}}/create/" class="btn btn-primary">Add Data</a></p>
+                                </div>
+                                <div class="col-xs-2">
+                                    <p><a href="/datasets/edit/{{dataset.uuid}}/" class="btn btn-primary">Edit</a></p>
+                                </div>
+                                <div class="col-xs-2">
+                                    <p><a href="/datasets/delete/{{dataset.uuid}}/" class="btn btn-danger">Delete Dataset</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                     {% endif %}
-                    <p><a href="/" class="btn btn-primary">Create Dataset</a></p>
+                    <p><a href="/datasets/{{project.uuid}}/create/" class="btn btn-primary">Add Dataset</a></p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- <div class="container">
-    <div class="row">
-        <div class="col-xs-4">
-            <img class="img-responsive" src="/static/images/img2.jpg">
-        </div>
-
-        <div class="col-xs-8">
-            <div class="row">
-                <div class="col-xs-8">
-                    <h2 id="projects-header">{{ project.value.title }}</h2>
-                </div>
-                <div class="col-xs-3">
-                    <a href="/projects/delete/{{project.uuid}}/" class="btn btn-danger">Delete Project</a>
-                </div>
-            </div>
-
-            <p><b>Type: </b>{{ project.value.investigation_type }}</p>
-            <p><b>Description: </b>{{ project.value.description }}</p>
-
-            <div class="row">
-                <div class="col-xs-8">
-                    <h3 id="projects-header">Datasets: </h3>
-                </div>
-                <div class="col-xs-3">
-                    <a href="/projects/{{project.uuid}}/dataset/" class="btn btn-primary">Add Dataset</a>
-                </div>
-            </div>
-
-            {% if datasets %}
-            <div class="row">
-                <div class="col-xs-4">
-                    <b>Type: </b>
-                </div>
-                <div class="col-xs-4">
-                    <b>Files: </b>
-                </div>
-                <div class="col-xs-4">
-                </div>
-            </div>
-            {% endif %}
-
-            {% for dataset in datasets %}
-            {{ dataset.value.dataset_type }}
-            <div class="row">
-                <div class="col-xs-4">
-                    {{ dataset.value.dataset_type }}
-                    process
-                </div>
-                <div class="col-xs-4">
-                    {% for file in files %}
-                        {{ file.value.name }} <br/>
-                    {% endfor %}
-                </div>
-                <div class="col-xs-4">
-                    <a href="/projects/dataset/{{dataset.uuid}}/data" class="btn btn-primary">Edit</a>
-                    <a href="/projects/dataset/{{dataset.uuid}}/delete" class="btn btn-danger">Delete</a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div> -->
 {% endblock %}

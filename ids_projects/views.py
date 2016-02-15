@@ -83,8 +83,15 @@ def detail(request, uuid):
     for specimen in specimens:
         associatedIds.append(specimen.uuid)
 
-    datasets_query = {'name':'idsvc.dataset','associationIds':associatedIds}
+    #TODO: work on $or mongo query
+    datasets_query = {'name':'idsvc.dataset','associationIds':'{}'.format(
+                        associatedIds[0])}
+
     datasets = a.meta.listMetadata(q=json.dumps(datasets_query))
+
+    print " *** datasets: {} *** ".format(json.dumps(datasets))
+
+    print " *** dataset query: {} *** ".format(json.dumps(datasets_query))
 
     files = [{'value':{'name':'data.txt'}},{'value':{'name':'data.txt'}}]
 
