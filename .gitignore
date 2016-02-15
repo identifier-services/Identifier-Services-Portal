@@ -3,3 +3,5 @@
 *__pycache__
 *config.py
 docker/
+*.sqlite3
+ids.env
