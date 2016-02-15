@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}Specimens{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        {% for specimen in specimens %}
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p><b>Taxon Name</b> {{ specimen.value.taxon_name }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

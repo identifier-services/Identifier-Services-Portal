@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-9">
+            <h2 id="projects-header">Projects</h2>
+        </div>
+        <div class="col-xs-3">
+            <a href="/projects/create/" class="btn btn-primary pull-right">Create Project</a>
+        </div>
+    </div>
+    <div class="row">
+    {% for item in data %}
+        <div class="col-xs-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                    <p><h4>{{ item.value.title }}</h4>
+                    <b>Type: </b>{{ item.value.investigation_type }}</p>
+                    <p><b>Description: </b>{{ item.value.description }}</p>
+                    <a href="/projects/{{item.uuid}}" class="btn btn-primary">View Project</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}

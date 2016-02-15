@@ -1,6 +1,0 @@
-CALLBACK_URL = 'https://localhost:5000/callback'
-CONSUMER_KEY = ''
-CONSUMER_SECRET = ''
-TOKEN_SECRET = ''
-ACCESS_TOKEN_URL = 'https://agave.iplantc.org/oauth2/token'
-PROFILE_API_URL = 'https://agave.iplantc.org/profiles/v2/me'

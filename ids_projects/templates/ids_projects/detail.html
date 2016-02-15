@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Left Column - Project Basic Info -->
+        <div class="col-xs-8 col-sm-5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Project</h1>
+                </div>
+                <div class="panel-body">
+                    <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                    <p><b>Project Name: </b> {{ project.value.title }}</p>
+                    <p><b>Investigation Type: </b> {{ project.value.investigation_type }}</p>
+                    <p><b>Description: </b> {{ project.value.description }}</p>
+                    <p><a href="/projects/delete/{{project.uuid}}/" class="btn btn-danger">Delete Project</a></p>
+                </div>
+            </div>
+        </div>
+        <!-- Middle/Right Column - Project Basic Info -->
+        <div class="col-xs-8 col-sm-7">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Specimens</h1>
+                </div>
+                <div class="panel-body">
+                    {% if not specimens %}
+                    <p>No specimen yet.</p>
+                    {% else %}
+                    {% for specimen in specimens %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h1 class="panel-title">{{ specimen.value.taxon_name }}</h1>
+                        </div>
+                        <div class="panel-body">
+                            <p><b>Taxon Name</b> {{ specimen.value.taxon_name }}</p>
+                            <p><b>Specimen ID</b> {{ specimen.value.specimen_id }}</p>
+                            <p><b>Organ/Tissue</b> {{ specimen.value.organ_or_tissue }}</p>
+                            <p><b>Development Stage</b> {{ specimen.value.development_stage }}</p>
+                            <p><b>Haploid Chromosone Count</b> {{ specimen.value.haploid_chromosome_count }}</p>
+                            <p><b>Ploidy</b> {{ specimen.value.ploidy }}</p>
+                            <p><b>Propogation</b> {{ specimen.value.propogation }}</p>
+                            <p><b>Estimated Genome Size</b> {{ specimen.value..est_genome_size }}</p>
+                            <div class="row">
+                                <div class="col-xs-4">
+                                    <p><a href="/specimens/{{project.uuid}}/create/" class="btn btn-primary">Add Data</a></p>
+                                </div>
+                                <div class="col-xs-2">
+                                    <p><a href="/specimens/edit/{{specimen.uuid}}/" class="btn btn-primary">Edit</a></p>
+                                </div>
+                                <div class="col-xs-2">
+                                    <p><a href="/specimens/delete/{{specimen.uuid}}/" class="btn btn-danger">Delete Specimen</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    <p><a href="/specimens/{{project.uuid}}/create/" class="btn btn-primary">Define Specimen</a></p>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Datasets</h1>
+                </div>
+                <div class="panel-body">
+                    {% if not datasets %}
+                    <p>No dataset yet.</p>
+                    {% else %}
+                    {% for dataset in datasets %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h1 class="panel-title">{{ dataset.value.process_type }}</h1>
+                        </div>
+                        <div class="panel-body">
+                            <p><b>Process Type</b> {{ dataset.value.process_type }}</p>
+                            <p><b>Sequence Method</b> {{ dataset.value.sequence_method }}</p>
+                            <p><b>Sequence Hardware</b> {{ dataset.value.sequence_hardware }}</p>
+                            <p><b>Reference Sequence</b> {{ dataset.value.reference_sequence }}</p>
+                            <div class="row">
+                                <div class="col-xs-4">
+                                    <p><a href="/datasets/{{project.uuid}}/create/" class="btn btn-primary">Add Data</a></p>
+                                </div>
+                                <div class="col-xs-2">
+                                    <p><a href="/datasets/edit/{{dataset.uuid}}/" class="btn btn-primary">Edit</a></p>
+                                </div>
+                                <div class="col-xs-2">
+                                    <p><a href="/datasets/delete/{{dataset.uuid}}/" class="btn btn-danger">Delete Dataset</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    <p><a href="/datasets/{{project.uuid}}/create/" class="btn btn-primary">Add Dataset</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

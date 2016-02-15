@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3>{{ project.value.title }} - Add Dataset</h3>
+    <div class="row">
+        <div class="col-xs-4">
+            <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+            <!-- <h2>{{ project.value.title }}</h2> -->
+            <p><b>Type: </b>{{ project.value.investigation_type }}</p>
+            <p><b>Description: </b>{{ project.value.description }}</p>
+            <p><b>Dataset Type: </b>process</p>
+        </div>
+        <!-- <div class="col-xs-8">
+            {% for system in systems %}
+            <div class="row">
+                <label class="btn btn-default col-xs-6">
+                    <input class="col-xs-1" type="radio" name="same"/>
+                    <span class="col-xs-5">{{ system.name }}</span>
+                </label>
+            </div>
+            {% endfor %}
+            <a href="/projects/{{dataset.uuid}}/data/" class="btn btn-primary">Add Data</a>
+        </div> -->
+        <div class="col-xs-8">
+            <form method="post">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+
+                <div>
+                    <!-- <button type="submit" class="btn btn-primary">Add Data</button> -->
+                    <a href="/projects/dataset/{{dataset.uuid}}/data/" class="btn btn-primary">Add Data</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
