@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class DataConfig(AppConfig):
-    name = 'ids_datasets'
+    name = 'ids_data'

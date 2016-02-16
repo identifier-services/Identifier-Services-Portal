@@ -74,7 +74,6 @@ def create(request, parent_id):
             }
             a = _client(request)
             response = a.meta.addMetadata(body=body)
-            print " *** response ** {} *** ".format(response)
 
             if json_flag:
                 return JsonResponse(response)
@@ -141,8 +140,6 @@ def delete(request, specimen_id):
         parent_id = associationIds[0]
     except Exception as e:
         parent_id = ''
-
-    print " ** 1: {} ** ".format(associationIds[0])
 
     a.meta.deleteMetadata(uuid=specimen_id)
 

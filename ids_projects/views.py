@@ -59,8 +59,6 @@ def create(request):
                 response = a.meta.addMetadata(body=body)
             except Exception as e:
                 logger.debug('no sir: %s' % e)
-            else:
-                print "response: {}".format(response)
 
             return HttpResponseRedirect('/projects/')
     # else:
@@ -88,10 +86,6 @@ def detail(request, uuid):
                         associatedIds[0])}
 
     datasets = a.meta.listMetadata(q=json.dumps(datasets_query))
-
-    print " *** datasets: {} *** ".format(json.dumps(datasets))
-
-    print " *** dataset query: {} *** ".format(json.dumps(datasets_query))
 
     files = [{'value':{'name':'data.txt'}},{'value':{'name':'data.txt'}}]
 

@@ -6,6 +6,7 @@ from django.http import (HttpResponse, HttpResponseRedirect, JsonResponse,
 from agavepy.agave import Agave, AgaveException
 import json, logging
 from forms import DataForm
+from forms import SystemForm
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,6 @@ def create(request, parent_id):
             }
             a = _client(request)
             response = a.meta.addMetadata(body=body)
-            print " *** response ** {} *** ".format(response)
 
             if json_flag:
                 return JsonResponse(response)
@@ -132,11 +132,33 @@ def delete(request, data_id):
     except Exception as e:
         parent_id = ''
 
-    print " ** 1: {} ** ".format(associationIds[0])
-
     a.meta.deleteMetadata(uuid=data_id)
 
     if json_flag:
         return JsonResponse({'status':'success'})
     else:
         return HttpResponseRedirect('/projects/{}'.format(parent_id))
+
+@login_required
+def system(request):
+    a = _client(request)
+    systems = a.systems.list(type='STORAGE')
+    system_choices = []
+    for system in systems:
+
+        choice_tuple = (system.id,system.name)
+        system_choices.append(choice_tuple)
+
+    if request.method == 'POST':
+
+        form = SystemForm(request.POST, systems=system_choices)
+
+        if form.is_valid():
+            choice = form.cleaned_data['system']
+            return HttpResponseRedirect('/projects/')
+    else:
+        return render(request, 'ids_data/system.html',
+            {
+                'form':SystemForm(systems=system_choices)
+            }
+        )

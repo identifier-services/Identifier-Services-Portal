@@ -35,8 +35,3 @@ class DatasetForm(forms.Form):
     seq_hardware = forms.CharField(max_length=255)
     assem_method = forms.CharField(max_length=255)
     ref_sequence = forms.CharField(max_length=255)
-
-class SystemForm(forms.Form):
-    def __init__(self, systems,  *args, **kwargs):
-        super(SystemForm, self).__init__(*args, **kwargs)
-        self.fields["system"] = forms.ChoiceField(widget=forms.RadioSelect, choices=systems)

@@ -24,6 +24,9 @@ urlpatterns = patterns(
     # datasets
     url(r'^data/', include('ids_data.urls', namespace='ids_data')),
 
+    # systems
+    url(r'^systems/', include('ids_systems.urls', namespace='ids_systems')),
+
     # auth
     url(r'^auth/', include('ids_auth.urls', namespace='ids_auth')),
     url(r'^login/$', 'ids_auth.views.agave_oauth', name='login'),
