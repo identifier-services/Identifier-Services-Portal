@@ -2,18 +2,33 @@
 
 {% load bootstrap3 %}
 
-{% block title %}Specimens{% endblock %}
+{% block title %}Directory Listing{% endblock %}
 
 {% block content %}
 <div class="container">
+    <h3>{{ project.value.title }}Directory Listing</h3>
     <div class="row">
-        {% for specimen in specimens %}
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <p><b>Taxon Name</b> {{ specimen.value.taxon_name }}</p>
-            </div>
+        <div class="col-xs-8">
+            <form method="post">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+
+                <div>
+                    <button type="submit" class="btn btn-primary">Select</button>
+                    <a href="/projects/" class="btn btn-warning">Cancel</a>
+                </div>
+            </form>
+            <!-- <form>
+                <ul>
+                {% for choice in form.contents.field.choices %}
+                    <li>
+                        <input type="radio" name="directory_contents" value="{{choice.0}}"/>
+                        <label for="">{{choice.1}}</label>
+                    </li>
+                {% endfor %}
+                </ul>
+            </form> -->
         </div>
-        {% endfor %}
     </div>
 </div>
 {% endblock %}

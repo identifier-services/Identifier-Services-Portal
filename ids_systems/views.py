@@ -5,7 +5,6 @@ from django.http import (HttpResponse, HttpResponseRedirect, JsonResponse,
                          Http404, HttpResponseNotAllowed)
 from agavepy.agave import Agave, AgaveException
 import json, logging
-from forms import DataForm
 from forms import SystemForm
 
 logger = logging.getLogger(__name__)

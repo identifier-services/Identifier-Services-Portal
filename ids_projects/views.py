@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 from agavepy.agave import Agave, AgaveException
 import json, logging
-from forms import ProjectForm, SystemForm
+from forms import ProjectForm
 
 
 logger = logging.getLogger(__name__)

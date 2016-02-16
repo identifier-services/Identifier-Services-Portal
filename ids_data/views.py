@@ -3,10 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import (HttpResponse, HttpResponseRedirect, JsonResponse,
                          Http404, HttpResponseNotAllowed)
+
 from agavepy.agave import Agave, AgaveException
-import json, logging
-from forms import DataForm
-from forms import SystemForm
+import json, logging, urllib
+from forms import DirectoryForm
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +43,69 @@ def index(request, parent_id=''):
             return JsonResponse({'error':message})
         else:
             raise HttpResponseNotAllowed(message)
+
+def _pack_contents(raw):
+    contents = []
+    for item in raw:
+        data = {
+            'system': item.system,
+            'path': item.path,
+            'type': item.type
+        }
+        choice_tuple = (
+            json.dumps(data),
+            item.name
+        )
+
+        contents.append(choice_tuple)
+    return contents
+
+def list(request, system_id):
+    a = _client(request)
+
+    if request.method == 'GET':
+        path = urllib.unquote(request.GET.get('path', "."))
+
+        logger.debug("GET request path: {}".format(path))
+
+        raw_contents = a.files.list(systemId=system_id, filePath=path)
+        contents = _pack_contents(raw_contents)
+        return render(request, 'ids_data/index.html',
+            {'form':DirectoryForm(contents=contents)}
+        )
+
+    elif request.method == 'POST':
+        path = urllib.unquote(request.POST.get('path', "."))
+
+        logger.debug("POST request path: {}".format(path))
+
+        raw_contents = a.files.list(systemId=system_id, filePath=path)
+        contents = _pack_contents(raw_contents)
+        form = DirectoryForm(request.POST, contents=contents)
+
+        if form.is_valid():
+            choice = form.cleaned_data['contents']
+
+            logger.debug("form valid, choice: {}".format(choice))
+            system = json.loads(choice)
+
+            if system['type'] == 'dir':
+                path = urllib.quote(system['path'], safe='')
+
+                logger.debug("form valid, path: {}".format(path))
+
+                url = '/data/{}/list/?path={}'.format(system_id, path)
+
+                logger.debug("requesting url: {}".format(url))
+
+                return HttpResponseRedirect(url)
+            else:
+                # create file meta object
+                return HttpResponseRedirect('/projects/')
+
+    else:
+
+        raise HttpResponseNotAllowed(message)
 
 @login_required
 def create(request, parent_id):
@@ -138,27 +201,3 @@ def delete(request, data_id):
         return JsonResponse({'status':'success'})
     else:
         return HttpResponseRedirect('/projects/{}'.format(parent_id))
-
-@login_required
-def system(request):
-    a = _client(request)
-    systems = a.systems.list(type='STORAGE')
-    system_choices = []
-    for system in systems:
-
-        choice_tuple = (system.id,system.name)
-        system_choices.append(choice_tuple)
-
-    if request.method == 'POST':
-
-        form = SystemForm(request.POST, systems=system_choices)
-
-        if form.is_valid():
-            choice = form.cleaned_data['system']
-            return HttpResponseRedirect('/projects/')
-    else:
-        return render(request, 'ids_data/system.html',
-            {
-                'form':SystemForm(systems=system_choices)
-            }
-        )
