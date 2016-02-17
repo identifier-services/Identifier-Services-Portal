@@ -67,6 +67,15 @@ def list(request, system_id):
     if request.method == 'GET':
         path = urllib.unquote(request.GET.get('path', "."))
 
+        if path != '.':
+            last_slash = path.rfind('/')
+            if last_slash > 0:
+                parent_path = path[:last_slash]
+            else:                
+                parent_path = "."
+        else:
+            parent_path = None
+
         logger.debug("GET request path: {}".format(path))
 
         raw_contents = a.files.list(systemId=system_id, filePath=path)
@@ -79,7 +88,8 @@ def list(request, system_id):
             {
                 'form':DirectoryForm(contents=contents),
                 'system_id':system_id,
-                'path':path
+                'path':path,
+                'parent_path':parent_path
             }
         )
 

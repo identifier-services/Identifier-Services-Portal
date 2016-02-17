@@ -8,28 +8,42 @@
 <div class="container">
     <h3>Directory Listing</h3>
     <h4>system: {{ system_id }}</h3>
-    <h4>path: {{ path }}</h3>
+    <h4>path: <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> {{ path }}</h3>
     <div class="row">
         <div class="col-xs-8">
             <form method="post">
                 {% csrf_token %}
-                {% bootstrap_form form %}
-
+                <div class="form-group required">
+                    <div>
+                        {% for choice in form.contents.field.choices %}
+                        <div class="radio">
+                            {% if "dir" in choice.0 %}
+                            <span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span>
+                            {% else %}
+                            <span class="glyphicon glyphicon-file  text-muted" aria-hidden="true"></span>
+                            {% endif %}
+                            <label for="{{choice.1}}">
+                                <!-- <input id="{{choice.1}}" type="radio" value="{{choice.0}}">{{choice.1}} -->
+                                {% if "dir" in choice.0 %}
+                                <b><input id="{{choice.1}}" name="contents" type="radio" value="{{choice.0}}">{{choice.1}}</b>
+                                {% else %}
+                                <input id="{{choice.1}}" name="contents" type="radio" value="{{choice.0}}">{{choice.1}}
+                                {% endif %}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
                 <div>
+                    {% if parent_path %}
+                    <a href="/data/{{system_id}}/list/?path={{parent_path}}" class="btn btn-primary">Back</a>
+                    {% else %}
+                    <a href="/data/{{system_id}}/list/?path={{parent_path}}" class="btn btn-primary disabled">Back</a>
+                    {% endif %}
                     <button type="submit" class="btn btn-primary">Select</button>
                     <a href="/projects/" class="btn btn-warning">Cancel</a>
                 </div>
             </form>
-            <!-- <form>
-                <ul>
-                {% for choice in form.contents.field.choices %}
-                    <li>
-                        <input type="radio" name="directory_contents" value="{{choice.0}}"/>
-                        <label for="">{{choice.1}}</label>
-                    </li>
-                {% endfor %}
-                </ul>
-            </form> -->
         </div>
     </div>
 </div>
