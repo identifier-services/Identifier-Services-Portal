@@ -36,6 +36,7 @@ def index(request, parent_id=''):
                 content_type="application/json", status=200)
         else:
             context = {'datas':datas}
+
             return render(request, 'ids_data/index.html', context)
     else:
         message = "Method {} not allowed for this resource".format(request.method)
@@ -70,8 +71,16 @@ def list(request, system_id):
 
         raw_contents = a.files.list(systemId=system_id, filePath=path)
         contents = _pack_contents(raw_contents)
+
+        # will use this to construct the form when handling the post
+        request.session['dir_contents'] = contents
+
         return render(request, 'ids_data/index.html',
-            {'form':DirectoryForm(contents=contents)}
+            {
+                'form':DirectoryForm(contents=contents),
+                'system_id':system_id,
+                'path':path
+            }
         )
 
     elif request.method == 'POST':
@@ -79,8 +88,11 @@ def list(request, system_id):
 
         logger.debug("POST request path: {}".format(path))
 
-        raw_contents = a.files.list(systemId=system_id, filePath=path)
-        contents = _pack_contents(raw_contents)
+        contents = request.session.get('dir_contents')
+        if not contents:
+            raw_contents = a.files.list(systemId=system_id, filePath=path)
+            contents = _pack_contents(raw_contents)
+
         form = DirectoryForm(request.POST, contents=contents)
 
         if form.is_valid():
@@ -91,13 +103,7 @@ def list(request, system_id):
 
             if system['type'] == 'dir':
                 path = urllib.quote(system['path'], safe='')
-
-                logger.debug("form valid, path: {}".format(path))
-
                 url = '/data/{}/list/?path={}'.format(system_id, path)
-
-                logger.debug("requesting url: {}".format(url))
-
                 return HttpResponseRedirect(url)
             else:
                 # create file meta object
