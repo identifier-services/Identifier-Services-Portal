@@ -8,7 +8,7 @@ from agavepy.agave import Agave, AgaveException
 import json, logging, urllib
 from forms import DirectoryForm
 
-import bson, datetime
+import datetime
 
 logger = logging.getLogger(__name__)
 
