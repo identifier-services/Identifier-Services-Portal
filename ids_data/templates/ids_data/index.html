@@ -36,9 +36,9 @@
                 </div>
                 <div>
                     {% if parent_path %}
-                    <a href="/data/{{system_id}}/list/?path={{parent_path}}" class="btn btn-primary">Back</a>
+                    <a href="/data/{{parent_id}}/{{system_id}}/list/?path={{parent_path}}" class="btn btn-primary">Back</a>
                     {% else %}
-                    <a href="/data/{{system_id}}/list/?path={{parent_path}}" class="btn btn-primary disabled">Back</a>
+                    <a href="/data/{{parent_id}}/{{system_id}}/list/?path={{parent_path}}" class="btn btn-primary disabled">Back</a>
                     {% endif %}
                     <button type="submit" class="btn btn-primary">Select</button>
                     <a href="/projects/" class="btn btn-warning">Cancel</a>

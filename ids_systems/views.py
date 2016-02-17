@@ -33,7 +33,7 @@ def delete(request, data_id):
     pass
 
 @login_required
-def index(request):
+def index(request, parent_id):
     a = _client(request)
     systems = a.systems.list(type='STORAGE')
     system_choices = []
@@ -48,7 +48,9 @@ def index(request):
 
         if form.is_valid():
             choice = form.cleaned_data['system']
-            return HttpResponseRedirect('/data/{}/list'.format(choice))
+            return HttpResponseRedirect(
+                '/data/{}/{}/list'.format(parent_id, choice)
+            )
     else:
         return render(request, 'ids_systems/index.html',
             {

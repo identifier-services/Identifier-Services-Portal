@@ -79,7 +79,10 @@ def detail(request, uuid):
     associatedIds = [uuid] # project id
 
     for specimen in specimens:
-        associatedIds.append(specimen.uuid)
+        data_query = {'name':'idsvc.data','associationIds':specimen.uuid}
+        data = a.meta.listMetadata(q=json.dumps(data_query))
+        specimen.data = data
+        #associatedIds.append(specimen.uuid)
 
     #TODO: work on $or mongo query
     datasets_query = {'name':'idsvc.dataset','associationIds':'{}'.format(
@@ -87,7 +90,10 @@ def detail(request, uuid):
 
     datasets = a.meta.listMetadata(q=json.dumps(datasets_query))
 
-    files = [{'value':{'name':'data.txt'}},{'value':{'name':'data.txt'}}]
+    for dataset in datasets:
+        data_query = {'name':'idsvc.data','associationIds':dataset.uuid}
+        data = a.meta.listMetadata(q=json.dumps(data_query))
+        dataset.data = data
 
     return render(request,
         'ids_projects/detail.html',
@@ -95,7 +101,6 @@ def detail(request, uuid):
             'project':project,
             'specimens':specimens,
             'datasets':datasets,
-            'files':files,
         }
     )
 

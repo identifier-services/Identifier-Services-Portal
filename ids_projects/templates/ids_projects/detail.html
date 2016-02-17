@@ -45,10 +45,44 @@
                             <p><b>Haploid Chromosone Count</b> {{ specimen.value.haploid_chromosome_count }}</p>
                             <p><b>Ploidy</b> {{ specimen.value.ploidy }}</p>
                             <p><b>Propogation</b> {{ specimen.value.propogation }}</p>
-                            <p><b>Estimated Genome Size</b> {{ specimen.value..est_genome_size }}</p>
+                            <p><b>Estimated Genome Size</b> {{ specimen.value.est_genome_size }}</p>
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h1 class="panel-title">Data</h1>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <b>Name</b>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <b>Size</b>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <b>Modified</b>
+                                        </div>
+                                    </div>
+                                    {% for file in specimen.data %}
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <b>{{ file.value.name }}</b>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            {{ file.value.length }}
+                                        </div>
+                                        <div class="col-xs-3">
+                                            {{ file.value.last_modified }}
+                                        </div>
+                                        <div class="col-xs-2">
+                                            <p><a href="/data/delete/{{file.uuid}}/" class="btn btn-danger">Remove</a></p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-xs-4">
-                                    <p><a href="/systems/" class="btn btn-primary">Add Data</a></p>
+                                    <p><a href="/systems/{{specimen.uuid}}/index/" class="btn btn-primary">Add Data</a></p>
                                 </div>
                                 <div class="col-xs-2">
                                     <p><a href="/specimens/edit/{{specimen.uuid}}/" class="btn btn-primary">Edit</a></p>
@@ -82,9 +116,43 @@
                             <p><b>Sequence Method</b> {{ dataset.value.sequence_method }}</p>
                             <p><b>Sequence Hardware</b> {{ dataset.value.sequence_hardware }}</p>
                             <p><b>Reference Sequence</b> {{ dataset.value.reference_sequence }}</p>
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h1 class="panel-title">Data</h1>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <b>Name</b>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <b>Size</b>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <b>Modified</b>
+                                        </div>
+                                    </div>
+                                    {% for file in dataset.data %}
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <b>{{ file.value.name }}</b>
+                                        </div>
+                                        <div class="col-xs-3">
+                                            {{ file.value.length }}
+                                        </div>
+                                        <div class="col-xs-3">
+                                            {{ file.value.last_modified }}
+                                        </div>
+                                        <div class="col-xs-2">
+                                            <p><a href="/data/delete/{{file.uuid}}/" class="btn btn-danger">Remove</a></p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-xs-4">
-                                    <p><a href="/systems/" class="btn btn-primary">Add Data</a></p>
+                                    <p><a href="/systems/{{dataset.uuid}}/index/" class="btn btn-primary">Add Data</a></p>
                                 </div>
                                 <div class="col-xs-2">
                                     <p><a href="/datasets/edit/{{dataset.uuid}}/" class="btn btn-primary">Edit</a></p>

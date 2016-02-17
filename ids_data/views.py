@@ -8,6 +8,8 @@ from agavepy.agave import Agave, AgaveException
 import json, logging, urllib
 from forms import DirectoryForm
 
+import bson, datetime
+
 logger = logging.getLogger(__name__)
 
 from django.shortcuts import render
@@ -46,12 +48,30 @@ def index(request, parent_id=''):
             raise HttpResponseNotAllowed(message)
 
 def _pack_contents(raw):
+
+# {u'mimeType': u'text/directory',
+# u'name': u'xwfs',
+# u'format': u'folder',
+# u'lastModified': datetime.datetime(2013, 9, 26, 11, 24, 8, tzinfo=tzoffset(None, -18000)),
+# u'system': u'corral-tacc-00',
+# u'length': 4096,
+# u'_links': {u'self': {u'href': u'https://agave.iplantc.org/files/v2/media/system/corral-tacc-00//xwfs'},
+# u'system': {u'href': u'https://agave.iplantc.org/systems/v2/corral-tacc-00'}},
+# u'path': u'/xwfs', u'type': u'dir', u'permissions': u'ALL'}
+
     contents = []
     for item in raw:
+        lm = item.lastModified
+
         data = {
+            'name': item.name,
+            'last_modified': lm.isoformat(" "),
+            'length':item.length,
+            'link': item._links['self']['href'],
             'system': item.system,
             'path': item.path,
-            'type': item.type
+            'type': item.type,
+            'permissions': item.permissions
         }
         choice_tuple = (
             json.dumps(data),
@@ -61,7 +81,7 @@ def _pack_contents(raw):
         contents.append(choice_tuple)
     return contents
 
-def list(request, system_id):
+def list(request, parent_id, system_id):
     a = _client(request)
 
     if request.method == 'GET':
@@ -71,7 +91,7 @@ def list(request, system_id):
             last_slash = path.rfind('/')
             if last_slash > 0:
                 parent_path = path[:last_slash]
-            else:                
+            else:
                 parent_path = "."
         else:
             parent_path = None
@@ -113,10 +133,29 @@ def list(request, system_id):
 
             if system['type'] == 'dir':
                 path = urllib.quote(system['path'], safe='')
-                url = '/data/{}/list/?path={}'.format(system_id, path)
+                url = '/data/{}/{}/list/?path={}'.format(
+                    parent_id, system_id, path
+                )
                 return HttpResponseRedirect(url)
             else:
-                # create file meta object
+                choice = json.loads(choice)
+
+                body = {
+                    "name":"idsvc.data",
+                    "associationIds": parent_id,
+                    "value": {
+                        'name': choice['name'],
+                        'last_modified': choice['last_modified'],
+                        'length': choice['length'],
+                        'link': choice['link'],
+                        'system': choice['system'],
+                        'path': choice['path'],
+                        'type': choice['type'],
+                        'permissions': choice['permissions']
+                    }
+                }
+                response = a.meta.addMetadata(body=body)
+
                 return HttpResponseRedirect('/projects/')
 
     else:
@@ -208,12 +247,26 @@ def delete(request, data_id):
 
     try:
         parent_id = associationIds[0]
+        parent = a.meta.getMetadata(uuid=parent_id)
     except Exception as e:
         parent_id = ''
+        parent = None
 
     a.meta.deleteMetadata(uuid=data_id)
 
     if json_flag:
         return JsonResponse({'status':'success'})
     else:
-        return HttpResponseRedirect('/projects/{}'.format(parent_id))
+        if parent:
+            if parent.name == 'idsvc.project':
+                return HttpResponseRedirect('/projects/{}'.format(parent_id))
+            elif parent.name == 'idsvc.specimen':
+                #return HttpResponseRedirect('/specimens/{}'.format(parent_id))
+                return HttpResponseRedirect('/projects/')
+            elif parent.name == 'idsvc.dataset':
+                #return HttpResponseRedirect('/datasets/{}'.format(parent_id))
+                return HttpResponseRedirect('/projects/')
+            else:
+                return HttpResponseRedirect('/projects/')
+        else:
+            return HttpResponseRedirect('/projects/')
