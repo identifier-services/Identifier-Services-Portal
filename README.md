@@ -1,4 +1,4 @@
-# DesignSafe-CI Portal
+# Identifier Services Portal
 
 Required environment variables:
 
