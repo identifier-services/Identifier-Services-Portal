@@ -1,0 +1,20 @@
+{
+  "id": "corral-storage-system-root",
+  "name": "My Corral Storage System",
+  "status": "UP",
+  "type": "STORAGE",
+  "description": "corral-tacc",
+  "site": "tacc.utexas.edu",
+  "storage": {
+    "host": "corral.tacc.utexas.edu",
+    "port": 22,
+    "protocol": "SFTP",
+    "rootDir": "/",
+    "homeDir": "/",
+    "auth": {
+      "username": "",
+      "password": "",
+      "type": "PASSWORD"
+    }
+  }
+}
