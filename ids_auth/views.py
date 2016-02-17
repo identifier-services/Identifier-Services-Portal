@@ -25,6 +25,7 @@ def agave_oauth(request):
         session['next'] = next_page
 
     redirect_uri = reverse('ids_auth:agave_oauth_callback')
+
     authorization_url = (
         '%s/authorize?client_id=%s&response_type=code&redirect_uri=%s&state=%s' % (
             tenant_base_url,
@@ -53,6 +54,7 @@ def agave_oauth_callback(request):
         client_sec = getattr(settings, 'AGAVE_CLIENT_SECRET')
         redirect_uri = request.build_absolute_uri(
             reverse('ids_auth:agave_oauth_callback'))
+
         body = {
             'grant_type': 'authorization_code',
             'code': code,
