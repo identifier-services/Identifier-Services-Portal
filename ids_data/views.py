@@ -270,3 +270,9 @@ def delete(request, data_id):
                 return HttpResponseRedirect('/projects/')
         else:
             return HttpResponseRedirect('/projects/')
+
+
+def files_list(request, system_id, file_path=''):
+    a = _client(request)
+    listing = a.files.list(systemId=system_id, filePath=file_path)
+    return JsonResponse(listing, safe=False)

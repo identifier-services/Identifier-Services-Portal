@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3%}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Add Data to Dataset<br>
+        <small>{{dataset.value.process_type}} {{dataset.uuid}}</small>
+    </h1>
+
+    <form>
+        <div class="form-group">
+            <label for="id_system_id">Select system</label>
+            <select name="system_id" id="id_system_id" class="form-control">
+                <option>Choose one</option>
+                {% for sys in systems %}
+                <option value="sys.id">{{sys.name}} ({{sys.id}})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <th>File name</th>
+                <th>File size</th>
+                <th>Action</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3">
+                        <p class="alert alert-info">
+                            Select a system on which to browse data
+                        </p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
+<script>
+    (function(window, $, undefined) {
+        $('#id_system_id').on('change', function() {
+            $.getJSON
+        });
+
+    })(window, jQuery);
+</script>
+{% endblock %}
