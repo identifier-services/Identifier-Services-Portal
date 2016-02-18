@@ -5,4 +5,6 @@
 docker/
 .idea/
 ids.env
+*.env
 db.sqlite3
+*.0

@@ -20,7 +20,13 @@
                             {% if "dir" in choice.0 %}
                             <span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span>
                             {% else %}
-                            <span class="glyphicon glyphicon-file  text-muted" aria-hidden="true"></span>
+                                {% if in_type in choice.1 %}
+                                <span class="glyphicon glyphicon-file text-muted suggest-in" aria-hidden="true"></span>
+                                {% elif out_type in choice.1 %}
+                                <span class="glyphicon glyphicon-file text-muted suggest-out" aria-hidden="true"></span>
+                                {% else %}
+                                <span class="glyphicon glyphicon-file text-muted" aria-hidden="true"></span>
+                                {% endif %}
                             {% endif %}
                             <label for="{{choice.1}}">
                                 <!-- <input id="{{choice.1}}" type="radio" value="{{choice.0}}">{{choice.1}} -->
@@ -35,10 +41,10 @@
                     </div>
                 </div>
                 <div>
-                    {% if parent_path %}
-                    <a href="/data/{{parent_id}}/{{system_id}}/list/?path={{parent_path}}" class="btn btn-primary">Back</a>
+                    {% if ancestor %}
+                    <a href="/data/{{parent_id}}/{{system_id}}/list/?path={{ancestor}}" class="btn btn-primary">Back</a>
                     {% else %}
-                    <a href="/data/{{parent_id}}/{{system_id}}/list/?path={{parent_path}}" class="btn btn-primary disabled">Back</a>
+                    <a href="/data/{{parent_id}}/{{system_id}}/list/?path={{ancestor}}" class="btn btn-primary disabled">Back</a>
                     {% endif %}
                     <button type="submit" class="btn btn-primary">Select</button>
                     <a href="/projects/" class="btn btn-warning">Cancel</a>

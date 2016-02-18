@@ -2,6 +2,14 @@
  ** Site Styles **
  *****************/
 
+.suggest-in {
+    background-color: lightgreen;
+}
+
+.suggest-out {
+    background-color: lightsalmon;
+}
+
 #projects-header {
     margin-top: 0px
 }

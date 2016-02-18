@@ -65,7 +65,7 @@ def _pack_contents(raw):
 
         data = {
             'name': item.name,
-            'last_modified': lm.isoformat(" "),
+            'last_modified': lm.strftime('%b %-d %I:%M'),#lm.isoformat(" "),
             'length':item.length,
             'link': item._links['self']['href'],
             'system': item.system,
@@ -90,16 +90,40 @@ def list(request, parent_id, system_id):
         if path != '.':
             last_slash = path.rfind('/')
             if last_slash > 0:
-                parent_path = path[:last_slash]
+                ancestor = path[:last_slash]
             else:
-                parent_path = "."
+                ancestor = "."
         else:
-            parent_path = None
+            ancestor = None
 
         logger.debug("GET request path: {}".format(path))
 
         raw_contents = a.files.list(systemId=system_id, filePath=path)
         contents = _pack_contents(raw_contents)
+
+        try:
+            parent = a.meta.listMetadata(uuid=parent_id)[0]
+            if parent.name == 'idsvc.dataset':
+                process_type == parent.value.process_type
+            else:
+                process_type = None
+        except:
+            parent = None
+            process_type = None
+
+        in_type = None
+        out_type = None
+
+        if process_type:
+            if process_type == 'Sequencing':
+                in_type = "?"
+                out_type = ".fq"
+            elif process_type == 'Alignment':
+                in_type = ".fq"
+                out_type = ".bam"
+            elif process_type == 'Anlysis':
+                in_type = ".bam"
+                out_type = "bp."
 
         # will use this to construct the form when handling the post
         request.session['dir_contents'] = contents
@@ -109,7 +133,9 @@ def list(request, parent_id, system_id):
                 'form':DirectoryForm(contents=contents),
                 'system_id':system_id,
                 'path':path,
-                'parent_path':parent_path
+                'ancestor':ancestor,
+                'in_type':int_type,
+                'out_type':out_type
             }
         )
 
