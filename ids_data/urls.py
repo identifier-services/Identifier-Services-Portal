@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns(
     'ids_data.views',
-    url(r'^listing/(?P<system_id>.+)/(?P<file_path>.+)/$', 'files_list',
+    url(r'^listing/(?P<system_id>[^/]+)/(?P<file_path>.+)?', 'files_list',
         name='files_list_json'),
 
     url(r'^$', 'index', name='index'),
