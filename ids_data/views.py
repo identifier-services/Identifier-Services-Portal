@@ -134,7 +134,7 @@ def list(request, parent_id, system_id):
                 'system_id':system_id,
                 'path':path,
                 'ancestor':ancestor,
-                'in_type':int_type,
+                'in_type':in_type,
                 'out_type':out_type
             }
         )
