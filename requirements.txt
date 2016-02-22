@@ -1,4 +1,4 @@
 Django==1.9
--e git+https://github.com/mrhanlon/agavepy.git@5eedc256aac1f95b9f67eb1c499b6423c4d6ff5e#egg=agavepy-master
+agavepy
 requests
 django-bootstrap3
