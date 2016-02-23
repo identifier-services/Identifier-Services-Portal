@@ -1,24 +1,21 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 from django.http import (HttpResponse, HttpResponseRedirect, JsonResponse,
-                         Http404, HttpResponseNotAllowed)
-
-from agavepy.agave import Agave, AgaveException
+                         HttpResponseNotAllowed)
+from agavepy.agave import Agave
 import json, logging, urllib
-from forms import DirectoryForm
-
-import datetime
+from forms import DirectoryForm, DataForm
+from django.shortcuts import render
 
 logger = logging.getLogger(__name__)
 
-from django.shortcuts import render
 
 def _client(request):
     token = request.session.get(getattr(settings, 'AGAVE_TOKEN_SESSION_ID'))
     access_token = token.get('access_token', None)
     url = getattr(settings, 'AGAVE_TENANT_BASEURL')
     return Agave(api_server = url, token = access_token)
+
 
 def index(request, parent_id=''):
     if request.method == 'GET':
@@ -46,6 +43,7 @@ def index(request, parent_id=''):
             return JsonResponse({'error':message})
         else:
             raise HttpResponseNotAllowed(message)
+
 
 def _pack_contents(raw):
 
@@ -80,6 +78,7 @@ def _pack_contents(raw):
 
         contents.append(choice_tuple)
     return contents
+
 
 def list(request, parent_id, system_id):
     a = _client(request)
@@ -188,6 +187,7 @@ def list(request, parent_id, system_id):
 
         raise HttpResponseNotAllowed(message)
 
+
 @login_required
 def create(request, parent_id):
     json_flag = False
@@ -224,6 +224,7 @@ def create(request, parent_id):
         else:
             raise HttpResponseNotAllowed(message)
 
+
 def detail(request, data_id):
     json_flag=False
     if request.method =='GET':
@@ -244,6 +245,7 @@ def detail(request, data_id):
         else:
             raise HttpResponseNotAllowed(message)
 
+
 @login_required
 def edit(request, data_id):
     json_flag=False
@@ -261,6 +263,7 @@ def edit(request, data_id):
             return JsonResponse({'error':message})
         else:
             raise HttpResponseNotAllowed(message)
+
 
 @login_required
 def delete(request, data_id):
@@ -287,12 +290,25 @@ def delete(request, data_id):
             if parent.name == 'idsvc.project':
                 return HttpResponseRedirect('/projects/{}'.format(parent_id))
             elif parent.name == 'idsvc.specimen':
-                #return HttpResponseRedirect('/specimens/{}'.format(parent_id))
+                # return HttpResponseRedirect('/specimens/{}'.format(parent_id))
                 return HttpResponseRedirect('/projects/')
             elif parent.name == 'idsvc.dataset':
-                #return HttpResponseRedirect('/datasets/{}'.format(parent_id))
+                # return HttpResponseRedirect('/datasets/{}'.format(parent_id))
                 return HttpResponseRedirect('/projects/')
             else:
                 return HttpResponseRedirect('/projects/')
         else:
             return HttpResponseRedirect('/projects/')
+
+
+def files_list(request, system_id, file_path=None):
+    if file_path is None:
+        file_path = '/'
+    a = _client(request)
+    try:
+        listing = a.files.list(systemId=system_id, filePath=file_path)
+        return JsonResponse(listing, safe=False)
+    except:
+        error_msg = 'The path=%s could not be listed on system=%s. ' \
+                    'Please choose another path or system.' % (file_path, system_id)
+        return JsonResponse({'message': error_msg}, status=404)

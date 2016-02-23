@@ -8,4 +8,5 @@ urlpatterns = patterns(
     url(r'^delete/(.+)/$', 'delete', name='delete'),
     url(r'^edit/(.+)/$', 'edit', name='edit'),
     url(r'^(.+)/$', 'detail', name='detail'),
+    url(r'^list.json$', 'systems_list', name='systems_list_json')
 )

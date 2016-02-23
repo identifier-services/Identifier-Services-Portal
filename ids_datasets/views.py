@@ -141,3 +141,15 @@ def delete(request, dataset_id):
         return JsonResponse({'status':'success'})
     else:
         return HttpResponseRedirect('/projects/{}'.format(parent_id))
+
+
+@login_required
+def add_data(request, dataset_id):
+    a = _client(request)
+
+    context = {
+        'dataset': a.meta.getMetadata(uuid=dataset_id),
+        'systems': a.systems.list(type='STORAGE'),
+    }
+
+    return render(request, 'ids_datasets/add_data.html', context)

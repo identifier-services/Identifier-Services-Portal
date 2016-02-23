@@ -57,3 +57,10 @@ def index(request, parent_id):
                 'form':SystemForm(systems=system_choices)
             }
         )
+
+
+@login_required
+def systems_list(request):
+    a = _client(request)
+    systems = a.systems.list(type='STORAGE')
+    return JsonResponse(systems, safe=False)
