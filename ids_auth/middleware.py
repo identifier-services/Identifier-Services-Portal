@@ -38,8 +38,12 @@ class AgaveTokenRefreshMiddleware(object):
                             len(ag.token.token_info['access_token']), '-')
                         logger.debug('refreshed token: %s' % masked_token)
                     except:
-                        logger.exception('Failed to refresh token for user=%s. '
-                                         'Forcing logout.' % request.user.username)
+                        try:
+                            logger.exception('Failed to refresh token for user=%s. '
+                                             'Forcing logout.' % request.user.username)
+                        except:
+                            logger.exception('Failed to refresh token. Forcing logout.')
+                            
                         logout(request)
 
                 else:
@@ -47,4 +51,3 @@ class AgaveTokenRefreshMiddleware(object):
                         len(token['access_token']), '-')
                     logger.debug('session.%s valid for %s additional seconds: %s' %
                                  (token_key, valid_seconds, masked_token))
-
