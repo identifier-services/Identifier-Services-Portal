@@ -32,7 +32,7 @@ def index(request):
         return HttpResponse('{{"error": "{0}" }}'.format(json.dumps(e.message)),
             status = 500, content_type='application/json')
 
-    return render(request, 'ids_projects/index.html', {'data':l})
+    return render(request, 'ids_projects/projects/index.html', {'data':l})
 
 @login_required
 def create(request):
@@ -66,7 +66,7 @@ def create(request):
         'form': ProjectForm()
     }
 
-    return render(request, 'ids_projects/create.html', context)
+    return render(request, 'ids_projects/projects/create.html', context)
 
 def detail(request, uuid):
     a = _client(request)

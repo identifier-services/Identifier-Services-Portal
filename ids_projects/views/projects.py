@@ -1,11 +1,13 @@
 from agavepy.agave import Agave, AgaveException
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.http import (HttpResponse,
                          HttpResponseRedirect,
                          HttpResponseBadRequest,
                          HttpResponseForbidden,
-                         HttpResponseNotFound)
+                         HttpResponseNotFound,
+                         HttpResponseServerError)
 from django.shortcuts import render
 import json, logging
 from ..forms.projects import ProjectForm
@@ -31,9 +33,7 @@ def list(request):
         query = {'name':'idsvc.project'}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
-        print '\n\n *** list : {} *** \n\n'.format(project_list)
-
-        return render(request, 'ids_projects/index.html', {'data':project_list})
+        return render(request, 'ids_projects/projects/index.html', {'data':project_list})
 
     #########
     # OTHER #
@@ -42,26 +42,46 @@ def list(request):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+def _collaps_meta(x):
+    d = x['value']
+    d['uuid'] = x['uuid']
+    return d
+
 def view(request, project_id):
-    """ """
+    """Queries project metadata and all associated metadata"""
+    # TODO: Performance in this view is pretty bad
+    # TODO: need to cut down on number of requests being made to agave tenant
     #######
     # GET #
     #######
     if request.method == 'GET':
 
         a = _client(request)
-        query = {'uuid':project_id}
-        project_list = a.meta.listMetadata(q=json.dumps(query))
+        project_raw = a.meta.getMetadata(uuid=project_id)
+        project = _collaps_meta(project_raw)
 
-        print '\n\n *** view : {} *** \n\n'.format(project_list)
+        specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_id)}
+        specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
+        specimens = map(_collaps_meta, specimens_raw)
 
-        try:
-            project = project_list[0]
-        except:
-            return HttpResponseNotFound("Project not found")
-        else:
+        for specimen in specimens:
+            specimen_id = specimen['uuid']
+            process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
+            processes_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
+            processes = map(_collaps_meta, processes_raw)
+            for process in processes:
+                process_id = process['uuid']
+                files_query = {'name':'idsvc.data','associationIds':'{}'.format(process_id)}
+                files_raw = a.meta.listMetadata(q=json.dumps(files_query))
+                files = map(_collaps_meta, files_raw)
+                process['files'] = files
+            specimen['processes'] = processes
+        project['specimens'] = specimens
 
-            return HttpResponse(json.dumps(project), content_type="application/json", status=200)
+        context = {'project' : project,}
+
+        #return HttpResponse(json.dumps(context),status = 200, content_type='application/json')
+        return render(request, 'ids_projects/projects/detail.html', context)
 
     #########
     # OTHER #
@@ -79,7 +99,7 @@ def create(request):
         # import pdb; pdb.set_trace()
 
         context = {'form': ProjectForm()}
-        return render(request, 'ids_projects/create.html', context)
+        return render(request, 'ids_projects/projects/create.html', context)
 
     ########
     # POST #
@@ -112,7 +132,12 @@ def create(request):
                 response = a.meta.addMetadata(body=new_project)
             except Exception as e:
                 logger.debug('Error while attempting to create project metadata: %s' % e)
+            else:
+                # import pdb; pdb.set_trace()
+                messages.success(request, 'Successfully created project.')
+                return HttpResponseRedirect('/project/{}'.format(response['uuid']))
 
+        messages.info(request, 'Did not create new project.')
         return HttpResponseRedirect('/projects/')
 
     #########
@@ -133,15 +158,13 @@ def edit(request, project_id):
         query = {'uuid':project_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
-        print '\n\n *** edit : {} *** \n\n'.format(project_list)
-
         try:
             project = project_list[0]
         except:
             return HttpResponseNotFound("Project not found")
         else:
             context = {'form': ProjectForm(initial=project)}
-            return render(request, 'ids_projects/create.html', context)
+            return render(request, 'ids_projects/projects/create.html', context)
 
     ########
     # POST #
@@ -175,6 +198,8 @@ def edit(request, project_id):
             except Exception as e:
                 logger.exception('Error while attempting to edit project metadata.')
 
+        # TODO: check to see if anything actually changed
+        messages.success(request, 'Successfully edited project.')
         return HttpResponseRedirect('/projects/')
 
     #########
@@ -192,17 +217,17 @@ def delete(request, project_id):
     if request.method == 'GET':
 
         a = _client(request)
-        query = {'uuid':project_id}
-        project_list = a.meta.listMetadata(q=json.dumps(query))
-
-        print '\n\n *** delete : {} *** \n\n'.format(project_list)
 
         try:
-            project = project_list[0]
+            a.meta.deleteMetadata(uuid=project_id)
         except:
-            return HttpResponseNotFound("Project not found")
+            logger.exception('Error deleting project.')
+            messages.error(request, 'Project deletion unsuccessful.')
+            # return HttpResponseServerError("Error deleting project.")
+            return HttpResponseRedirect('/projects/')
         else:
-            return HttpResponse(json.dumps(project), content_type="application/json", status=200)
+            messages.success(request, 'Successfully deleted project.')
+            return HttpResponseRedirect('/projects/')
 
     #########
     # OTHER #

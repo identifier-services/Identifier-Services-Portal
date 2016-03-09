@@ -28,8 +28,6 @@ def list(request, project_id):
         query = {'uuid':specimen_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
-        print project_list
-
         try:
             project = project_list[0]
         except:
@@ -56,8 +54,6 @@ def view(request, specimen_id):
         query = {'uuid':specimen_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
-        print project_list
-
         try:
             project = project_list[0]
         except:
@@ -83,8 +79,6 @@ def create(request, project_id):
         a = _client(request)
         query = {'uuid':project_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
-
-        print project_list
 
         try:
             project = project_list[0]
@@ -116,8 +110,6 @@ def edit(request, specimen_id):
         a = _client(request)
         query = {'uuid':project_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
-
-        print project_list
 
         try:
             project = project_list[0]

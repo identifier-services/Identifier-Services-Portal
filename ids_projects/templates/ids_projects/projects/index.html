@@ -11,7 +11,7 @@
             <h2 id="projects-header">Projects</h2>
         </div>
         <div class="col-xs-3">
-            <a href="/projects/create/" class="btn btn-primary pull-right">Create Project</a>
+            <a href="/project" class="btn btn-primary pull-right">Create Project</a>
         </div>
     </div>
     <div class="row">
@@ -23,7 +23,7 @@
                     <p><h4>{{ item.value.title }}</h4>
                     <b>Type: </b>{{ item.value.investigation_type }}</p>
                     <p><b>Description: </b>{{ item.value.description }}</p>
-                    <a href="/projects/{{item.uuid}}" class="btn btn-primary">View Project</a>
+                    <a href="/project/{{item.uuid}}" class="btn btn-primary">View Project</a>
                 </div>
             </div>
         </div>
