@@ -1,8 +1,7 @@
 # Identifier Services Portal
 
-(default: https://agave.iplantc.org/)
 
-# First time setup
+## First time setup
 
 1. Clone the repo
 
@@ -24,7 +23,7 @@
 
    Optional:
 
-   - AGAVE_TENANT_BASEURL  
+   - AGAVE_TENANT_BASEURL  (default: https://agave.iplantc.org/)
 
 3. Installing
 
@@ -35,14 +34,14 @@
     $ pip install -r requirements.txt
     ```
 
-4. Running
+## Running
 
-    From project directory (same directory as manage.py):
+1. From project directory (same directory as manage.py):
 
     ```
     $ python manage.py runserver
     ```
 
-3. Open in browser
+2. Open in browser
 
    Navigate to [http://localhost:8000](http://localhost:8000) in your browser.
