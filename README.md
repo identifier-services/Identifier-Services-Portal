@@ -13,8 +13,7 @@
 2. Configure environment variables
 
    Make a copy of [ids.env.sample](ids.env.sample) and rename it to
-   `ids.env`. Configure variables as necessary. See
-   [designsafe.env.sample](designsafe.env.sample) for details of configuration.
+   `ids.env`. Configure variables as necessary.
 
    Required environment variables:
 
