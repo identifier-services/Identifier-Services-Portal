@@ -38,6 +38,7 @@
 1. From project directory (same directory as manage.py):
 
     ```
+    $ source ids.env
     $ python manage.py runserver
     ```
 
