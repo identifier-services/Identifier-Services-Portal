@@ -9,3 +9,4 @@ ids.env
 db.sqlite3
 *.0
 definitions/
+*.ignore
