@@ -115,7 +115,7 @@ def create(request, project_id):
             taxon_name = form.cleaned_data['taxon_name']
             specimen_id = form.cleaned_data['specimen_id']
             organ_or_tissue = form.cleaned_data['organ_or_tissue']
-            development_stage = form.cleaned_data['development_stage']
+            developmental_stage = form.cleaned_data['developmental_stage']
             haploid_chromosome_count = form.cleaned_data['haploid_chromosome_count']
             ploidy = form.cleaned_data['ploidy']
             propogation = form.cleaned_data['propogation']
@@ -128,7 +128,7 @@ def create(request, project_id):
                     "taxon_name":taxon_name,
                     "specimen_id":specimen_id,
                     "organ_or_tissue":organ_or_tissue,
-                    "development_stage":development_stage,
+                    "developmental_stage":developmental_stage,
                     "haploid_chromosome_count":haploid_chromosome_count,
                     "ploidy":ploidy,
                     "propogation":propogation,
