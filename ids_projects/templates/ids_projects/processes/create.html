@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}Project{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Process</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+
+        <div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="/specimen/{{specimen_id}}" class="btn btn-warning pull-right">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -68,10 +68,14 @@ def view(request, project_id):
         specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
         specimens = map(_collaps_meta, specimens_raw)
 
+        specimen_count = len(specimens)
+        process_count = 0
+        file_count = 0
+
         for specimen in specimens:
             specimen_id = specimen['uuid']
             process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
-            processes_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
+            processes_raw = a.meta.listMetadata(q=json.dumps(process_query))
             processes = map(_collaps_meta, processes_raw)
             for process in processes:
                 process_id = process['uuid']
@@ -79,10 +83,15 @@ def view(request, project_id):
                 files_raw = a.meta.listMetadata(q=json.dumps(files_query))
                 files = map(_collaps_meta, files_raw)
                 process['files'] = files
+                file_count += 1
             specimen['processes'] = processes
+            process_count += 1
         project['specimens'] = specimens
 
-        context = {'project' : project,}
+        context = {'project' : project,
+                   'specimen_count' : specimen_count,
+                   'process_count' : process_count,
+                   'file_count' : file_count,}
 
         print context
 

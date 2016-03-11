@@ -28,6 +28,32 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col-xs-6">
+                    <h4>Specimens: {{ specimen_count }}</h4>
+                </div>
+                <div class="col-xs-3 col-xs-offset-2">
+                    <a href="/project/{{project.uuid}}/edit" class="btn btn-primary">Add </a>
+                </div>
+            </div><hr>
+            <div class="row">
+                <div class="col-xs-6">
+                    <h4>Processes: {{ process_count }}</h4>
+                </div>
+                <div class="col-xs-3 col-xs-offset-2">
+                    <a href="/project/{{project.uuid}}/edit" class="btn btn-primary">Add </a>
+                </div>
+            </div><hr>
+            <div class="row">
+                <div class="col-xs-6">
+                    <h4>Files: {{ file_count }}</h4>
+                </div>
+                <div class="col-xs-3 col-xs-offset-2">
+                    <a href="/project/{{project.uuid}}/edit" class="btn btn-primary">Add </a>
+                </div>
+            </div><hr>
+
         </div>
         <!-- Middle/Right Column - Project Basic Info -->
         <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">

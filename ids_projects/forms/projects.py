@@ -22,4 +22,4 @@ class ProjectForm(forms.Form):
                 if key in self.fields:
                     self.fields[key].initial = self.initial['value'][key]
         except Exception as e:
-            logger.exception('Error parsing initial values in ProjectForm.')
+            logger.debug('New project, no initial values.')

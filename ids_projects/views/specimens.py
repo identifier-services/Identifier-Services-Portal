@@ -118,7 +118,7 @@ def create(request, project_id):
             developmental_stage = form.cleaned_data['developmental_stage']
             haploid_chromosome_count = form.cleaned_data['haploid_chromosome_count']
             ploidy = form.cleaned_data['ploidy']
-            propogation = form.cleaned_data['propogation']
+            propagation = form.cleaned_data['propagation']
             estimated_genome_size = form.cleaned_data['estimated_genome_size']
 
             new_specimen = {
@@ -131,7 +131,7 @@ def create(request, project_id):
                     "developmental_stage":developmental_stage,
                     "haploid_chromosome_count":haploid_chromosome_count,
                     "ploidy":ploidy,
-                    "propogation":propogation,
+                    "propagation":propagation,
                     "estimated_genome_size":estimated_genome_size,
                 }
             }

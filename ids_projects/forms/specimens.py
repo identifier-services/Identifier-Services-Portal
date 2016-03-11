@@ -7,5 +7,5 @@ class SpecimenForm(forms.Form):
     developmental_stage = forms.CharField(max_length=255)
     haploid_chromosome_count = forms.CharField(max_length=255)
     ploidy = forms.CharField(max_length=255)
-    propogation = forms.CharField(max_length=255)
+    propagation = forms.CharField(max_length=255)
     estimated_genome_size = forms.CharField(max_length=255)

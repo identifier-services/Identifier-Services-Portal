@@ -1,6 +1,6 @@
 from django import forms
 
-class DatasetForm(forms.Form):
+class ProcessForm(forms.Form):
     SEQUENCING = 'Sequencing'
     ALIGNMENT = 'Alignment'
     ANALYSIS = 'Anlysis'

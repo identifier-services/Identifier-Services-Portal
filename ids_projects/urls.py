@@ -1,20 +1,20 @@
 from django.conf.urls import patterns, include, url
 
-#############
-# Specimens #
-#############
+#########
+# Files #
+#########
 urlpatterns = patterns(
-    'ids_projects.views.specimens',
-    # list all specimens related to a project
-    url(r'^project/(?P<project_id>.+)/specimens/?$', 'list', name='list'),
-    # create a specimen related to a project
-    url(r'^project/(?P<project_id>.+)/specimen/?$', 'create', name='create'),
-    # edit a specimen
-    url(r'^specimen/(?P<specimen_id>.+)/edit$', 'edit', name='edit'), # or specimen_edit/...?
-    # delete a specimen
-    url(r'^specimen/(?P<specimen_id>.+)/delete$', 'delete', name='delete'), # or specimen_delete/...?
-    # view a specimen
-    url(r'^specimen/(?P<specimen_id>.+)/?$', 'view', name='view'),
+    'ids_projects.views.files',
+    # list all files associated with a process
+    url(r'^process/(?P<process_id>.+)/files/?$', 'list', name='list'),
+    # create a file metadat object associated with a process
+    url(r'^process/(?P<process_id>.+)/file/?$', 'create', name='create'),
+    # edit a file metadata object
+    url(r'^file/(?P<data_id>.+)/edit$', 'edit', name='edit'),
+    # edit a file metadata object
+    url(r'^file/(?P<data_id>.+)/delete$', 'delete', name='delete'),
+    # view a file metadata object
+    url(r'^file/(?P<data_id>.+)/?$', 'view', name='view'),
 )
 
 #############
@@ -32,23 +32,6 @@ urlpatterns += patterns(
     url(r'^process/(?P<process_id>.+)/delete$', 'delete', name='delete'),
     # view a process
     url(r'^process/(?P<process_id>.+)/?$', 'view', name='view'),
-)
-
-#########
-# Files #
-#########
-urlpatterns += patterns(
-    'ids_projects.views.files',
-    # list all files associated with a process
-    url(r'^process/(?P<process_id>.+)/files/?$', 'list', name='list'),
-    # create a file metadat object associated with a process
-    url(r'^process/(?P<process_id>.+)/file/?$', 'create', name='create'),
-    # edit a file metadata object
-    url(r'^file/(?P<data_id>.+)/edit$', 'edit', name='edit'),
-    # edit a file metadata object
-    url(r'^file/(?P<data_id>.+)/delete$', 'delete', name='delete'),
-    # view a file metadata object
-    url(r'^file/(?P<data_id>.+)/?$', 'view', name='view'),
 )
 
 ###########
@@ -76,6 +59,23 @@ urlpatterns += patterns(
     url(r'^workflow/(?P<workflow_id>.+)/delete$', 'delete', name='delete'),
     # view a workflow
     url(r'^workflow/(?P<workflow_id>.+)/?$', 'view', name='view'),
+)
+
+#############
+# Specimens #
+#############
+urlpatterns += patterns(
+    'ids_projects.views.specimens',
+    # list all specimens related to a project
+    url(r'^project/(?P<project_id>.+)/specimens/?$', 'list', name='list'),
+    # create a specimen related to a project
+    url(r'^project/(?P<project_id>.+)/specimen/?$', 'create', name='create'),
+    # edit a specimen
+    url(r'^specimen/(?P<specimen_id>.+)/edit$', 'edit', name='edit'), # or specimen_edit/...?
+    # delete a specimen
+    url(r'^specimen/(?P<specimen_id>.+)/delete$', 'delete', name='delete'), # or specimen_delete/...?
+    # view a specimen
+    url(r'^specimen/(?P<specimen_id>.+)/?$', 'view', name='view'),
 )
 
 ############

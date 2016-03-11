@@ -13,11 +13,20 @@ import json, logging
 from ..forms.processes import ProcessForm
 
 
+logger = logging.getLogger(__name__)
+
+
 def _client(request):
     token = request.session.get(getattr(settings, 'AGAVE_TOKEN_SESSION_ID'))
     access_token = token.get('access_token', None)
     url = getattr(settings, 'AGAVE_TENANT_BASEURL')
     return Agave(api_server = url, token = access_token)
+
+
+def _collaps_meta(x):
+    d = x['value']
+    d['uuid'] = x['uuid']
+    return d
 
 
 def list(request, specimen_id):
@@ -78,7 +87,7 @@ def create(request, specimen_id):
     #######
     if request.method == 'GET':
 
-        context = {'form': ProcessForm(), 'project_id': specimen_id}
+        context = {'form': ProcessForm(), 'specimen_id': specimen_id}
 
         return render(request, 'ids_projects/processes/create.html', context)
 
@@ -97,8 +106,8 @@ def create(request, specimen_id):
             reference_sequence = form.cleaned_data['reference_sequence']
 
             new_specimen = {
-                "name":"idsvc.specimen",
-                "associationIds": project_id,
+                "name":"idsvc.process",
+                "associationIds": specimen_id,
                 "value": {
                     "process_type":process_type,
                     "sequence_method":sequence_method,
@@ -114,10 +123,10 @@ def create(request, specimen_id):
                 logger.debug('Error while attempting to create process metadata: %s' % e)
             else:
                 messages.success(request, 'Successfully created process.')
-                return HttpResponseRedirect('/specimen/{{specimen_id}}'.format(response['uuid']))
+                return HttpResponseRedirect('/process/{}'.format(response['uuid']))
 
         messages.info(request, 'Did not create new process.')
-        return HttpResponseRedirect('/specimen/{{specimen_id}}')
+        return HttpResponseRedirect('/specimen/{}'.format(specimen_id))
 
     #########
     # OTHER #
