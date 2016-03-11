@@ -1,13 +1,16 @@
 from agavepy.agave import Agave, AgaveException
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.http import (HttpResponse,
+                         HttpResponseRedirect,
                          HttpResponseBadRequest,
                          HttpResponseForbidden,
-                         HttpResponseNotFound)
+                         HttpResponseNotFound,
+                         HttpResponseServerError)
 from django.shortcuts import render
 import json, logging
-#from forms import SpecimenForm
+from ..forms.processes import ProcessForm
 
 
 def _client(request):
@@ -70,28 +73,51 @@ def view(request, process_id):
 
 
 def create(request, specimen_id):
-    """Create a process related to a specimen"""
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        a = _client(request)
-        query = {'uuid':project_id}
-        project_list = a.meta.listMetadata(q=json.dumps(query))
+        context = {'form': ProcessForm(), 'project_id': specimen_id}
 
-        try:
-            project = project_list[0]
-        except:
-            return HttpResponseNotFound("Project not found")
-        else:
-            return HttpResponse(json.dumps(project), content_type="application/json", status=200)
+        return render(request, 'ids_projects/processes/create.html', context)
 
     ########
     # POST #
     ########
     elif request.method == 'POST':
-        return HttpResponse("Creating new project: {}".format(len(projects)+1))
+
+        form = ProcessForm(request.POST)
+
+        if form.is_valid():
+
+            process_type = form.cleaned_data['process_type']
+            sequence_method = form.cleaned_data['sequence_method']
+            sequence_hardware = form.cleaned_data['sequence_hardware']
+            reference_sequence = form.cleaned_data['reference_sequence']
+
+            new_specimen = {
+                "name":"idsvc.specimen",
+                "associationIds": project_id,
+                "value": {
+                    "process_type":process_type,
+                    "sequence_method":sequence_method,
+                    "sequence_hardware":sequence_hardware,
+                    "reference_sequence":reference_sequence
+                }
+            }
+
+            a = _client(request)
+            try:
+                response = a.meta.addMetadata(body=new_project)
+            except Exception as e:
+                logger.debug('Error while attempting to create process metadata: %s' % e)
+            else:
+                messages.success(request, 'Successfully created process.')
+                return HttpResponseRedirect('/specimen/{{specimen_id}}'.format(response['uuid']))
+
+        messages.info(request, 'Did not create new process.')
+        return HttpResponseRedirect('/specimen/{{specimen_id}}')
 
     #########
     # OTHER #

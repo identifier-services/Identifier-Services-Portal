@@ -46,10 +46,6 @@ INSTALLED_APPS = [
 
     'ids_auth',
     'ids_projects',
-    'ids_specimens',
-    'ids_datasets',
-    'ids_data',
-    'ids_systems',
 ]
 
 AUTHENTICATION_BACKENDS = (

@@ -15,15 +15,15 @@
         </div>
     </div>
     <div class="row">
-    {% for item in data %}
-        <div class="col-xs-4">
+    {% for project in projects %}
+        <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-body">
                     <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                    <p><h4>{{ item.value.title }}</h4>
-                    <b>Type: </b>{{ item.value.investigation_type }}</p>
-                    <p><b>Description: </b>{{ item.value.description }}</p>
-                    <a href="/project/{{item.uuid}}" class="btn btn-primary">View Project</a>
+                    <p><h4>{{ project.title }}</h4>
+                    <b>Type: </b>{{ project.investigation_type }}</p>
+                    <p><b>Description: </b>{{ project.description }}</p>
+                    <a href="/project/{{project.uuid}}" class="btn btn-primary">View Project</a>
                 </div>
             </div>
         </div>

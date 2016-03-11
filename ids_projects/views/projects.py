@@ -23,17 +23,26 @@ def _client(request):
     return Agave(api_server = url, token = access_token)
 
 
+def _collaps_meta(x):
+    d = x['value']
+    d['uuid'] = x['uuid']
+    return d
+
+
 def list(request):
-    """ """
+    """List all projects"""
     #######
     # GET #
     #######
     if request.method == 'GET':
         a = _client(request)
         query = {'name':'idsvc.project'}
-        project_list = a.meta.listMetadata(q=json.dumps(query))
+        projects_raw = a.meta.listMetadata(q=json.dumps(query))
+        projects = map(_collaps_meta, projects_raw)
 
-        return render(request, 'ids_projects/projects/index.html', {'data':project_list})
+        context = {'projects':projects}
+
+        return render(request, 'ids_projects/projects/index.html', context)
 
     #########
     # OTHER #
@@ -41,11 +50,6 @@ def list(request):
     else:
         django.http.HttpResponseNotAllowed("Method not allowed")
 
-
-def _collaps_meta(x):
-    d = x['value']
-    d['uuid'] = x['uuid']
-    return d
 
 def view(request, project_id):
     """Queries project metadata and all associated metadata"""
@@ -80,6 +84,8 @@ def view(request, project_id):
 
         context = {'project' : project,}
 
+        print context
+
         #return HttpResponse(json.dumps(context),status = 200, content_type='application/json')
         return render(request, 'ids_projects/projects/detail.html', context)
 
@@ -96,7 +102,6 @@ def create(request):
     # GET #
     #######
     if request.method == 'GET':
-        # import pdb; pdb.set_trace()
 
         context = {'form': ProjectForm()}
         return render(request, 'ids_projects/projects/create.html', context)

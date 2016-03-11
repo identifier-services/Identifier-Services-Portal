@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-6 col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">{{specimen.taxon_name}} {{specimen.specimen_id}}</h1>
+                </div>
+                <div class="panel-body">
+                    <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                    <p><b>Taxon Name</b> {{ specimen.taxon_name }}</p>
+                    <p><b>Specimen ID</b> {{ specimen.specimen_id }}</p>
+                    <p><b>Organ/Tissue</b> {{ specimen.organ_or_tissue }}</p>
+                    <p><b>Development Stage</b> {{ specimen.development_stage }}</p>
+                    <p><b>Haploid Chromosone Count</b> {{ specimen.haploid_chromosome_count }}</p>
+                    <p><b>Ploidy</b> {{ specimen.ploidy }}</p>
+                    <p><b>Propogation</b> {{ specimen.propagation }}</p>
+                    <p><b>Estimated Genome Size</b> {{ specimen.estimated_genome_size }}</p>
+                </div>
+                <div class="panel-heading">
+                    <h1 class="panel-title">PROCESSES</h1>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <a href="/specimen/{{specimen.uuid}}/" class="btn btn-primary">View</a>
+                        </div>
+                        <div class="col-xs-3">
+                            <a href="/specimen/{{specimen.uuid}}/edit" class="btn btn-primary">Edit</a>
+                        </div>
+                        <div class="col-xs-3 col-xs-offset-1 col-sm-offset-2">
+                            <a href="/specimen/{{specimen.uuid}}/delete" class="btn btn-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
