@@ -60,8 +60,19 @@
 
             <!-- <div class="panel-body"> -->
             {% if not project.specimens %}
-            <p>No specimens yet.</p>
+            <div class="object-header darker">
+                <div>
+                    No Specimens yet.
+                    <a href="/data/delete/{{file.uuid}}/" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                </div>
+            </div>
             {% else %}
+            <div class="object-header darker">
+                <div>
+                    Specimens
+                    <a href="/data/delete/{{file.uuid}}/" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                </div>
+            </div>
             {% for specimen in project.specimens %}
 
             <div class="object-header">
@@ -135,8 +146,19 @@
                 </div>
 
                     {% if not specimen.processes %}
-                    <p>No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}</p>
+                    <div class="object-header darker">
+                        <div>
+                            No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                            <a href="/data/delete/{{file.uuid}}/" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                        </div>
+                    </div>
                     {% else %}
+                    <div class="object-header darker">
+                        <div>
+                            Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                            <a href="/data/delete/{{file.uuid}}/" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                        </div>
+                    </div>
                     {% for process in specimen.processes %}
 
                     <div class="panel panel-default">
@@ -149,7 +171,10 @@
                             {{ process }}
 
                             {% if not process.files %}
-                            <p>No files for {{ process.process_type }}</p>
+                            <div class="ids-header">
+                                <p>No files for {{ process.process_type }}</p>
+                            </div>
+
                             {% else %}
 
                             <div class="row">

@@ -77,6 +77,7 @@ def view(request, project_id):
             process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
             processes_raw = a.meta.listMetadata(q=json.dumps(process_query))
             processes = map(_collaps_meta, processes_raw)
+            print " #$$#$%#% {} #$%#$%# ".format(processes)
             for process in processes:
                 process_id = process['uuid']
                 files_query = {'name':'idsvc.data','associationIds':'{}'.format(process_id)}
