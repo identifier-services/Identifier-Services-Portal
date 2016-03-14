@@ -41,7 +41,7 @@ def list(request, project_id):
         specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
         specimens = map(_collaps_meta, specimens_raw)
 
-        context = {'specimens' : specimens}
+        context = {'specimens' : specimens, 'project_id': project_id}
 
         return render(request, 'ids_projects/specimens/index.html', context)
 
@@ -78,8 +78,6 @@ def view(request, specimen_id):
         # project['specimens'] = specimens
 
         context = {'specimen' : specimen,}
-
-        print context
 
         #return HttpResponse(json.dumps(context),status = 200, content_type='application/json')
         return render(request, 'ids_projects/specimens/detail.html', context)

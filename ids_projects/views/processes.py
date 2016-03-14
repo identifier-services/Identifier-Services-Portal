@@ -63,16 +63,26 @@ def view(request, process_id):
     if request.method == 'GET':
 
         a = _client(request)
-        query = {'uuid':specimen_id}
-        project_list = a.meta.listMetadata(q=json.dumps(query))
+        process_raw = a.meta.getMetadata(uuid=process_id)
+        process = _collaps_meta(process_raw)
 
-        try:
-            project = project_list[0]
-        except:
-            return HttpResponseNotFound("Project not found")
-        else:
-            return HttpResponse(json.dumps(project),
-            content_type="application/json", status=200)
+        # for specimen in specimens:
+        #     specimen_id = specimen['uuid']
+        #     process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
+        #     processes_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
+        #     processes = map(_collaps_meta, processes_raw)
+        #     for process in processes:
+        #         process_id = process['uuid']
+        #         files_query = {'name':'idsvc.data','associationIds':'{}'.format(process_id)}
+        #         files_raw = a.meta.listMetadata(q=json.dumps(files_query))
+        #         files = map(_collaps_meta, files_raw)
+        #         process['files'] = files
+        #     specimen['processes'] = processes
+        # project['specimens'] = specimens
+
+        context = {'process' : process,}
+
+        return render(request, 'ids_projects/processes/detail.html', context)
 
     #########
     # OTHER #
@@ -82,6 +92,7 @@ def view(request, process_id):
 
 
 def create(request, specimen_id):
+    """Create a new process realted to a specimen"""
     #######
     # GET #
     #######
@@ -96,6 +107,15 @@ def create(request, specimen_id):
     ########
     elif request.method == 'POST':
 
+        # inherit specimen association ids
+        a = _client(request)
+        specimen = a.meta.getMetadata(uuid=specimen_id)
+        associationIds = specimen['associationIds']
+        project_id = associationIds[0]
+
+        # add specimen uuid to association ids
+        associationIds.append(specimen_id)
+
         form = ProcessForm(request.POST)
 
         if form.is_valid():
@@ -105,9 +125,9 @@ def create(request, specimen_id):
             sequence_hardware = form.cleaned_data['sequence_hardware']
             reference_sequence = form.cleaned_data['reference_sequence']
 
-            new_specimen = {
+            new_process = {
                 "name":"idsvc.process",
-                "associationIds": specimen_id,
+                "associationIds": associationIds,
                 "value": {
                     "process_type":process_type,
                     "sequence_method":sequence_method,
@@ -116,9 +136,8 @@ def create(request, specimen_id):
                 }
             }
 
-            a = _client(request)
             try:
-                response = a.meta.addMetadata(body=new_project)
+                response = a.meta.addMetadata(body=new_process)
             except Exception as e:
                 logger.debug('Error while attempting to create process metadata: %s' % e)
             else:
@@ -126,7 +145,8 @@ def create(request, specimen_id):
                 return HttpResponseRedirect('/process/{}'.format(response['uuid']))
 
         messages.info(request, 'Did not create new process.')
-        return HttpResponseRedirect('/specimen/{}'.format(specimen_id))
+        # return HttpResponseRedirect('/specimen/{}'.format(specimen_id))
+        return HttpResponseRedirect('/project/{}'.format(project_id))
 
     #########
     # OTHER #

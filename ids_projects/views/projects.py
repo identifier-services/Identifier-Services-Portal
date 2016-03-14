@@ -29,6 +29,7 @@ def _collaps_meta(x):
     return d
 
 
+@login_required
 def list(request):
     """List all projects"""
     #######
@@ -77,7 +78,7 @@ def view(request, project_id):
             process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
             processes_raw = a.meta.listMetadata(q=json.dumps(process_query))
             processes = map(_collaps_meta, processes_raw)
-            print " #$$#$%#% {} #$%#$%# ".format(processes)
+            print " #$$#$#% {} #$%#$%# ".format(processes)
             for process in processes:
                 process_id = process['uuid']
                 files_query = {'name':'idsvc.data','associationIds':'{}'.format(process_id)}
@@ -106,8 +107,9 @@ def view(request, project_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def create(request):
-    """ """
+    """Create a new project"""
     #######
     # GET #
     #######
@@ -162,6 +164,7 @@ def create(request):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def edit(request, project_id):
     """ """
     #######
@@ -224,6 +227,7 @@ def edit(request, project_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def delete(request, project_id):
     """ """
     #######

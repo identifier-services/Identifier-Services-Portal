@@ -63,14 +63,14 @@
             <div class="object-header darker">
                 <div>
                     No Specimens yet.
-                    <a href="/data/delete/{{file.uuid}}/" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="/project/{{project.uuid}}/specimen" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
             {% else %}
             <div class="object-header darker">
                 <div>
                     Specimens
-                    <a href="/data/delete/{{file.uuid}}/" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="/project/{{project.uuid}}/specimen" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
             {% for specimen in project.specimens %}
@@ -156,7 +156,7 @@
                     <div class="object-header darker">
                         <div>
                             Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
-                            <a href="/data/delete/{{file.uuid}}/" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                            <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                         </div>
                     </div>
                     {% for process in specimen.processes %}
@@ -262,7 +262,7 @@
 
             {% endfor %}
             {% endif %}
-            <p><a href="/project/{{project.uuid}}/specimen/" class="btn btn-primary">Define Specimen</a></p>
+            <!-- <p><a href="/project/{{project.uuid}}/specimen/" class="btn btn-primary">Define Specimen</a></p> -->
         </div>
     </div>
 </div>
