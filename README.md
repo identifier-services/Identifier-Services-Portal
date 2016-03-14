@@ -1,12 +1,47 @@
 # Identifier Services Portal
 
-Required environment variables:
 
-AGAVE_CLIENT_KEY  
-AGAVE_CLIENT_SECRET  
+## First time setup
 
-Optional:
+1. Clone the repo
 
-AGAVE_TENANT_BASEURL  
+   ```
+   $ git clone https://github.com/DesignSafe-CI/portal.git
+   $ cd portal
+   ```
 
-(default: https://agave.iplantc.org/)
+2. Configure environment variables
+
+   Make a copy of [ids.env.sample](ids.env.sample) and rename it to
+   `ids.env`. Configure variables as necessary.
+
+   Required environment variables:
+
+   - AGAVE_CLIENT_KEY  
+   - AGAVE_CLIENT_SECRET  
+
+   Optional:
+
+   - AGAVE_TENANT_BASEURL  (default: https://agave.iplantc.org/)
+
+3. Installing
+
+    Install requirements:
+    (Would suggest doing this in a virtual environment)
+
+    ```
+    $ pip install -r requirements.txt
+    ```
+
+## Running
+
+1. From project directory (same directory as manage.py):
+
+    ```
+    $ source ids.env
+    $ python manage.py runserver
+    ```
+
+2. Open in browser
+
+   Navigate to [http://localhost:8000](http://localhost:8000) in your browser.
