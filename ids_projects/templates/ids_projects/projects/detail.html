@@ -2,11 +2,22 @@
 
 {% load bootstrap3 %}
 
+{% load django_bootstrap_breadcrumbs %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% breadcrumb "Projects" "ids_projects:projects-list" %}
+    {% breadcrumb "Project" "" %}
+{% endblock %}
+
 {% block title %}Projects{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row">
+        <div class="col-xs-12">
+            {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
+        </div>
         <!-- Left Column - Project Basic Info -->
         <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-5">
             <div class="panel panel-default">

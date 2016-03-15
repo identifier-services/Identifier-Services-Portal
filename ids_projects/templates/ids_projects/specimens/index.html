@@ -4,21 +4,21 @@
 
 {% load django_bootstrap_breadcrumbs %}
 
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% breadcrumb "Projects" "ids_projects:projects-list" %}
+    {% breadcrumb "Specimens" "ids_projects:specimens-list" %}
+{% endblock %}
+
 {% block title %}Specimens{% endblock %}
 
 {% block content %}
+
 <div class="container">
     <div class="row">
-        <div class="col-xs-7 col-xs-offset-1 col-sm-offset-0">
-        hi
-        {% block breadcrumbs %}
-            {% breadcrumb "Project" "/" %}
-        {% endblock %}
-        </div>
-    </div>
-    <div class="row">
         <div class="col-xs-9">
-            <h2 id="projects-header">Specimens</h2>
+            <!-- <h2 id="projects-header">Specimens</h2> -->
+            {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
         </div>
         <div class="col-xs-3">
             <a href="/project/{{project.uuid}}/specimen" class="btn btn-primary pull-right">Create Specimen</a>
@@ -63,7 +63,7 @@
                     <p><b>Propagation</b> {{ specimen.propagation }}</p>
                     <p><b>Estimated Genome Size</b> {{ specimen.estimated_genome_size }}</p>
                 </div>
-                <div class="panel-heading">
+                <!-- <div class="panel-heading">
                     <h1 class="panel-title">PROCESSES</h1>
                 </div>
                 <div class="panel-body">
@@ -78,7 +78,7 @@
                             <a href="/specimen/{{specimen.uuid}}/delete" class="btn btn-danger">Delete</a>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     {% endfor %}

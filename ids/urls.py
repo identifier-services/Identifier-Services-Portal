@@ -34,5 +34,5 @@ urlpatterns = patterns(
     # url(r'^', include('ids_auth.urls', namespace='ids_auth')),
 
     # projects
-    url(r'', include('ids_projects.urls', namespace='ids_projects')),
+    url(r'^', include('ids_projects.urls', namespace='ids_projects')),
 )

@@ -61,6 +61,7 @@ def view(request, specimen_id):
 
         a = _client(request)
         specimen_raw = a.meta.getMetadata(uuid=specimen_id)
+        project_id = specimen_raw['associationIds'][0]
         specimen = _collaps_meta(specimen_raw)
 
         # for specimen in specimens:
@@ -77,7 +78,7 @@ def view(request, specimen_id):
         #     specimen['processes'] = processes
         # project['specimens'] = specimens
 
-        context = {'specimen' : specimen,}
+        context = {'specimen' : specimen, 'project_id' : project_id}
 
         #return HttpResponse(json.dumps(context),status = 200, content_type='application/json')
         return render(request, 'ids_projects/specimens/detail.html', context)

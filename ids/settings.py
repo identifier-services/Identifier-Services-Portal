@@ -90,8 +90,6 @@ TEMPLATES = [
     },
 ]
 
-
-
 WSGI_APPLICATION = 'ids.wsgi.application'
 
 

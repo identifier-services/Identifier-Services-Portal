@@ -2,13 +2,21 @@
 
 {% load bootstrap3 %}
 
+{% load django_bootstrap_breadcrumbs %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% breadcrumb "Projects" "ids_projects:projects-list" %}
+{% endblock %}
+
 {% block title %}Projects{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row">
         <div class="col-xs-9">
-            <h2 id="projects-header">Projects</h2>
+            <!-- <h2 id="projects-header">Projects</h2> -->
+            {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
         </div>
         <div class="col-xs-3">
             <a href="/project" class="btn btn-primary pull-right">Create Project</a>

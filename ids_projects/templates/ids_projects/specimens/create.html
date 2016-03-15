@@ -2,11 +2,21 @@
 
 {% load bootstrap3 %}
 
-{% block title %}Project{% endblock %}
+{% load django_bootstrap_breadcrumbs %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% breadcrumb "Projects" "ids_projects:projects-list" %}
+    {% breadcrumb "Specimens" "ids_projects:specimens-list" %}
+    {% breadcrumb "Specimen" "" %}
+{% endblock %}
+
+{% block title %}Create Specimen{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1>Specimen</h1>
+    <!-- <h1>Specimen</h1> -->
+    {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
 
     <form method="post">
         {% csrf_token %}
