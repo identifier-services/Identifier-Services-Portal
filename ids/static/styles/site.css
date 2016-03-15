@@ -23,6 +23,15 @@
     /*padding: 15px 15px;*/
 }
 
+.object-header .header-link {
+    color: #777;
+    text-decoration: none;
+}
+
+.object-header .header-link:hover {
+    color: #080808;
+}
+
 .darker {
     background-color: #eaeaea;
     border-color: #ccc;
