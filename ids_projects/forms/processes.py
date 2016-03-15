@@ -25,7 +25,10 @@ class ProcessForm(forms.Form):
     sequence_hardware = forms.CharField(max_length=255)
     assembly_method = forms.CharField(max_length=255)
     reference_sequence = forms.CharField(max_length=255)
+
+    # hidden
     project_id = forms.CharField(widget=forms.HiddenInput())
+    # maybe i should use MultiValueField?
     associationIds = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
