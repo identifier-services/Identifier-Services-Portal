@@ -120,9 +120,11 @@ def create(request, project_id):
             propagation = form.cleaned_data['propagation']
             estimated_genome_size = form.cleaned_data['estimated_genome_size']
 
+            associationIds = [project_id]
+
             new_specimen = {
                 "name":"idsvc.specimen",
-                "associationIds": project_id,
+                "associationIds": associationIds,
                 "value": {
                     "taxon_name":taxon_name,
                     "specimen_id":specimen_id,
@@ -137,7 +139,7 @@ def create(request, project_id):
 
             a = _client(request)
             try:
-                response = a.meta.addMetadata(body=new_specimen)
+                response = a.meta.addMetadata(body=new_specimen)                
             except Exception as e:
                 logger.debug('Error while attempting to create specimen metadata: %s' % e)
             else:

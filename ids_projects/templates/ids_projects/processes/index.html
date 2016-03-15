@@ -21,7 +21,7 @@
             {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
         </div>
         <div class="col-xs-3">
-            <a href="/project" class="btn btn-primary pull-right">Create Specimen</a>
+            <a href="/specimen/{{specimen_id}}/process" class="btn btn-primary pull-right">Create Process</a>
         </div>
     </div>
     <div class="row">
@@ -62,11 +62,6 @@
                     <p><b>Ploidy</b> {{ specimen.ploidy }}</p>
                     <p><b>Propagation</b> {{ specimen.propagation }}</p>
                     <p><b>Estimated Genome Size</b> {{ specimen.estimated_genome_size }}</p>
-                </div>
-                <div class="panel-heading">
-                    <h1 class="panel-title">PROCESSES</h1>
-                </div>
-                <div class="panel-body">
                     <div class="row">
                         <div class="col-xs-3">
                             <a href="/specimen/{{specimen.uuid}}/" class="btn btn-primary">View</a>

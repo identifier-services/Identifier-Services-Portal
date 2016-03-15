@@ -65,7 +65,9 @@ def view(request, project_id):
         project_raw = a.meta.getMetadata(uuid=project_id)
         project = _collaps_meta(project_raw)
 
-        specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_id)}
+        associationIds = [project_id]
+
+        specimens_query = {'associationIds': { '$in': associationIds }}
         specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
         specimens = map(_collaps_meta, specimens_raw)
 
@@ -78,7 +80,6 @@ def view(request, project_id):
             process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
             processes_raw = a.meta.listMetadata(q=json.dumps(process_query))
             processes = map(_collaps_meta, processes_raw)
-            print " #$$#$#% {} #$%#$%# ".format(processes)
             for process in processes:
                 process_id = process['uuid']
                 files_query = {'name':'idsvc.data','associationIds':'{}'.format(process_id)}
@@ -94,8 +95,6 @@ def view(request, project_id):
                    'specimen_count' : specimen_count,
                    'process_count' : process_count,
                    'file_count' : file_count,}
-
-        print context
 
         #return HttpResponse(json.dumps(context),status = 200, content_type='application/json')
         return render(request, 'ids_projects/projects/detail.html', context)
@@ -133,9 +132,11 @@ def create(request):
             inv_type = form.cleaned_data['investigation_type']
             desc = form.cleaned_data['description']
 
+            # l = ['3705648026154823195-242ac1110-0001-012','2783344145537765861-242ac1110-0001-012']
+
             new_project = {
                 'name' : 'idsvc.project',
-                'associationIds' : [],
+                'associationIds' : [], #l,
                 'value' : {
                     'title' : title,
                     'creator' : user_full,
@@ -144,13 +145,15 @@ def create(request):
                 },
             }
 
+            import pdb;
+
             a = _client(request)
+
             try:
                 response = a.meta.addMetadata(body=new_project)
             except Exception as e:
                 logger.debug('Error while attempting to create project metadata: %s' % e)
             else:
-                # import pdb; pdb.set_trace()
                 messages.success(request, 'Successfully created project.')
                 return HttpResponseRedirect('/project/{}'.format(response['uuid']))
 
@@ -236,6 +239,12 @@ def delete(request, project_id):
     if request.method == 'GET':
 
         a = _client(request)
+
+        query = {'associationIds':'{}'.format(project_id)}
+        results = a.meta.listMetadata(q=json.dumps(query))
+
+        for result in results:
+            a.meta.deleteMetadata(uuid=result.uuid)
 
         try:
             a.meta.deleteMetadata(uuid=project_id)

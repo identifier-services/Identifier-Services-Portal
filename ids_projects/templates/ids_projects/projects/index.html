@@ -31,7 +31,15 @@
                     <p><h4>{{ project.title }}</h4>
                     <b>Type: </b>{{ project.investigation_type }}</p>
                     <p><b>Description: </b>{{ project.description }}</p>
-                    <a href="/project/{{project.uuid}}" class="btn btn-primary">View Project</a>
+                    <!-- <a href="/project/{{project.uuid}}" class="btn btn-primary">View Project</a> -->
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <a href="/project/{{project.uuid}}/" class="btn btn-primary">View</a>
+                        </div>
+                        <div class="col-xs-3 col-xs-offset-4 col-sm-offset-5">
+                            <a href="/project/{{project.uuid}}/delete" class="btn btn-danger">Delete</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

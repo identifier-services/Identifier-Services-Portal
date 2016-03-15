@@ -37,16 +37,13 @@ def list(request, specimen_id):
     if request.method == 'GET':
 
         a = _client(request)
-        query = {'uuid':specimen_id}
-        project_list = a.meta.listMetadata(q=json.dumps(query))
+        process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
+        process_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
+        processes = map(_collaps_meta, process_raw)
 
-        try:
-            project = project_list[0]
-        except:
-            return HttpResponseNotFound("Project not found")
-        else:
-            return HttpResponse(json.dumps(project),
-            content_type="application/json", status=200)
+        context = {'processes' : specimens, 'specimen_id': specimen_id}
+
+        return render(request, 'ids_projects/processes/index.html', context)
 
     #########
     # OTHER #
@@ -116,6 +113,8 @@ def create(request, specimen_id):
         # add specimen uuid to association ids
         associationIds.append(specimen_id)
 
+        # import pdb; pdb.set_trace()
+
         form = ProcessForm(request.POST)
 
         if form.is_valid():
@@ -123,6 +122,7 @@ def create(request, specimen_id):
             process_type = form.cleaned_data['process_type']
             sequence_method = form.cleaned_data['sequence_method']
             sequence_hardware = form.cleaned_data['sequence_hardware']
+            assembly_method = form.cleaned_data['assembly_method']
             reference_sequence = form.cleaned_data['reference_sequence']
 
             new_process = {
@@ -132,12 +132,17 @@ def create(request, specimen_id):
                     "process_type":process_type,
                     "sequence_method":sequence_method,
                     "sequence_hardware":sequence_hardware,
+                    "assembly_method":assembly_method,
                     "reference_sequence":reference_sequence
                 }
             }
 
             try:
                 response = a.meta.addMetadata(body=new_process)
+                #"associationIds": ["4903812449245925861-242ac1110-0001-012", "3127635931663625755-242ac1110-0001-012"]
+                #"associationIds": ["4903812449245925861-242ac1110-0001-012", "3127635931663625755-242ac1110-0001-012"]
+                # "associationIds": ["4903812449245925861-242ac1110-0001-012"]
+                # "associationIds": "4903812449245925861-242ac1110-0001-012"
             except Exception as e:
                 logger.debug('Error while attempting to create process metadata: %s' % e)
             else:

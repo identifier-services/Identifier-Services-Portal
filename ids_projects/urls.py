@@ -23,15 +23,15 @@ from django.conf.urls import patterns, include, url
 urlpatterns = patterns(
     'ids_projects.views.processes',
     # list all processes related to a specimen
-    url(r'^specimen/(?P<specimen_id>.+)/processes/?$', 'list', name='list'),
+    url(r'^specimen/(?P<specimen_id>.+?)/processes/?$', 'list', name='processes-list'),
     # create a processes related to a specimen
-    url(r'^specimen/(?P<specimen_id>.+)/process/?$', 'create', name='processes-create'),
+    url(r'^specimen/(?P<specimen_id>.+?)/process/?$', 'create', name='processes-create'),
     # edit a process
-    url(r'^process/(?P<process_id>.+)/edit$', 'edit', name='processes-edit'),
+    url(r'^process/(?P<process_id>.+?)/edit$', 'edit', name='processes-edit'),
     # delete a process
-    url(r'^process/(?P<process_id>.+)/delete$', 'delete', name='processes-delete'),
+    url(r'^process/(?P<process_id>.+?)/delete$', 'delete', name='processes-delete'),
     # view a process
-    url(r'^process/(?P<process_id>.+)/?$', 'view', name='processes-view'),
+    url(r'^process/(?P<process_id>.+?)/?$', 'view', name='processes-view'),
 )
 
 ###########
@@ -67,15 +67,15 @@ urlpatterns = patterns(
 urlpatterns += patterns(
     'ids_projects.views.specimens',
     # list all specimens related to a project
-    url(r'^project/(?P<project_id>.+)/specimens/?$', 'list', name='specimens-list'),
+    url(r'^project/(?P<project_id>.+?)/specimens/?$', 'list', name='specimens-list'),
     # create a specimen related to a project
-    url(r'^project/(?P<project_id>.+)/specimen/?$', 'create', name='specimens-create'),
+    url(r'^project/(?P<project_id>.+?)/specimen/?$', 'create', name='specimens-create'),
     # edit a specimen
-    url(r'^specimen/(?P<specimen_id>.+)/edit$', 'edit', name='specimens-edit'), # or specimen_edit/...?
+    url(r'^specimen/(?P<specimen_id>.+?)/edit$', 'edit', name='specimens-edit'), # or specimen_edit/...?
     # delete a specimen
-    url(r'^specimen/(?P<specimen_id>.+)/delete$', 'delete', name='specimens-delete'), # or specimen_delete/...?
+    url(r'^specimen/(?P<specimen_id>.+?)/delete$', 'delete', name='specimens-delete'), # or specimen_delete/...?
     # view a specimen
-    url(r'^specimen/(?P<specimen_id>.+)/?$', 'view', name='specimens-view'),
+    url(r'^specimen/(?P<specimen_id>.+?)/?$', 'view', name='specimens-view'),
 )
 
 ############
@@ -88,9 +88,9 @@ urlpatterns += patterns(
     # create project
     url(r'^project/?$', 'create', name='projects-create'),
     # edit project
-    url(r'^project/(?P<project_id>.+)/edit$', 'edit', name='projects-edit'), # or project_edit/... ?
+    url(r'^project/(?P<project_id>.+?)/edit$', 'edit', name='projects-edit'), # or project_edit/... ?
     # delete project
-    url(r'^project/(?P<project_id>.+)/delete$', 'delete', name='projects-delete'), # or project_delete/... ?
+    url(r'^project/(?P<project_id>.+?)/delete$', 'delete', name='projects-delete'), # or project_delete/... ?
     # view a specific project
-    url(r'^project/(?P<project_id>.+)/?$', 'view', name='projects-view'),
+    url(r'^project/(?P<project_id>.+?)/?$', 'view', name='projects-view'),
 )
