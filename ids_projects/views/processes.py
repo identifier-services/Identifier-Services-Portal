@@ -98,10 +98,9 @@ def create(request, specimen_id):
     #######
     if request.method == 'GET':
 
-        # inherit specimen association ids
+        # get association ids
         a = _client(request)
         specimen = a.meta.getMetadata(uuid=specimen_id)
-        # associationIds = map(lambda x: x.encode('utf-8'), specimen['associationIds'])
         associationIds = specimen['associationIds']
 
         # find which is project id
@@ -112,14 +111,7 @@ def create(request, specimen_id):
             if result.name == 'idsvc.project':
                 project_id == result.uuid
 
-        # add specimen uuid to association ids
-        # associationIds.append(specimen_id.encode('utf-8'))
-        associationIds.append(specimen_id)
-
-        initial = {'associationIds':associationIds,
-                   'project_id':project_id}
-
-        context = {'form': ProcessForm(initial=initial),
+        context = {'form': ProcessForm(),
                    'project_id': project_id,
                    'specimen_id': specimen_id,
                    'none_test': None}
@@ -132,6 +124,28 @@ def create(request, specimen_id):
     elif request.method == 'POST':
 
         form = ProcessForm(request.POST)
+
+        # inherit specimen association ids
+        a = _client(request)
+        specimen = a.meta.getMetadata(uuid=specimen_id)
+        associationIds = specimen['associationIds']
+
+        logger.debug('associationIds: {}'.format(associationIds))
+
+        # find which is project id
+        query = {'uuid': { '$in': associationIds }}
+        results = a.meta.listMetadata(q=json.dumps(query))
+
+        logger.debug('results: {}'.format(results))
+
+        project_id = None
+        for result in results:
+
+            if result['name'] == 'idsvc.project':
+                project_id == result['uuid']
+
+        # add specimen uuid to association ids
+        associationIds.append(specimen_id)
 
         if form.is_valid():
 
@@ -154,8 +168,6 @@ def create(request, specimen_id):
                     "reference_sequence":reference_sequence
                 }
             }
-
-            print "#$%#$ new process: {} #$%#$%#$".format(new_process)
 
             try:
                 response = a.meta.addMetadata(body=new_process)
