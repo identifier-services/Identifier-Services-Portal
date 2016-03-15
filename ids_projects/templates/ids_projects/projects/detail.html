@@ -87,7 +87,7 @@
             {% for specimen in project.specimens %}
 
             <div class="object-header">
-                <span>{{ specimen.taxon_name }} {{ specimen.specimen_id }}</span>
+                <a href="/specimen/{{specimen.uuid}}" class="header-link">{{ specimen.taxon_name }} {{ specimen.specimen_id }}</a>
             </div>
 
             <div>
@@ -156,74 +156,127 @@
                     </div>
                 </div>
 
-                    {% if not specimen.processes %}
-                    <div class="object-header darker">
-                        <div>
-                            No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
-                            <a href="/data/delete/{{file.uuid}}/" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
-                        </div>
+                {% if not specimen.processes %}
+                <div class="object-header darker">
+                    <div>
+                        No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                        <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                     </div>
-                    {% else %}
-                    <div class="object-header darker">
-                        <div>
-                            Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
-                            <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
-                        </div>
+                </div>
+                {% else %}
+                <div class="object-header darker">
+                    <div>
+                        Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                        <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                     </div>
-                    {% for process in specimen.processes %}
+                </div>
+                {% for process in specimen.processes %}
 
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h1 class="panel-title"> Process {{ process.process_type }}</h1>
-                        </div>
+                <div class="object-header">
+                    <a href="/process/{{process.uuid}}" class="header-link">{{ process.process_type }}</a>
+                </div>
 
-                        <div class="panel-body">
-
-                            {{ process }}
-
-                            {% if not process.files %}
-                            <div class="ids-header">
-                                <p>No files for {{ process.process_type }}</p>
-                            </div>
-
-                            {% else %}
-
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <b>Name</b>
-                                </div>
-                                <div class="col-xs-3">
-                                    <b>Size</b>
-                                </div>
-                                <div class="col-xs-3">
-                                    <b>Modified</b>
-                                </div>
-                            </div>
-
-                            {% for file in process.files %}
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <b>{{ file.name }}</b>
-                                </div>
-                                <div class="col-xs-3">
-                                    {{ file.length }}
-                                </div>
-                                <div class="col-xs-3">
-                                    {{ file.last_modified }}
-                                </div>
-                                <div class="col-xs-2">
-                                    <p><a href="/data/delete/{{file.uuid}}/" class="btn btn-danger">Remove</a></p>
-                                </div>
-                            </div>
-                            {% endfor %}
-                            {% endif %}
-                        </div>
+                <div class="row info-item">
+                    <div class="col-xs-6">
+                        <b>Process Type</b>
                     </div>
-                    {% endfor %}
-                    {% endif %}
+                    <div class="col-xs-6">
+                        {{ process.process_type }}
+                    </div>
+                </div>
+                {% if process.sequence_method %}
+                <div class="row info-item">
+                    <div class="col-xs-6">
+                        <b>Sequence Method</b>
+                    </div>
+                    <div class="col-xs-6">
+                        {{ process.sequence_method }}
+                    </div>
+                </div>
+                {% endif %}
+                {% if process.sequence_hardware %}
+                <div class="row info-item">
+                    <div class="col-xs-6">
+                        <b>Sequence Hardware</b>
+                    </div>
+                    <div class="col-xs-6">
+                        {{ process.sequence_hardware }}
+                    </div>
+                </div>
+                {% endif %}
+                {% if process.assembly_method %}
+                <div class="row info-item">
+                    <div class="col-xs-6">
+                        <b>Assembly Method</b>
+                    </div>
+                    <div class="col-xs-6">
+                        {{ process.assembly_method }}
+                    </div>
+                </div>
+                {% endif %}
+                {% if process.reference_sequence %}
+                <div class="row info-item">
+                    <div class="col-xs-6">
+                        <b>Reference Sequence</b>
+                    </div>
+                    <div class="col-xs-6">
+                        {{ process.reference_sequence }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h1 class="panel-title"> Process {{ process.process_type }}</h1>
+                    </div>
+
+                    <div class="panel-body">
+
+                        {{ process }}
+
+                        {% if not process.files %}
+                        <div class="ids-header">
+                            <p>No files for {{ process.process_type }}</p>
+                        </div>
+
+                        {% else %}
+
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <b>Name</b>
+                            </div>
+                            <div class="col-xs-3">
+                                <b>Size</b>
+                            </div>
+                            <div class="col-xs-3">
+                                <b>Modified</b>
+                            </div>
+                        </div>
+
+                        {% for file in process.files %}
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <b>{{ file.name }}</b>
+                            </div>
+                            <div class="col-xs-3">
+                                {{ file.length }}
+                            </div>
+                            <div class="col-xs-3">
+                                {{ file.last_modified }}
+                            </div>
+                            <div class="col-xs-2">
+                                <p><a href="/data/delete/{{file.uuid}}/" class="btn btn-danger">Remove</a></p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div> -->
+                {% endfor %}
+                {% endif %}
 
 
-                <div class="panel panel-default">
+                <!-- <div class="panel panel-default">
                     <div class="panel-heading">
                         <h1 class="panel-title">Data</h1>
                     </div>
@@ -269,7 +322,7 @@
                         <p><a href="/specimens/delete/{{specimen.uuid}}/" class="btn btn-danger">Delete Specimen</a></p>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             {% endfor %}
             {% endif %}
