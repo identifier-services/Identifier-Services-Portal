@@ -149,13 +149,15 @@ def create(request, specimen_id):
 
         if form.is_valid():
 
+            logger.debug('Process form is valid')
+
             process_type = form.cleaned_data['process_type']
             sequence_method = form.cleaned_data['sequence_method']
             sequence_hardware = form.cleaned_data['sequence_hardware']
             assembly_method = form.cleaned_data['assembly_method']
             reference_sequence = form.cleaned_data['reference_sequence']
-            associationIds = form.cleaned_data['associationIds']
-            project_id = form.cleaned_data['project_id']
+            # associationIds = form.cleaned_data['associationIds']
+            # project_id = form.cleaned_data['project_id']
 
             new_process = {
                 "name":"idsvc.process",
@@ -176,6 +178,10 @@ def create(request, specimen_id):
             else:
                 messages.success(request, 'Successfully created process.')
                 return HttpResponseRedirect('/process/{}'.format(response['uuid']))
+
+        else:
+
+            logger.debug('Process form is not valid')
 
         messages.info(request, 'Did not create new process.')
         # return HttpResponseRedirect('/specimen/{}'.format(specimen_id))
