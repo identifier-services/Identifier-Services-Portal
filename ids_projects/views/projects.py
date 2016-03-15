@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 def _client(request):
     token = request.session.get(getattr(settings, 'AGAVE_TOKEN_SESSION_ID'))
     access_token = token.get('access_token', None)
+    logger.debug("access token: {}".format(access_token))
     url = getattr(settings, 'AGAVE_TENANT_BASEURL')
     return Agave(api_server = url, token = access_token)
 
@@ -64,8 +65,60 @@ def view(request, project_id):
         a = _client(request)
         project_raw = a.meta.getMetadata(uuid=project_id)
         project = _collaps_meta(project_raw)
-
+        # project = a.meta.getMetadata(uuid=project_id)
+        # project['specimens'] = []
+        #
         associationIds = [project_id]
+        #
+        # query = {'associationIds': { '$in': associationIds }}
+        # results = a.meta.listMetadata(q=json.dumps(query))
+        #
+        # specimens = {}
+        # processes = {}
+        # files = {}
+        #
+        # for result in results:
+        #     uuid = result['uuid']
+        #     name = result['name']
+        #     if name == 'idsvc.specimen':
+        #         result['processes'] = []
+        #         specimens[uuid] = result
+        #     elif name == 'idsvc.process':
+        #         result['files'] = []
+        #         processes[uuid].append(result)
+        #     elif name == 'idsvc.data':
+        #         files[uuid] = result
+        #
+        # specimen_ids = specimens.iterkeys()
+        # process_ids = processes.iterkeys()
+        # file_ids = files.iterkeys()
+        #
+        # unmatched_processes = []
+        # unmatched_files = []
+        #
+        # for file_id in file_ids:
+        #     file_data = files[file_id]
+        #     associations = file_data['associationIds']
+        #     match = filter(lambda x: x in associationIds, process_ids)
+        #     if match:
+        #         process_id = match[0]
+        #         processes[process_id]['files'].append(file_data)
+        #     else:
+        #         unmatched_files.append(file_data)
+        #
+        # for process_id in process_ids:
+        #     process = processes[process_id]
+        #     associations = process['associationIds']
+        #     match = filter(lambda x: x in associationIds, specimen_ids)
+        #     if match:
+        #         specimen_id = match[0]
+        #         specimens[specimen_id]['processes'].append(process)
+        #     else:
+        #         unmatched_processes.append(process)
+        #
+        # for specimen_id in specimen_ids:
+        #     specimen = specimens[specimen_id]
+        #     project['specimens'].append(specimen)
 
         specimens_query = {'associationIds': { '$in': associationIds }}
         specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
@@ -132,11 +185,9 @@ def create(request):
             inv_type = form.cleaned_data['investigation_type']
             desc = form.cleaned_data['description']
 
-            # l = ['3705648026154823195-242ac1110-0001-012','2783344145537765861-242ac1110-0001-012']
-
             new_project = {
                 'name' : 'idsvc.project',
-                'associationIds' : [], #l,
+                'associationIds' : [],
                 'value' : {
                     'title' : title,
                     'creator' : user_full,
@@ -176,11 +227,8 @@ def edit(request, project_id):
     if request.method == 'GET':
 
         a = _client(request)
-        query = {'uuid':project_id}
-        project_list = a.meta.listMetadata(q=json.dumps(query))
-
         try:
-            project = project_list[0]
+            project = a.meta.getMetadata(uuid=project_id)
         except:
             return HttpResponseNotFound("Project not found")
         else:

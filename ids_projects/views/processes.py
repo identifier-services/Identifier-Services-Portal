@@ -29,6 +29,7 @@ def _collaps_meta(x):
     return d
 
 
+@login_required
 def list(request, specimen_id):
     """List all processes related to a specimen"""
     #######
@@ -52,6 +53,7 @@ def list(request, specimen_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def view(request, process_id):
     """ """
     #######
@@ -88,6 +90,7 @@ def view(request, process_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def create(request, specimen_id):
     """Create a new process realted to a specimen"""
     #######
@@ -95,7 +98,31 @@ def create(request, specimen_id):
     #######
     if request.method == 'GET':
 
-        context = {'form': ProcessForm(), 'specimen_id': specimen_id}
+        # inherit specimen association ids
+        a = _client(request)
+        specimen = a.meta.getMetadata(uuid=specimen_id)
+        # associationIds = map(lambda x: x.encode('utf-8'), specimen['associationIds'])
+        associationIds = specimen['associationIds']
+
+        # find which is project id
+        query = {'associationIds': { '$in': associationIds }}
+        results = a.meta.listMetadata(q=json.dumps(query))
+        project_id = None
+        for result in results:
+            if result.name == 'idsvc.project':
+                project_id == result.uuid
+
+        # add specimen uuid to association ids
+        # associationIds.append(specimen_id.encode('utf-8'))
+        associationIds.append(specimen_id)
+
+        initial = {'associationIds':associationIds,
+                   'project_id':project_id}
+
+        context = {'form': ProcessForm(initial=initial),
+                   'project_id': project_id,
+                   'specimen_id': specimen_id,
+                   'none_test': None}
 
         return render(request, 'ids_projects/processes/create.html', context)
 
@@ -103,17 +130,6 @@ def create(request, specimen_id):
     # POST #
     ########
     elif request.method == 'POST':
-
-        # inherit specimen association ids
-        a = _client(request)
-        specimen = a.meta.getMetadata(uuid=specimen_id)
-        associationIds = specimen['associationIds']
-        project_id = associationIds[0]
-
-        # add specimen uuid to association ids
-        associationIds.append(specimen_id)
-
-        # import pdb; pdb.set_trace()
 
         form = ProcessForm(request.POST)
 
@@ -124,6 +140,8 @@ def create(request, specimen_id):
             sequence_hardware = form.cleaned_data['sequence_hardware']
             assembly_method = form.cleaned_data['assembly_method']
             reference_sequence = form.cleaned_data['reference_sequence']
+            associationIds = form.cleaned_data['associationIds']
+            project_id = form.cleaned_data['project_id']
 
             new_process = {
                 "name":"idsvc.process",
@@ -137,12 +155,10 @@ def create(request, specimen_id):
                 }
             }
 
+            print "#$%#$ new process: {} #$%#$%#$".format(new_process)
+
             try:
                 response = a.meta.addMetadata(body=new_process)
-                #"associationIds": ["4903812449245925861-242ac1110-0001-012", "3127635931663625755-242ac1110-0001-012"]
-                #"associationIds": ["4903812449245925861-242ac1110-0001-012", "3127635931663625755-242ac1110-0001-012"]
-                # "associationIds": ["4903812449245925861-242ac1110-0001-012"]
-                # "associationIds": "4903812449245925861-242ac1110-0001-012"
             except Exception as e:
                 logger.debug('Error while attempting to create process metadata: %s' % e)
             else:
@@ -160,6 +176,7 @@ def create(request, specimen_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def edit(request, process_id):
     """ """
     #######
@@ -191,6 +208,7 @@ def edit(request, process_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def delete(request, prodess_id):
     """ """
     #######

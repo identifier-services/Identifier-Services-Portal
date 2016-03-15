@@ -29,6 +29,7 @@ def _collaps_meta(x):
     return d
 
 
+@login_required
 def list(request, project_id):
     """List all specimens related to a project"""
     #######
@@ -52,6 +53,7 @@ def list(request, project_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def view(request, specimen_id):
     """ """
     #######
@@ -91,6 +93,7 @@ def view(request, specimen_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def create(request, project_id):
     """Create a new specimen related to a project"""
     #######
@@ -139,7 +142,7 @@ def create(request, project_id):
 
             a = _client(request)
             try:
-                response = a.meta.addMetadata(body=new_specimen)                
+                response = a.meta.addMetadata(body=new_specimen)
             except Exception as e:
                 logger.debug('Error while attempting to create specimen metadata: %s' % e)
             else:
@@ -156,6 +159,7 @@ def create(request, project_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def edit(request, specimen_id):
     """ """
     #######
@@ -187,6 +191,7 @@ def edit(request, specimen_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def delete(request, specimen_id):
     """ """
     #######
