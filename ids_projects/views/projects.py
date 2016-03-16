@@ -27,6 +27,8 @@ def _client(request):
 def _collaps_meta(x):
     d = x['value']
     d['uuid'] = x['uuid']
+    d['associationIds'] = x['associationIds']
+    d['name'] = x['name']
     return d
 
 
@@ -65,91 +67,84 @@ def view(request, project_id):
         a = _client(request)
         project_raw = a.meta.getMetadata(uuid=project_id)
         project = _collaps_meta(project_raw)
-        # project = a.meta.getMetadata(uuid=project_id)
-        # project['specimens'] = []
-        #
+        project['specimens'] = []
+
         associationIds = [project_id]
-        #
-        # query = {'associationIds': { '$in': associationIds }}
-        # results = a.meta.listMetadata(q=json.dumps(query))
-        #
-        # specimens = {}
-        # processes = {}
-        # files = {}
-        #
-        # for result in results:
-        #     uuid = result['uuid']
-        #     name = result['name']
-        #     if name == 'idsvc.specimen':
-        #         result['processes'] = []
-        #         specimens[uuid] = result
-        #     elif name == 'idsvc.process':
-        #         result['files'] = []
-        #         processes[uuid].append(result)
-        #     elif name == 'idsvc.data':
-        #         files[uuid] = result
-        #
-        # specimen_ids = specimens.iterkeys()
-        # process_ids = processes.iterkeys()
-        # file_ids = files.iterkeys()
-        #
-        # unmatched_processes = []
-        # unmatched_files = []
-        #
-        # for file_id in file_ids:
-        #     file_data = files[file_id]
-        #     associations = file_data['associationIds']
-        #     match = filter(lambda x: x in associationIds, process_ids)
-        #     if match:
-        #         process_id = match[0]
-        #         processes[process_id]['files'].append(file_data)
-        #     else:
-        #         unmatched_files.append(file_data)
-        #
-        # for process_id in process_ids:
-        #     process = processes[process_id]
-        #     associations = process['associationIds']
-        #     match = filter(lambda x: x in associationIds, specimen_ids)
-        #     if match:
-        #         specimen_id = match[0]
-        #         specimens[specimen_id]['processes'].append(process)
-        #     else:
-        #         unmatched_processes.append(process)
-        #
-        # for specimen_id in specimen_ids:
-        #     specimen = specimens[specimen_id]
-        #     project['specimens'].append(specimen)
 
-        specimens_query = {'associationIds': { '$in': associationIds }}
-        specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
-        specimens = map(_collaps_meta, specimens_raw)
+        query = {'associationIds': { '$in': associationIds }}
+        results_raw = a.meta.listMetadata(q=json.dumps(query))
+        results = map(_collaps_meta, results_raw)
 
-        specimen_count = len(specimens)
-        process_count = 0
-        file_count = 0
+        specimens = {}
+        processes = {}
+        files = {}
 
-        for specimen in specimens:
-            specimen_id = specimen['uuid']
-            process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
-            processes_raw = a.meta.listMetadata(q=json.dumps(process_query))
-            processes = map(_collaps_meta, processes_raw)
-            for process in processes:
-                process_id = process['uuid']
-                files_query = {'name':'idsvc.data','associationIds':'{}'.format(process_id)}
-                files_raw = a.meta.listMetadata(q=json.dumps(files_query))
-                files = map(_collaps_meta, files_raw)
-                process['files'] = files
-                file_count += 1
-            specimen['processes'] = processes
-            process_count += 1
-        project['specimens'] = specimens
+        for result in results:
+            uuid = result['uuid']
+            name = result['name']
+            if name == 'idsvc.specimen':
+                # self documenting code
+                specimen = result
+                # create a list for processes
+                specimen['processes'] = []
+                # add to dictionary
+                specimens[uuid] = specimen
+            elif name == 'idsvc.process':
+                process = result
+                # create a list for file metadata
+                process['files'] = []
+                processes[uuid] = process
+            elif name == 'idsvc.data':
+                file_data = result
+                files[uuid] = file_data
+
+        specimen_ids = specimens.keys()
+        process_ids = processes.keys()
+        file_ids = files.keys()
+
+        unmatched_processes = []
+        unmatched_files = []
+
+        for file_id in file_ids:
+            file_data = files[file_id]
+            associationIds = file_data['associationIds']
+            match = filter(lambda x: x in associationIds, process_ids)
+            if match:
+                process_id = match[0]
+                print "matched file to process: {}".format(process_id)
+                processes[process_id]['files'].append(file_data)
+            else:
+                unmatched_files.append(file_data)
+
+        for process_id in process_ids:
+            process = processes[process_id]
+            print "\n\nprocess:\n\n{}\n\n".format(process)
+            associationIds = process['associationIds']
+
+            print "yo, here are the ids:"
+            print associationIds
+            print
+            print specimen_ids
+            print
+
+            match = filter(lambda x: x in associationIds, specimen_ids)
+            if match:
+                specimen_id = match[0]
+                print "matched process to specimen: {}".format(specimen_id)
+                specimens[specimen_id]['processes'].append(process)
+            else:
+                unmatched_processes.append(process)
+
+        for specimen_id in specimen_ids:
+            specimen = specimens[specimen_id]
+            print "\n\nspecimen:\n\n{}\n\n".format(specimen)
+            project['specimens'].append(specimen)
 
         context = {'project' : project,
-                   'specimen_count' : specimen_count,
-                   'process_count' : process_count,
-                   'file_count' : file_count,}
+                   'specimen_count' : len(specimens),
+                   'process_count' : len(processes),
+                   'file_count' : len(files)}
 
-        #return HttpResponse(json.dumps(context),status = 200, content_type='application/json')
         return render(request, 'ids_projects/projects/detail.html', context)
 
     #########
