@@ -54,14 +54,16 @@ def view(request, specimen_id):
         specimen_raw = a.meta.getMetadata(uuid=specimen_id)
         specimen = collapse_meta(specimen_raw)
 
-        # find project specimen is associated with
+        project = None
+
+        # find the project that the specimen is associated with
         associationIds = specimen['associationIds']
-        query = {'associationIds': { '$in': associationIds }}
-        results = a.meta.listMetadata(q=json.dumps(query))
-        project_id = None
+        query = {'uuid': { '$in': associationIds }}
+        results_raw = a.meta.listMetadata(q=json.dumps(query))
+        results = map(collapse_meta, results_raw)
         for result in results:
-            if result.name == 'idsvc.project':
-                project_id == result.uuid
+            if result['name'] == 'idsvc.project':
+                project = result
 
         # get all objects with specimen_id in associationIds list
         query = {'associationIds': specimen_id }
@@ -116,7 +118,7 @@ def view(request, specimen_id):
             process = processes[process_id]
             specimen['processes'].append(process)
 
-        context = {'specimen' : specimen, 'project_id' : project_id}
+        context = {'specimen' : specimen, 'project' : project}
 
         return render(request, 'ids_projects/specimens/detail.html', context)
 
@@ -135,7 +137,14 @@ def create(request, project_id):
     #######
     if request.method == 'GET':
 
-        context = {'form': SpecimenForm(), 'project_id': project_id}
+        # get the project
+        a = client(request)
+        project_raw = a.meta.getMetadata(uuid=project_id)
+        project = collapse_meta(project_raw)
+
+        context = {'form': SpecimenForm(initial=specimen),
+                   'specimen': None,
+                   'project': project}
 
         return render(request, 'ids_projects/specimens/create.html', context)
 
@@ -202,21 +211,73 @@ def edit(request, specimen_id):
     if request.method == 'GET':
 
         a = client(request)
-        query = {'uuid':project_id}
-        project_list = a.meta.listMetadata(q=json.dumps(query))
-
         try:
-            project = project_list[0]
+            # get the specimen metadata object
+            specimen = a.meta.getMetadata(uuid=specimen_id)
         except:
-            return HttpResponseNotFound("Project not found")
+            logger.error('Error editing specimen. {} {}'.format(e.errno, e.strerror))
+            messages.error(request, 'Specimen not found.')
+
+            return HttpResponseRedirect('/projects/')
         else:
-            return HttpResponse(json.dumps(project), content_type="application/json", status=200)
+            # find the project that the specimen is associated with
+            project = None
+            associationIds = specimen['associationIds']
+            query = {'uuid': { '$in': associationIds }}
+            results_raw = a.meta.listMetadata(q=json.dumps(query))
+            results = map(collapse_meta, results_raw)
+            for result in results:
+                if result['name'] == 'idsvc.project':
+                    project = result
+
+            context = {'form': SpecimenForm(initial=specimen),
+                       'specimen': specimen,
+                       'project': project}
+            return render(request, 'ids_projects/specimens/create.html', context)
 
     ########
     # POST #
     ########
     elif request.method == 'POST':
-        return HttpResponse("Creating new project: {}".format(len(projects)+1))
+
+        form = SpecimenForm(request.POST)
+
+        if form.is_valid():
+
+            taxon_name = form.cleaned_data['taxon_name']
+            specimen_id = form.cleaned_data['specimen_id']
+            organ_or_tissue = form.cleaned_data['organ_or_tissue']
+            developmental_stage = form.cleaned_data['developmental_stage']
+            haploid_chromosome_count = form.cleaned_data['haploid_chromosome_count']
+            ploidy = form.cleaned_data['ploidy']
+            propagation = form.cleaned_data['propagation']
+            estimated_genome_size = form.cleaned_data['estimated_genome_size']
+
+            new_specimen = {
+                "value": {
+                    "taxon_name":taxon_name,
+                    "specimen_id":specimen_id,
+                    "organ_or_tissue":organ_or_tissue,
+                    "developmental_stage":developmental_stage,
+                    "haploid_chromosome_count":haploid_chromosome_count,
+                    "ploidy":ploidy,
+                    "propagation":propagation,
+                    "estimated_genome_size":estimated_genome_size,
+                }
+            }
+
+            a = client(request)
+            try:
+                response = a.meta.updateMetadata(uuid=specimen_id, body=new_specimen)
+            except Exception as e:
+                logger.debug('Error while attempting to edit specimen metadata: %s' % e)
+                messages.error(request, 'Error while attempting to edit specimen.')
+            else:
+                messages.success(request, 'Successfully edited specimen.')
+                return HttpResponseRedirect('/specimen/{}'.format(response['uuid']))
+
+        messages.info(request, 'Did not edit specimen.')
+        return HttpResponseRedirect('/project/{}'.format(project_id))
 
     #########
     # OTHER #
@@ -227,21 +288,47 @@ def edit(request, specimen_id):
 
 @login_required
 def delete(request, specimen_id):
-    """ """
+    """Delete a specimen"""
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        a = client(request)
-        specimens_query = {
-            'name':'idsvc.specimen',
-            'associationIds':'{}'.format(project_id)
-        }
-        specimens_list = a.meta.listMetadata(q=json.dumps(specimens_query))
+        # TODO: Ask user if process and file data should be deleted
 
-        return HttpResponse(json.dumps(specimens_list),
-            content_type="application/json", status=200)
+        # get the specimen
+        a = client(request)
+        specimen_raw = a.meta.getMetadata(uuid=specimen_id)
+        specimen = collapse_meta(specimen_raw)
+
+        project = None
+
+        # find the project that the specimen is associated with
+        associationIds = specimen['associationIds']
+        query = {'uuid': { '$in': associationIds }}
+        results_raw = a.meta.listMetadata(q=json.dumps(query))
+        results = map(collapse_meta, results_raw)
+        for result in results:
+            if result['name'] == 'idsvc.project':
+                project = result
+
+        try:
+            a.meta.deleteMetadata(uuid=specimen_id)
+        except:
+            logger.error('Error deleting specimen. {} {}'.format(e.errno, e.strerror) )
+            messages.error(request, 'Specimen deletion unsuccessful.')
+
+            if project:
+                return HttpResponseRedirect('/project/{}'.format(project['uuid']))
+            else:
+                return HttpResponseRedirect('/projects/')
+        else:
+            messages.success(request, 'Successfully deleted specimen.')
+
+            if project:
+                return HttpResponseRedirect('/project/{}'.format(project['uuid']))
+            else:
+                return HttpResponseRedirect('/projects/')
 
     #########
     # OTHER #

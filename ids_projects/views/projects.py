@@ -149,7 +149,7 @@ def create(request):
     #######
     if request.method == 'GET':
 
-        context = {'form': ProjectForm()}
+        context = {'form': ProjectForm(), 'project': None}
         return render(request, 'ids_projects/projects/create.html', context)
 
     ########
@@ -177,8 +177,6 @@ def create(request):
                     'description' : desc,
                 },
             }
-
-            import pdb;
 
             a = client(request)
 
@@ -212,9 +210,12 @@ def edit(request, project_id):
         try:
             project = a.meta.getMetadata(uuid=project_id)
         except:
-            return HttpResponseNotFound("Project not found")
+            logger.error('Error while attempting to edit project, not found.')
+            messages.error(request, 'Project not found.')
+            return HttpResponseRedirect('/projects/')
         else:
-            context = {'form': ProjectForm(initial=project)}
+            context = {'form': ProjectForm(initial=project),
+                       'project': project}
             return render(request, 'ids_projects/projects/create.html', context)
 
     ########
@@ -247,11 +248,13 @@ def edit(request, project_id):
             try:
                 response = a.meta.updateMetadata(uuid=project_id, body=new_project)
             except Exception as e:
-                logger.exception('Error while attempting to edit project metadata.')
+                logger.error('Error while attempting to edit project metadata.')
+                messages.error(request, 'Error while attempting to edit specimen.')
+                return HttpResponseRedirect('/projects/')
 
         # TODO: check to see if anything actually changed
         messages.success(request, 'Successfully edited project.')
-        return HttpResponseRedirect('/projects/')
+        return HttpResponseRedirect('/project/{}'.format(project_id))
 
     #########
     # OTHER #
@@ -262,26 +265,31 @@ def edit(request, project_id):
 
 @login_required
 def delete(request, project_id):
-    """ """
+    """Delete a project """
     #######
     # GET #
     #######
     if request.method == 'GET':
 
+        # TODO: ask user if they want to delete associated objects?
+
         a = client(request)
 
+        # find all associated objects
         query = {'associationIds':'{}'.format(project_id)}
         results = a.meta.listMetadata(q=json.dumps(query))
 
+        # delete all associated objects
         for result in results:
             a.meta.deleteMetadata(uuid=result.uuid)
 
+        # delete project
         try:
             a.meta.deleteMetadata(uuid=project_id)
         except:
-            logger.exception('Error deleting project.')
+            logger.error('Error deleting project. {} {}'.format(e.errno, e.strerror) )
             messages.error(request, 'Project deletion unsuccessful.')
-            # return HttpResponseServerError("Error deleting project.")
+
             return HttpResponseRedirect('/projects/')
         else:
             messages.success(request, 'Successfully deleted project.')

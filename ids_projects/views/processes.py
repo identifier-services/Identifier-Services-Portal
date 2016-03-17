@@ -49,25 +49,28 @@ def view(request, process_id):
     #######
     if request.method == 'GET':
 
+        # get the process
         a = client(request)
         process_raw = a.meta.getMetadata(uuid=process_id)
         process = collapse_meta(process_raw)
 
-        # for specimen in specimens:
-        #     specimen_id = specimen['uuid']
-        #     process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
-        #     processes_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
-        #     processes = map(collapse_meta, processes_raw)
-        #     for process in processes:
-        #         process_id = process['uuid']
-        #         files_query = {'name':'idsvc.data','associationIds':'{}'.format(process_id)}
-        #         files_raw = a.meta.listMetadata(q=json.dumps(files_query))
-        #         files = map(collapse_meta, files_raw)
-        #         process['files'] = files
-        #     specimen['processes'] = processes
-        # project['specimens'] = specimens
+        project = None
+        specimen = None
 
-        context = {'process' : process,}
+        # find project & specimen the process is associated with
+        associationIds = process['associationIds']
+        query = {'uuid': { '$in': associationIds }}
+        results_raw = a.meta.listMetadata(q=json.dumps(query))
+        results = map(collapse_meta, results_raw)
+        for result in results:
+            if result['name'] == 'idsvc.specimen':
+                specimen = result
+            if result['name'] == 'idsvc.project':
+                project = result
+
+        context = {'process' : process,
+                   'project' : project,
+                   'specimen' : specimen}
 
         return render(request, 'ids_projects/processes/detail.html', context)
 
@@ -91,18 +94,25 @@ def create(request, specimen_id):
         specimen = a.meta.getMetadata(uuid=specimen_id)
         associationIds = specimen['associationIds']
 
-        # find which is project id
-        query = {'associationIds': { '$in': associationIds }}
-        results = a.meta.listMetadata(q=json.dumps(query))
-        project_id = None
+        project = None
+        specimen = None
+
+        # find the project
+        query = {'uuid': { '$in': associationIds }}
+        results_raw = a.meta.listMetadata(q=json.dumps(query))
+        results = map(collapse_meta, results_raw)
         for result in results:
-            if result.name == 'idsvc.project':
-                project_id == result.uuid
+            if result['name'] == 'idsvc.project':
+                project == result
+            if result['name'] == 'idsvc.specimen':
+                specimen == result
 
         context = {'form': ProcessForm(),
-                   'project_id': project_id,
-                   'specimen_id': specimen_id,
-                   'none_test': None}
+                   'project': project,
+                   'specimen': specimen,
+                   'process': None}
+
+        import pdb; pdb.set_trace()
 
         return render(request, 'ids_projects/processes/create.html', context)
 
@@ -118,19 +128,15 @@ def create(request, specimen_id):
         specimen = a.meta.getMetadata(uuid=specimen_id)
         associationIds = specimen['associationIds']
 
-        logger.debug('associationIds: {}'.format(associationIds))
+        project = None
 
-        # find which is project id
+        # find the project
         query = {'uuid': { '$in': associationIds }}
-        results = a.meta.listMetadata(q=json.dumps(query))
-
-        logger.debug('results: {}'.format(results))
-
-        project_id = None
+        results_raw = a.meta.listMetadata(q=json.dumps(query))
+        results = map(collapse_meta, results_raw)
         for result in results:
-
             if result['name'] == 'idsvc.project':
-                project_id == result['uuid']
+                project == result
 
         # add specimen uuid to association ids
         associationIds.append(specimen_id)
@@ -173,7 +179,7 @@ def create(request, specimen_id):
 
         messages.info(request, 'Did not create new process.')
         # return HttpResponseRedirect('/specimen/{}'.format(specimen_id))
-        return HttpResponseRedirect('/project/{}'.format(project_id))
+        return HttpResponseRedirect('/project/{}'.format(project.uuid))
 
     #########
     # OTHER #
@@ -191,21 +197,78 @@ def edit(request, process_id):
     if request.method == 'GET':
 
         a = client(request)
-        query = {'uuid':project_id}
-        project_list = a.meta.listMetadata(q=json.dumps(query))
-
         try:
-            project = project_list[0]
+            # get the process metadata object
+            process = a.meta.getMetadata(uuid=process_id)
         except:
-            return HttpResponseNotFound("Project not found")
+            logger.error('Error editing process. {} {}'.format(e.errno, e.strerror))
+            messages.error(request, 'Process not found.')
+
+            return HttpResponseRedirect('/projects/')
         else:
-            return HttpResponse(json.dumps(project), content_type="application/json", status=200)
+            project = None
+            specimen = None
+
+            # find the project and specimen that the process is associated with
+            associationIds = process['associationIds']
+            query = {'uuid': { '$in': associationIds }}
+            results_raw = a.meta.listMetadata(q=json.dumps(query))
+            results = map(collapse_meta, results_raw)
+            for result in results:
+                if result['name'] == 'idsvc.project':
+                    project = result
+                if result['name'] == 'idsvc.specimen':
+                    specimen = result
+
+            context = {'form': SpecimenForm(initial=specimen),
+                       'specimen': specimen,
+                       'project': project,
+                       'process': process}
+
+            return render(request, 'ids_projects/processes/create.html', context)
 
     ########
     # POST #
     ########
     elif request.method == 'POST':
-        return HttpResponse("Creating new project: {}".format(len(projects)+1))
+
+        form = ProcessForm(request.POST)
+
+        if form.is_valid():
+
+            logger.debug('Process form is valid')
+
+            process_type = form.cleaned_data['process_type']
+            sequence_method = form.cleaned_data['sequence_method']
+            sequence_hardware = form.cleaned_data['sequence_hardware']
+            assembly_method = form.cleaned_data['assembly_method']
+            reference_sequence = form.cleaned_data['reference_sequence']
+
+            new_process = {
+                "value": {
+                    "process_type":process_type,
+                    "sequence_method":sequence_method,
+                    "sequence_hardware":sequence_hardware,
+                    "assembly_method":assembly_method,
+                    "reference_sequence":reference_sequence
+                }
+            }
+
+            try:
+                response = a.meta.updateMetadata(uuid=process_id, body=new_process)
+            except Exception as e:
+                logger.debug('Error while attempting to edit process metadata: %s' % e)
+                messages.error(request, 'Error while attempting to edit process.')
+            else:
+                messages.success(request, 'Successfully edited process.')
+                return HttpResponseRedirect('/process/{}'.format(response['uuid']))
+
+        else:
+
+            logger.debug('Process form is not valid')
+
+        messages.info(request, 'Did not edit process.')
+        return HttpResponseRedirect('/process/{}'.format(process_id))
 
     #########
     # OTHER #
@@ -215,22 +278,54 @@ def edit(request, process_id):
 
 
 @login_required
-def delete(request, prodess_id):
-    """ """
+def delete(request, process_id):
+    """Delete a process"""
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        a = client(request)
-        specimens_query = {
-            'name':'idsvc.specimen',
-            'associationIds':'{}'.format(project_id)
-        }
-        specimens_list = a.meta.listMetadata(q=json.dumps(specimens_query))
+        # TODO: Ask user if file data should be deleted
 
-        return HttpResponse(json.dumps(specimens_list),
-            content_type="application/json", status=200)
+        # get the process
+        a = client(request)
+        process_raw = a.meta.getMetadata(uuid=process_id)
+        process = collapse_meta(process_raw)
+
+        project = None
+        specimen = None
+
+        # find project & specimen the process is associated with
+        associationIds = process['associationIds']
+        query = {'uuid': { '$in': associationIds }}
+        results_raw = a.meta.listMetadata(q=json.dumps(query))
+        results = map(collapse_meta, results_raw)
+        for result in results:
+            if result['name'] == 'idsvc.specimen':
+                specimen = result
+            if result['name'] == 'idsvc.project':
+                project = result
+
+        try:
+            a.meta.deleteMetadata(uuid=process_id)
+        except Exception as e:
+            logger.error('Error deleting process. {} {}'.format(e.errno, e.strerror) )
+            messages.error(request, 'Process deletion unsuccessful.')
+            # return HttpResponseServerError("Error deleting project.")
+            if specimen:
+                return HttpResponseRedirect('/specimen/{}'.format(specimen['uuid']))
+            if project:
+                return HttpResponseRedirect('/project/{}'.format(project['uuid']))
+            else:
+                return HttpResponseRedirect('/projects/')
+        else:
+            messages.success(request, 'Successfully deleted process.')
+            if specimen:
+                return HttpResponseRedirect('/specimen/{}'.format(specimen['uuid']))
+            if project:
+                return HttpResponseRedirect('/project/{}'.format(project['uuid']))
+            else:
+                return HttpResponseRedirect('/projects/')
 
     #########
     # OTHER #
