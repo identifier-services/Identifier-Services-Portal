@@ -49,30 +49,76 @@ def view(request, specimen_id):
     #######
     if request.method == 'GET':
 
+        # get specimen metadata
         a = client(request)
         specimen_raw = a.meta.getMetadata(uuid=specimen_id)
-        project_id = specimen_raw['associationIds'][0]
         specimen = collapse_meta(specimen_raw)
 
-        # for specimen in specimens:
-        #     specimen_id = specimen['uuid']
-        #     process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
-        #     processes_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
-        #     processes = map(collapse_meta, processes_raw)
-        #     for process in processes:
-        #         process_id = process['uuid']
-        #         files_query = {'name':'idsvc.data','associationIds':'{}'.format(process_id)}
-        #         files_raw = a.meta.listMetadata(q=json.dumps(files_query))
-        #         files = map(collapse_meta, files_raw)
-        #         process['files'] = files
-        #     specimen['processes'] = processes
-        # project['specimens'] = specimens
+        # find project specimen is associated with
+        associationIds = specimen['associationIds']
+        query = {'associationIds': { '$in': associationIds }}
+        results = a.meta.listMetadata(q=json.dumps(query))
+        project_id = None
+        for result in results:
+            if result.name == 'idsvc.project':
+                project_id == result.uuid
+
+        # get all objects with specimen_id in associationIds list
+        query = {'associationIds': specimen_id }
+        results_raw = a.meta.listMetadata(q=json.dumps(query))
+        results = map(collapse_meta, results_raw)
+
+        # create dicts to group by type
+        processes = {}
+        files = {}
+
+        # group by type
+        for result in results:
+            uuid = result['uuid']
+            name = result['name']
+            if name == 'idsvc.process':
+                # let's make things clear, call the result a process
+                process = result
+                # create a list for file metadata
+                process['files'] = []
+                # add to dict
+                processes[uuid] = process
+            elif name == 'idsvc.data':
+                # let's make things clear, call the result file_data
+                file_data = result
+                # add to dict
+                files[uuid] = file_data
+
+        # get the uuids
+        process_ids = processes.keys()
+        file_ids = files.keys()
+
+        # place to put objects that were created 'out of order'
+        unmatched_processes = []
+        unmatched_files = []
+
+        # match files with processes
+        for file_id in file_ids:
+            file_data = files[file_id]
+            associationIds = file_data['associationIds']
+            match = filter(lambda x: x in associationIds, process_ids)
+            if match:
+                process_id = match[0]
+                processes[process_id]['files'].append(file_data)
+            else:
+                unmatched_files.append(file_data)
+
+        # list to hold the specimen's processes
+        specimen['processes'] = []
+
+        # stick processes into specimen
+        for process_id in process_ids:
+            process = processes[process_id]
+            specimen['processes'].append(process)
 
         context = {'specimen' : specimen, 'project_id' : project_id}
 
-        #return HttpResponse(json.dumps(context),status = 200, content_type='application/json')
         return render(request, 'ids_projects/specimens/detail.html', context)
-
 
     #########
     # OTHER #

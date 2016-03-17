@@ -41,24 +41,7 @@
                     <p><b>Ploidy</b> {{ specimen.ploidy }}</p>
                     <p><b>Propagation</b> {{ specimen.propagation }}</p>
                     <p><b>Estimated Genome Size</b> {{ specimen.estimated_genome_size }}</p>
-                <!-- </div> -->
-                <!-- <div class="panel-heading">
-                    <h1 class="panel-title">PROCESSES</h1>
-                </div>
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-xs-3">
-                            <a href="/specimen/{{specimen.uuid}}/" class="btn btn-primary">View</a>
-                        </div>
-                        <div class="col-xs-3">
-                            <a href="/specimen/{{specimen.uuid}}/edit" class="btn btn-primary">Edit</a>
-                        </div>
-                        <div class="col-xs-3 col-xs-offset-1 col-sm-offset-2">
-                            <a href="/specimen/{{specimen.uuid}}/delete" class="btn btn-danger">Delete</a>
-                        </div>
-                    </div>
-                </div> -->
-                <!--  -->
+
                     <div class="row">
                         <div class="col-xs-1">
                             <a href="/specimen/{{specimen.uuid}}/edit" class="btn btn-primary">Edit</a>
@@ -68,27 +51,82 @@
                         </div>
                     </div>
                 </div>
-                <!--  -->
+
             </div>
         </div>
         <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">
-            {% if not project.specimens %}
+            {% if not specimen.processes %}
             <div class="object-header darker">
                 <div>
-                    No Processes yet.
+                    No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
                     <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
             {% else %}
             <div class="object-header darker">
                 <div>
-                    Processes
-                    <a href="/data/delete/{{file.uuid}}/" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                    <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
-            {% for specimen in project.specimens %}
-            {% endfor %}
-            {% endif %}
+
+                {% for process in specimen.processes %}
+
+                <div class="object-header">
+                    <a href="/process/{{process.uuid}}" class="header-link">{{ process.process_type }}</a>
+                </div>
+
+                <div class="row info-item">
+                    <div class="col-xs-6">
+                        <b>Process Type</b>
+                    </div>
+                    <div class="col-xs-6">
+                        {{ process.process_type }}
+                    </div>
+                </div>
+                {% if process.sequence_method %}
+                <div class="row info-item">
+                    <div class="col-xs-6">
+                        <b>Sequence Method</b>
+                    </div>
+                    <div class="col-xs-6">
+                        {{ process.sequence_method }}
+                    </div>
+                </div>
+                {% endif %}
+                {% if process.sequence_hardware %}
+                <div class="row info-item">
+                    <div class="col-xs-6">
+                        <b>Sequence Hardware</b>
+                    </div>
+                    <div class="col-xs-6">
+                        {{ process.sequence_hardware }}
+                    </div>
+                </div>
+                {% endif %}
+                {% if process.assembly_method %}
+                <div class="row info-item">
+                    <div class="col-xs-6">
+                        <b>Assembly Method</b>
+                    </div>
+                    <div class="col-xs-6">
+                        {{ process.assembly_method }}
+                    </div>
+                </div>
+                {% endif %}
+                {% if process.reference_sequence %}
+                <div class="row info-item">
+                    <div class="col-xs-6">
+                        <b>Reference Sequence</b>
+                    </div>
+                    <div class="col-xs-6">
+                        {{ process.reference_sequence }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% endfor %} <!-- processes -->
+            {% endif %} <!-- specimen.processes -->
         </div>
     </div>
 </div>
