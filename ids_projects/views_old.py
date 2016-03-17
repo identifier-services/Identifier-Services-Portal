@@ -10,7 +10,7 @@ from forms import ProjectForm
 
 logger = logging.getLogger(__name__)
 
-def _client(request):
+def client(request):
     token = request.session.get(getattr(settings, 'AGAVE_TOKEN_SESSION_ID'))
     access_token = token.get('access_token', None)
     url = getattr(settings, 'AGAVE_TENANT_BASEURL')
@@ -54,7 +54,7 @@ def create(request):
                     "description":desc,
                 }
             }
-            a = _client(request)
+            a = client(request)
             try:
                 response = a.meta.addMetadata(body=body)
             except Exception as e:
@@ -69,7 +69,7 @@ def create(request):
     return render(request, 'ids_projects/projects/create.html', context)
 
 def detail(request, uuid):
-    a = _client(request)
+    a = client(request)
     query = {'uuid':uuid}
     project = a.meta.listMetadata(q=json.dumps(query))[0]
 
@@ -106,6 +106,6 @@ def detail(request, uuid):
 
 @login_required
 def delete(request, uuid):
-    a = _client(request)
+    a = client(request)
     a.meta.deleteMetadata(uuid=uuid)
     return HttpResponseRedirect('/projects/')

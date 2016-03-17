@@ -10,7 +10,7 @@ import json, logging
 #from forms import DataForm
 
 
-def _client(request):
+def client(request):
     token = request.session.get(getattr(settings, 'AGAVE_TOKEN_SESSION_ID'))
     access_token = token.get('access_token', None)
     url = getattr(settings, 'AGAVE_TENANT_BASEURL')
@@ -24,7 +24,7 @@ def list(request, process_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         query = {'uuid':specimen_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
@@ -50,7 +50,7 @@ def view(request, data_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         query = {'uuid':specimen_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
@@ -76,7 +76,7 @@ def create(request, process_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         query = {'uuid':project_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
@@ -107,7 +107,7 @@ def edit(request, data_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         query = {'uuid':project_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
@@ -138,7 +138,7 @@ def delete(request, data_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         specimens_query = {
             'name':'idsvc.specimen',
             'associationIds':'{}'.format(project_id)

@@ -11,22 +11,10 @@ from django.http import (HttpResponse,
 from django.shortcuts import render
 import json, logging
 from ..forms.specimens import SpecimenForm
+from helper import client, collapse_meta
 
 
 logger = logging.getLogger(__name__)
-
-
-def _client(request):
-    token = request.session.get(getattr(settings, 'AGAVE_TOKEN_SESSION_ID'))
-    access_token = token.get('access_token', None)
-    url = getattr(settings, 'AGAVE_TENANT_BASEURL')
-    return Agave(api_server = url, token = access_token)
-
-
-def _collaps_meta(x):
-    d = x['value']
-    d['uuid'] = x['uuid']
-    return d
 
 
 @login_required
@@ -37,10 +25,10 @@ def list(request, project_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_id)}
         specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
-        specimens = map(_collaps_meta, specimens_raw)
+        specimens = map(collapse_meta, specimens_raw)
 
         context = {'specimens' : specimens, 'project_id': project_id}
 
@@ -61,21 +49,21 @@ def view(request, specimen_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         specimen_raw = a.meta.getMetadata(uuid=specimen_id)
         project_id = specimen_raw['associationIds'][0]
-        specimen = _collaps_meta(specimen_raw)
+        specimen = collapse_meta(specimen_raw)
 
         # for specimen in specimens:
         #     specimen_id = specimen['uuid']
         #     process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
         #     processes_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
-        #     processes = map(_collaps_meta, processes_raw)
+        #     processes = map(collapse_meta, processes_raw)
         #     for process in processes:
         #         process_id = process['uuid']
         #         files_query = {'name':'idsvc.data','associationIds':'{}'.format(process_id)}
         #         files_raw = a.meta.listMetadata(q=json.dumps(files_query))
-        #         files = map(_collaps_meta, files_raw)
+        #         files = map(collapse_meta, files_raw)
         #         process['files'] = files
         #     specimen['processes'] = processes
         # project['specimens'] = specimens
@@ -140,7 +128,7 @@ def create(request, project_id):
                 }
             }
 
-            a = _client(request)
+            a = client(request)
             try:
                 response = a.meta.addMetadata(body=new_specimen)
             except Exception as e:
@@ -167,7 +155,7 @@ def edit(request, specimen_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         query = {'uuid':project_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
@@ -199,7 +187,7 @@ def delete(request, specimen_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         specimens_query = {
             'name':'idsvc.specimen',
             'associationIds':'{}'.format(project_id)

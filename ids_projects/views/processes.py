@@ -11,22 +11,10 @@ from django.http import (HttpResponse,
 from django.shortcuts import render
 import json, logging
 from ..forms.processes import ProcessForm
+from helper import client, collapse_meta
 
 
 logger = logging.getLogger(__name__)
-
-
-def _client(request):
-    token = request.session.get(getattr(settings, 'AGAVE_TOKEN_SESSION_ID'))
-    access_token = token.get('access_token', None)
-    url = getattr(settings, 'AGAVE_TENANT_BASEURL')
-    return Agave(api_server = url, token = access_token)
-
-
-def _collaps_meta(x):
-    d = x['value']
-    d['uuid'] = x['uuid']
-    return d
 
 
 @login_required
@@ -37,10 +25,10 @@ def list(request, specimen_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
         process_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
-        processes = map(_collaps_meta, process_raw)
+        processes = map(collapse_meta, process_raw)
 
         context = {'processes' : specimens, 'specimen_id': specimen_id}
 
@@ -61,20 +49,20 @@ def view(request, process_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         process_raw = a.meta.getMetadata(uuid=process_id)
-        process = _collaps_meta(process_raw)
+        process = collapse_meta(process_raw)
 
         # for specimen in specimens:
         #     specimen_id = specimen['uuid']
         #     process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_id)}
         #     processes_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
-        #     processes = map(_collaps_meta, processes_raw)
+        #     processes = map(collapse_meta, processes_raw)
         #     for process in processes:
         #         process_id = process['uuid']
         #         files_query = {'name':'idsvc.data','associationIds':'{}'.format(process_id)}
         #         files_raw = a.meta.listMetadata(q=json.dumps(files_query))
-        #         files = map(_collaps_meta, files_raw)
+        #         files = map(collapse_meta, files_raw)
         #         process['files'] = files
         #     specimen['processes'] = processes
         # project['specimens'] = specimens
@@ -99,7 +87,7 @@ def create(request, specimen_id):
     if request.method == 'GET':
 
         # get association ids
-        a = _client(request)
+        a = client(request)
         specimen = a.meta.getMetadata(uuid=specimen_id)
         associationIds = specimen['associationIds']
 
@@ -126,7 +114,7 @@ def create(request, specimen_id):
         form = ProcessForm(request.POST)
 
         # inherit specimen association ids
-        a = _client(request)
+        a = client(request)
         specimen = a.meta.getMetadata(uuid=specimen_id)
         associationIds = specimen['associationIds']
 
@@ -202,7 +190,7 @@ def edit(request, process_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         query = {'uuid':project_id}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
@@ -234,7 +222,7 @@ def delete(request, prodess_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         specimens_query = {
             'name':'idsvc.specimen',
             'associationIds':'{}'.format(project_id)

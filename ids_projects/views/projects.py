@@ -11,25 +11,10 @@ from django.http import (HttpResponse,
 from django.shortcuts import render
 import json, logging
 from ..forms.projects import ProjectForm
+from helper import client, collapse_meta
 
 
 logger = logging.getLogger(__name__)
-
-
-def _client(request):
-    token = request.session.get(getattr(settings, 'AGAVE_TOKEN_SESSION_ID'))
-    access_token = token.get('access_token', None)
-    logger.debug("access token: {}".format(access_token))
-    url = getattr(settings, 'AGAVE_TENANT_BASEURL')
-    return Agave(api_server = url, token = access_token)
-
-
-def _collaps_meta(x):
-    d = x['value']
-    d['uuid'] = x['uuid']
-    d['associationIds'] = x['associationIds']
-    d['name'] = x['name']
-    return d
 
 
 @login_required
@@ -39,10 +24,10 @@ def list(request):
     # GET #
     #######
     if request.method == 'GET':
-        a = _client(request)
+        a = client(request)
         query = {'name':'idsvc.project'}
         projects_raw = a.meta.listMetadata(q=json.dumps(query))
-        projects = map(_collaps_meta, projects_raw)
+        projects = map(collapse_meta, projects_raw)
 
         context = {'projects':projects}
 
@@ -57,23 +42,21 @@ def list(request):
 
 def view(request, project_id):
     """Queries project metadata and all associated metadata"""
-    # TODO: Performance in this view is pretty bad
-    # TODO: need to cut down on number of requests being made to agave tenant
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         project_raw = a.meta.getMetadata(uuid=project_id)
-        project = _collaps_meta(project_raw)
+        project = collapse_meta(project_raw)
         project['specimens'] = []
 
         associationIds = [project_id]
 
         query = {'associationIds': { '$in': associationIds }}
         results_raw = a.meta.listMetadata(q=json.dumps(query))
-        results = map(_collaps_meta, results_raw)
+        results = map(collapse_meta, results_raw)
 
         specimens = {}
         processes = {}
@@ -120,12 +103,6 @@ def view(request, project_id):
             process = processes[process_id]
             print "\n\nprocess:\n\n{}\n\n".format(process)
             associationIds = process['associationIds']
-
-            print "yo, here are the ids:"
-            print associationIds
-            print
-            print specimen_ids
-            print
 
             match = filter(lambda x: x in associationIds, specimen_ids)
             if match:
@@ -193,7 +170,7 @@ def create(request):
 
             import pdb;
 
-            a = _client(request)
+            a = client(request)
 
             try:
                 response = a.meta.addMetadata(body=new_project)
@@ -221,7 +198,7 @@ def edit(request, project_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
         try:
             project = a.meta.getMetadata(uuid=project_id)
         except:
@@ -256,7 +233,7 @@ def edit(request, project_id):
                 },
             }
 
-            a = _client(request)
+            a = client(request)
             try:
                 response = a.meta.updateMetadata(uuid=project_id, body=new_project)
             except Exception as e:
@@ -281,7 +258,7 @@ def delete(request, project_id):
     #######
     if request.method == 'GET':
 
-        a = _client(request)
+        a = client(request)
 
         query = {'associationIds':'{}'.format(project_id)}
         results = a.meta.listMetadata(q=json.dumps(query))
