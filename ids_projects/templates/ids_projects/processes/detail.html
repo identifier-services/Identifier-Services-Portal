@@ -8,6 +8,7 @@
     {{ block.super }}
     {% breadcrumb "Projects" "ids_projects:projects-list" %}
     {% breadcrumb "Specimens" "ids_projects:specimens-list" %}
+    {% breadcrumb "Processes" "ids_projects:processes-list" %}
     {% breadcrumb "Process" "" %}
 {% endblock %}
 
@@ -19,6 +20,8 @@
         <div class="col-xs-9">
             <!-- <h2 id="projects-header">Processes</h2> -->
             {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
+            {{ project }}
+            {{ specimen }}
         </div>
         <div class="col-xs-3">
             <a href="/project" class="btn btn-primary pull-right">Add Data</a>

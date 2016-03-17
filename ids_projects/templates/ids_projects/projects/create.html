@@ -16,14 +16,22 @@
 <div class="container">
     <!-- <h1>Projects</h1> -->
     {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
-
+    {% if project %}
+        {{ project }}
+    {% else %}
+        {{ project }}
+    {% endif %}
     <form method="post">
         {% csrf_token %}
         {% bootstrap_form form %}
 
         <div>
             <button type="submit" class="btn btn-primary">Save</button>
-            <a href="/projects/" class="btn btn-warning pull-right">Cancel</a>
+            {% if project %}
+                <a href="/project/{{project.uuid}}" class="btn btn-warning pull-right">Cancel</a>
+            {% else %}
+                <a href="/projects/" class="btn btn-warning pull-right">Cancel</a>
+            {% endif %}
         </div>
     </form>
 </div>
