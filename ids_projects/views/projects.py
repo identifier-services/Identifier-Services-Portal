@@ -54,12 +54,9 @@ def view(request, project_id):
         # list for the project's specimens
         project['specimens'] = []
 
-        # TODO: this doesn't need to be a list...?
-        associationIds = [project_id]
-
         # get everything related to the project (everything with the
         # project_id in associationIds)
-        query = {'associationIds': { '$in': associationIds }}
+        query = {'associationIds': project_id }
         results_raw = a.meta.listMetadata(q=json.dumps(query))
         results = map(collapse_meta, results_raw)
 
