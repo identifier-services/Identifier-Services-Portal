@@ -15,8 +15,24 @@ def client(request):
 
 
 def collapse_meta(x):
-    d = x['value']
-    d['uuid'] = x['uuid']
-    d['associationIds'] = x['associationIds']
-    d['name'] = x['name']
+    try:
+        d = x['value']
+    except Exception as e:
+        logger.exception('{} {}'.format(e.errno, e.strerror))
+
+    try:
+        d['uuid'] = x['uuid']
+    except Exception as e:
+        logger.error('{} {}'.format(e.errno, e.strerror))
+
+    try:
+        d['associationIds'] = x['associationIds']
+    except Exception as e:
+        logger.error('{} {}'.format(e.errno, e.strerror))
+
+    try:
+        d['name'] = x['name']
+    except Exception as e:
+        logger.error('{} {}'.format(e.errno, e.strerror))
+
     return d
