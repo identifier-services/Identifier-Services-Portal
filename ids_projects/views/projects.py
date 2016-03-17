@@ -94,27 +94,23 @@ def view(request, project_id):
             match = filter(lambda x: x in associationIds, process_ids)
             if match:
                 process_id = match[0]
-                print "matched file to process: {}".format(process_id)
                 processes[process_id]['files'].append(file_data)
             else:
                 unmatched_files.append(file_data)
 
         for process_id in process_ids:
             process = processes[process_id]
-            print "\n\nprocess:\n\n{}\n\n".format(process)
             associationIds = process['associationIds']
 
             match = filter(lambda x: x in associationIds, specimen_ids)
             if match:
                 specimen_id = match[0]
-                print "matched process to specimen: {}".format(specimen_id)
                 specimens[specimen_id]['processes'].append(process)
             else:
                 unmatched_processes.append(process)
 
         for specimen_id in specimen_ids:
             specimen = specimens[specimen_id]
-            print "\n\nspecimen:\n\n{}\n\n".format(specimen)
             project['specimens'].append(specimen)
 
         context = {'project' : project,
