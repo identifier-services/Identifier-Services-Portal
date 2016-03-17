@@ -9,3 +9,12 @@ class SpecimenForm(forms.Form):
     ploidy = forms.CharField(max_length=255)
     propagation = forms.CharField(max_length=255)
     estimated_genome_size = forms.CharField(max_length=255)
+
+    def __init__(self, *args, **kwargs):
+        super(SpecimenForm, self).__init__(*args, **kwargs)
+        try:
+            for key in self.initial['value'].iterkeys():
+                if key in self.fields:
+                    self.fields[key].initial = self.initial['value'][key]
+        except Exception as e:
+            logger.debug('New project, no initial values.')
