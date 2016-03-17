@@ -47,47 +47,62 @@ def view(request, project_id):
     #######
     if request.method == 'GET':
 
+        # get the project meta
         a = client(request)
         project_raw = a.meta.getMetadata(uuid=project_id)
         project = collapse_meta(project_raw)
+        # list for the project's specimens
         project['specimens'] = []
 
+        # TODO: this doesn't need to be a list...?
         associationIds = [project_id]
 
+        # get everything related to the project (everything with the
+        # project_id in associationIds)
         query = {'associationIds': { '$in': associationIds }}
         results_raw = a.meta.listMetadata(q=json.dumps(query))
         results = map(collapse_meta, results_raw)
 
+        # create dicts to hold objects, key will be object uuid
         specimens = {}
         processes = {}
         files = {}
 
+        # group by type
         for result in results:
             uuid = result['uuid']
             name = result['name']
             if name == 'idsvc.specimen':
-                # self documenting code
+                # let's call the result a specimen
                 specimen = result
                 # create a list for processes
                 specimen['processes'] = []
                 # add to dictionary
                 specimens[uuid] = specimen
             elif name == 'idsvc.process':
+                # let's call the result a process
                 process = result
                 # create a list for file metadata
                 process['files'] = []
+                # add to dictionary
                 processes[uuid] = process
             elif name == 'idsvc.data':
+                # let's call the result file_data
                 file_data = result
+                # add to dictionary
                 files[uuid] = file_data
 
+
+        # get list of uuids for each object type
         specimen_ids = specimens.keys()
         process_ids = processes.keys()
         file_ids = files.keys()
 
+        # place to put object created 'out of order'
         unmatched_processes = []
         unmatched_files = []
 
+        # match files to processes
         for file_id in file_ids:
             file_data = files[file_id]
             associationIds = file_data['associationIds']
@@ -98,6 +113,7 @@ def view(request, project_id):
             else:
                 unmatched_files.append(file_data)
 
+        # match processes to specimens
         for process_id in process_ids:
             process = processes[process_id]
             associationIds = process['associationIds']
@@ -109,6 +125,7 @@ def view(request, project_id):
             else:
                 unmatched_processes.append(process)
 
+        # stick specimens into project
         for specimen_id in specimen_ids:
             specimen = specimens[specimen_id]
             project['specimens'].append(specimen)
