@@ -71,14 +71,14 @@
 
             <!-- <div class="panel-body"> -->
             {% if not project.specimens %}
-            <div class="object-header darker">
+            <div class="object-header dark">
                 <div>
                     No Specimens yet.
                     <a href="/project/{{project.uuid}}/specimen" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
             {% else %}
-            <div class="object-header darker">
+            <div class="object-header dark">
                 <div>
                     Specimens
                     <a href="/project/{{project.uuid}}/specimen" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
@@ -87,7 +87,9 @@
 
                 {% for specimen in project.specimens %}
 
-                <div class="object-header">
+                <div class="specimen-panel">
+
+                <div class="object-header darker">
                     <a href="/specimen/{{specimen.uuid}}" class="header-link">{{ specimen.taxon_name }} {{ specimen.specimen_id }}</a>
                 </div>
 
@@ -158,14 +160,14 @@
                     </div>
 
                         {% if not specimen.processes %}
-                        <div class="object-header darker">
+                        <div class="object-header dark">
                             <div>
                                 No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
                                 <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                             </div>
                         </div>
                         {% else %}
-                        <div class="object-header darker">
+                        <div class="object-header dark">
                             <div>
                                 Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
                                 <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
@@ -230,7 +232,12 @@
                             {% endfor %} <!-- processes -->
                         {% endif %} <!-- specimen.processes -->
 
-                        <hr>
+                        </div>
+
+                    </div>
+
+                    <hr>
+
                 {% endfor %} <!-- specimens -->
             {% endif %} <!-- project.specimens -->
         </div>
