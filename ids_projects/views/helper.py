@@ -35,4 +35,18 @@ def collapse_meta(x):
     except Exception as e:
         logger.error('{} {}'.format(e.errno, e.strerror))
 
+    def make_short(s):
+        if len(s) > 18:
+            return s[:18] + "..."
+        else:
+            return s
+
+    keys = d.keys()
+    if 'title' in keys:
+        d['short'] = make_short(d['title'])
+    elif 'taxon_name' in keys:
+        d['short'] = make_short(d['taxon_name'] + d['specimen_id'])
+    elif 'process_type' in keys:
+        d['short'] = make_short(d['process_type'])
+
     return d
