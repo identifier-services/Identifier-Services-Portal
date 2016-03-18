@@ -17,7 +17,7 @@ def client(request):
     return Agave(api_server = url, token = access_token)
 
 
-def list(request, process_id):
+def list(request, process_uuid):
     """List all files related to a process"""
     #######
     # GET #
@@ -25,7 +25,7 @@ def list(request, process_id):
     if request.method == 'GET':
 
         a = client(request)
-        query = {'uuid':specimen_id}
+        query = {'uuid':specimen_uuid}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
         try:
@@ -51,7 +51,7 @@ def view(request, data_id):
     if request.method == 'GET':
 
         a = client(request)
-        query = {'uuid':specimen_id}
+        query = {'uuid':specimen_uuid}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
         try:
@@ -69,7 +69,7 @@ def view(request, data_id):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
-def create(request, process_id):
+def create(request, process_uuid):
     """Create a new file (metadata object) related to a process"""
     #######
     # GET #
@@ -77,7 +77,7 @@ def create(request, process_id):
     if request.method == 'GET':
 
         a = client(request)
-        query = {'uuid':project_id}
+        query = {'uuid':project_uuid}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
         try:
@@ -108,7 +108,7 @@ def edit(request, data_id):
     if request.method == 'GET':
 
         a = client(request)
-        query = {'uuid':project_id}
+        query = {'uuid':project_uuid}
         project_list = a.meta.listMetadata(q=json.dumps(query))
 
         try:
@@ -141,7 +141,7 @@ def delete(request, data_id):
         a = client(request)
         specimens_query = {
             'name':'idsvc.specimen',
-            'associationIds':'{}'.format(project_id)
+            'associationIds':'{}'.format(project_uuid)
         }
         specimens_list = a.meta.listMetadata(q=json.dumps(specimens_query))
 

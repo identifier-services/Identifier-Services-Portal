@@ -15,7 +15,7 @@ projects = [{
         # Specimen 0 #
         ##############
         "taxon_name" :  "Zea Mays",
-        "specimen_id" : "B73",
+        "specimen_uuid" : "B73",
         "haploid_chromosomes_count" : "10",
         "ploid" : "diploid",
         "organ_tissue" : "leaf",
@@ -39,7 +39,7 @@ projects = [{
                 "reference_sequence" : "Maize AGPv2",
                 # "precursor_type" : "specimen",
                 # "precursor_id" : 0,
-                "specimen_id" : 0,
+                "specimen_uuid" : 0,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "B73_all3_R1_val_1.fq",
@@ -72,7 +72,7 @@ projects = [{
                 "process_type" : "alignment",
                 # "precursor_type" : "sequencing",
                 # "precursor_id" : 0,
-                "specimen_id" : 0,
+                "specimen_uuid" : 0,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "B73_all3_bt202_sorted.bam",
@@ -94,7 +94,7 @@ projects = [{
                 ## additional analysis software    Python script
                 # "precursor_type" : "alignment",
                 # "precursor_id" : 0,
-                "specimen_id" : 0,
+                "specimen_uuid" : 0,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "B73_all3_tile_merged_100bp.txt",
@@ -111,7 +111,7 @@ projects = [{
         # Specimen 1 #
         ##############
         "taxon_name" :  "Zea Mays",
-        "specimen_id" : "Mo17",
+        "specimen_uuid" : "Mo17",
         "haploid_chromosomes_count" : "10",
         "ploid" : "diploid",
         "organ_tissue" : "leaf",
@@ -133,7 +133,7 @@ projects = [{
                 "sequencing_hardware" : "Illumina HiSeq 2000",
                 "assembly_method" : "Bismark or BSMAP",
                 "reference_sequence" : "Maize AGPv2",
-                "specimen_id" : 1,
+                "specimen_uuid" : 1,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "Mo17_all3_R1_val_1.fq",
@@ -164,7 +164,7 @@ projects = [{
                 # Alignment #
                 #############
                 "process_type" : "alignment",
-                "specimen_id" : 1,
+                "specimen_uuid" : 1,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "Mo17_all3_bt202_sorted.bam",
@@ -181,7 +181,7 @@ projects = [{
                 "process_type" : "analysis",
                 "software" : "Bismark or BSMAP",
                 "software_version" : "0.10.1",
-                "specimen_id" : 1,
+                "specimen_uuid" : 1,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "100tile/Mo17_all3_tile_merged_100bp.txt",
@@ -198,7 +198,7 @@ projects = [{
         # Specimen 2 #
         ##############
         "taxon_name" :  "Zea Mays",
-        "specimen_id" : "CML322",
+        "specimen_uuid" : "CML322",
         "haploid_chromosomes_count" : "10",
         "ploid" : "diploid",
         "organ_tissue" : "leaf",
@@ -220,7 +220,7 @@ projects = [{
                 "sequencing_hardware" : "Illumina HiSeq 2000",
                 "assembly_method" : "Bismark or BSMAP",
                 "reference_sequence" : "Maize AGPv2",
-                "specimen_id" : 2,
+                "specimen_uuid" : 2,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "CML322_R1.allreads_val_1.fq",
@@ -251,7 +251,7 @@ projects = [{
                 # Alignment #
                 #############
                 "process_type" : "alignment",
-                "specimen_id" : 2,
+                "specimen_uuid" : 2,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "CML322_all3_bt202_sorted.bam",
@@ -268,7 +268,7 @@ projects = [{
                 "process_type" : "analysis",
                 "software" : "Bismark or BSMAP",
                 "software_version" : "0.10.1",
-                "specimen_id" : 2,
+                "specimen_uuid" : 2,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "CML322_all3_tile_merged_100bp.txt",
@@ -285,7 +285,7 @@ projects = [{
         # Specimen 3 #
         ##############
         "taxon_name" :  "Zea Mays",
-        "specimen_id" : "Oh43",
+        "specimen_uuid" : "Oh43",
         "haploid_chromosomes_count" : "10",
         "ploid" : "diploid",
         "organ_tissue" : "leaf",
@@ -307,7 +307,7 @@ projects = [{
                 "sequencing_hardware" : "Illumina HiSeq 2000",
                 "assembly_method" : "Bismark or BSMAP",
                 "reference_sequence" : "Maize AGPv2",
-                "specimen_id" : 3,
+                "specimen_uuid" : 3,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "Oh43_R1.allreads_val_1.fq",
@@ -338,7 +338,7 @@ projects = [{
                 # Alignment #
                 #############
                 "process_type" : "alignment",
-                "specimen_id" : 3,
+                "specimen_uuid" : 3,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "Oh43_all3_bt202_sorted.bam",
@@ -355,7 +355,7 @@ projects = [{
                 "process_type" : "analysis",
                 "software" : "Bismark or BSMAP",
                 "software_version" : "0.10.1",
-                "specimen_id" : 3,
+                "specimen_uuid" : 3,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "Oh43_all3_tile_merged_100bp.txt",
@@ -372,7 +372,7 @@ projects = [{
         # Specimen 4 #
         ##############
         "taxon_name" :  "Zea Mays",
-        "specimen_id" : "Tx303",
+        "specimen_uuid" : "Tx303",
         "haploid_chromosomes_count" : "10",
         "ploid" : "diploid",
         "organ_tissue" : "leaf",
@@ -394,7 +394,7 @@ projects = [{
                 "sequencing_hardware" : "Illumina HiSeq 2000",
                 "assembly_method" : "Bismark or BSMAP",
                 "reference_sequence" : "Maize AGPv2",
-                "specimen_id" : 4,
+                "specimen_uuid" : 4,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "Tx303_R1.allreads_val_1.fq",
@@ -425,7 +425,7 @@ projects = [{
                 # Alignment #
                 #############
                 "process_type" : "alignment",
-                "specimen_id" : 4,
+                "specimen_uuid" : 4,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "Tx303_all3_bt202_sorted.bam",
@@ -442,7 +442,7 @@ projects = [{
                 "process_type" : "analysis",
                 "software" : "Bismark or BSMAP",
                 "software_version" : "0.10.1",
-                "specimen_id" : 4,
+                "specimen_uuid" : 4,
                 "inputs" : None,
                 "outputs" : [{
                     "file_name" : "Tx303_all3_tile_merged_100bp.txt",
@@ -468,7 +468,7 @@ projects = [{
         "reference_sequence" : "Maize AGPv2",
         # "precursor_type" : "specimen",
         # "precursor_id" : 0,
-        "specimen_id" : 0,
+        "specimen_uuid" : 0,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "B73_all3_R1_val_1.fq",
@@ -503,7 +503,7 @@ projects = [{
         "sequencing_hardware" : "Illumina HiSeq 2000",
         "assembly_method" : "Bismark or BSMAP",
         "reference_sequence" : "Maize AGPv2",
-        "specimen_id" : 1,
+        "specimen_uuid" : 1,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "Mo17_all3_R1_val_1.fq",
@@ -538,7 +538,7 @@ projects = [{
         "sequencing_hardware" : "Illumina HiSeq 2000",
         "assembly_method" : "Bismark or BSMAP",
         "reference_sequence" : "Maize AGPv2",
-        "specimen_id" : 2,
+        "specimen_uuid" : 2,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "CML322_R1.allreads_val_1.fq",
@@ -573,7 +573,7 @@ projects = [{
         "sequencing_hardware" : "Illumina HiSeq 2000",
         "assembly_method" : "Bismark or BSMAP",
         "reference_sequence" : "Maize AGPv2",
-        "specimen_id" : 3,
+        "specimen_uuid" : 3,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "Oh43_R1.allreads_val_1.fq",
@@ -608,7 +608,7 @@ projects = [{
         "sequencing_hardware" : "Illumina HiSeq 2000",
         "assembly_method" : "Bismark or BSMAP",
         "reference_sequence" : "Maize AGPv2",
-        "specimen_id" : 4,
+        "specimen_uuid" : 4,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "Tx303_R1.allreads_val_1.fq",
@@ -641,7 +641,7 @@ projects = [{
         "process_type" : "alignment",
         # "precursor_type" : "sequencing",
         # "precursor_id" : 0,
-        "specimen_id" : 0,
+        "specimen_uuid" : 0,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "B73_all3_bt202_sorted.bam",
@@ -656,7 +656,7 @@ projects = [{
         # Alignment #
         #############
         "process_type" : "alignment",
-        "specimen_id" : 1,
+        "specimen_uuid" : 1,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "Mo17_all3_bt202_sorted.bam",
@@ -671,7 +671,7 @@ projects = [{
         # Alignment #
         #############
         "process_type" : "alignment",
-        "specimen_id" : 2,
+        "specimen_uuid" : 2,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "CML322_all3_bt202_sorted.bam",
@@ -686,7 +686,7 @@ projects = [{
         # Alignment #
         #############
         "process_type" : "alignment",
-        "specimen_id" : 3,
+        "specimen_uuid" : 3,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "Oh43_all3_bt202_sorted.bam",
@@ -701,7 +701,7 @@ projects = [{
         # Alignment #
         #############
         "process_type" : "alignment",
-        "specimen_id" : 4,
+        "specimen_uuid" : 4,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "Tx303_all3_bt202_sorted.bam",
@@ -723,7 +723,7 @@ projects = [{
         ## additional analysis software    Python script
         # "precursor_type" : "alignment",
         # "precursor_id" : 0,
-        "specimen_id" : 0,
+        "specimen_uuid" : 0,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "B73_all3_tile_merged_100bp.txt",
@@ -740,7 +740,7 @@ projects = [{
         "process_type" : "analysis",
         "software" : "Bismark or BSMAP",
         "software_version" : "0.10.1",
-        "specimen_id" : 1,
+        "specimen_uuid" : 1,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "100tile/Mo17_all3_tile_merged_100bp.txt",
@@ -757,7 +757,7 @@ projects = [{
         "process_type" : "analysis",
         "software" : "Bismark or BSMAP",
         "software_version" : "0.10.1",
-        "specimen_id" : 2,
+        "specimen_uuid" : 2,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "CML322_all3_tile_merged_100bp.txt",
@@ -774,7 +774,7 @@ projects = [{
         "process_type" : "analysis",
         "software" : "Bismark or BSMAP",
         "software_version" : "0.10.1",
-        "specimen_id" : 3,
+        "specimen_uuid" : 3,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "Oh43_all3_tile_merged_100bp.txt",
@@ -791,7 +791,7 @@ projects = [{
         "process_type" : "analysis",
         "software" : "Bismark or BSMAP",
         "software_version" : "0.10.1",
-        "specimen_id" : 4,
+        "specimen_uuid" : 4,
         "inputs" : None,
         "outputs" : [{
             "file_name" : "Tx303_all3_tile_merged_100bp.txt",

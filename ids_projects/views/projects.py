@@ -40,7 +40,7 @@ def list(request):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
-def view(request, project_id):
+def view(request, project_uuid):
     """Queries project metadata and all associated metadata"""
     #######
     # GET #
@@ -49,14 +49,14 @@ def view(request, project_id):
 
         # get the project meta
         a = client(request)
-        project_raw = a.meta.getMetadata(uuid=project_id)
+        project_raw = a.meta.getMetadata(uuid=project_uuid)
         project = collapse_meta(project_raw)
         # list for the project's specimens
         project['specimens'] = []
 
         # get everything related to the project (everything with the
-        # project_id in associationIds)
-        query = {'associationIds': project_id }
+        # project_uuid in associationIds)
+        query = {'associationIds': project_uuid }
         results_raw = a.meta.listMetadata(q=json.dumps(query))
         results = map(collapse_meta, results_raw)
 
@@ -91,8 +91,8 @@ def view(request, project_id):
 
 
         # get list of uuids for each object type
-        specimen_ids = specimens.keys()
-        process_ids = processes.keys()
+        specimen_uuids = specimens.keys()
+        process_uuids = processes.keys()
         file_ids = files.keys()
 
         # place to put object created 'out of order'
@@ -103,28 +103,28 @@ def view(request, project_id):
         for file_id in file_ids:
             file_data = files[file_id]
             associationIds = file_data['associationIds']
-            match = filter(lambda x: x in associationIds, process_ids)
+            match = filter(lambda x: x in associationIds, process_uuids)
             if match:
-                process_id = match[0]
-                processes[process_id]['files'].append(file_data)
+                process_uuid = match[0]
+                processes[process_uuid]['files'].append(file_data)
             else:
                 unmatched_files.append(file_data)
 
         # match processes to specimens
-        for process_id in process_ids:
-            process = processes[process_id]
+        for process_uuid in process_uuids:
+            process = processes[process_uuid]
             associationIds = process['associationIds']
 
-            match = filter(lambda x: x in associationIds, specimen_ids)
+            match = filter(lambda x: x in associationIds, specimen_uuids)
             if match:
-                specimen_id = match[0]
-                specimens[specimen_id]['processes'].append(process)
+                specimen_uuid = match[0]
+                specimens[specimen_uuid]['processes'].append(process)
             else:
                 unmatched_processes.append(process)
 
         # stick specimens into project
-        for specimen_id in specimen_ids:
-            specimen = specimens[specimen_id]
+        for specimen_uuid in specimen_uuids:
+            specimen = specimens[specimen_uuid]
             project['specimens'].append(specimen)
 
         context = {'project' : project,
@@ -199,7 +199,7 @@ def create(request):
 
 
 @login_required
-def edit(request, project_id):
+def edit(request, project_uuid):
     """ """
     #######
     # GET #
@@ -208,7 +208,7 @@ def edit(request, project_id):
 
         a = client(request)
         try:
-            project = a.meta.getMetadata(uuid=project_id)
+            project = a.meta.getMetadata(uuid=project_uuid)
         except:
             logger.error('Error while attempting to edit project, not found.')
             messages.error(request, 'Project not found.')
@@ -246,15 +246,17 @@ def edit(request, project_id):
 
             a = client(request)
             try:
-                response = a.meta.updateMetadata(uuid=project_id, body=new_project)
+                response = a.meta.updateMetadata(uuid=project_uuid, body=new_project)
             except Exception as e:
                 logger.error('Error while attempting to edit project metadata.')
                 messages.error(request, 'Error while attempting to edit specimen.')
                 return HttpResponseRedirect('/projects/')
+            else:
+                messages.success(request, 'Successfully edited project.')
+                return HttpResponseRedirect('/project/{}'.format(project_uuid))
 
-        # TODO: check to see if anything actually changed
-        messages.success(request, 'Successfully edited project.')
-        return HttpResponseRedirect('/project/{}'.format(project_id))
+        messages.success(request, 'Did not edit project.')
+        return HttpResponseRedirect('/project/{}'.format(project_uuid))
 
     #########
     # OTHER #
@@ -264,7 +266,7 @@ def edit(request, project_id):
 
 
 @login_required
-def delete(request, project_id):
+def delete(request, project_uuid):
     """Delete a project """
     #######
     # GET #
@@ -276,7 +278,7 @@ def delete(request, project_id):
         a = client(request)
 
         # find all associated objects
-        query = {'associationIds':'{}'.format(project_id)}
+        query = {'associationIds':'{}'.format(project_uuid)}
         results = a.meta.listMetadata(q=json.dumps(query))
 
         # delete all associated objects
@@ -285,7 +287,7 @@ def delete(request, project_id):
 
         # delete project
         try:
-            a.meta.deleteMetadata(uuid=project_id)
+            a.meta.deleteMetadata(uuid=project_uuid)
         except:
             logger.error('Error deleting project. {} {}'.format(e.errno, e.strerror) )
             messages.error(request, 'Project deletion unsuccessful.')

@@ -1,4 +1,9 @@
+import logging
 from django import forms
+
+
+logger = logging.getLogger(__name__)
+
 
 class ProcessForm(forms.Form):
     SEQUENCING = 'Sequencing'
@@ -27,7 +32,7 @@ class ProcessForm(forms.Form):
     reference_sequence = forms.CharField(max_length=255)
 
     # # hidden
-    # project_id = forms.CharField(widget=forms.HiddenInput())
+    # project_uuid = forms.CharField(widget=forms.HiddenInput())
     # # maybe i should use MultiValueField?
     # associationIds = forms.CharField(widget=forms.HiddenInput())
 

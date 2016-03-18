@@ -1,4 +1,9 @@
+import logging
 from django import forms
+
+
+logger = logging.getLogger(__name__)
+
 
 class SpecimenForm(forms.Form):
     taxon_name = forms.CharField(max_length=255, required=True)

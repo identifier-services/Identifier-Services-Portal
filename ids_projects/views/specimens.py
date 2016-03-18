@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def list(request, project_id):
+def list(request, project_uuid):
     """List all specimens related to a project"""
     #######
     # GET #
@@ -26,11 +26,11 @@ def list(request, project_id):
     if request.method == 'GET':
 
         a = client(request)
-        specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_id)}
+        specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_uuid)}
         specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
         specimens = map(collapse_meta, specimens_raw)
 
-        context = {'specimens' : specimens, 'project_id': project_id}
+        context = {'specimens' : specimens, 'project_uuid': project_uuid}
 
         return render(request, 'ids_projects/specimens/index.html', context)
 
@@ -42,7 +42,7 @@ def list(request, project_id):
 
 
 @login_required
-def view(request, specimen_id):
+def view(request, specimen_uuid):
     """ """
     #######
     # GET #
@@ -51,7 +51,7 @@ def view(request, specimen_id):
 
         # get specimen metadata
         a = client(request)
-        specimen_raw = a.meta.getMetadata(uuid=specimen_id)
+        specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
         specimen = collapse_meta(specimen_raw)
 
         project = None
@@ -65,8 +65,8 @@ def view(request, specimen_id):
             if result['name'] == 'idsvc.project':
                 project = result
 
-        # get all objects with specimen_id in associationIds list
-        query = {'associationIds': specimen_id }
+        # get all objects with specimen_uuid in associationIds list
+        query = {'associationIds': specimen_uuid }
         results_raw = a.meta.listMetadata(q=json.dumps(query))
         results = map(collapse_meta, results_raw)
 
@@ -92,7 +92,7 @@ def view(request, specimen_id):
                 files[uuid] = file_data
 
         # get the uuids
-        process_ids = processes.keys()
+        process_uuids = processes.keys()
         file_ids = files.keys()
 
         # place to put objects that were created 'out of order'
@@ -103,10 +103,10 @@ def view(request, specimen_id):
         for file_id in file_ids:
             file_data = files[file_id]
             associationIds = file_data['associationIds']
-            match = filter(lambda x: x in associationIds, process_ids)
+            match = filter(lambda x: x in associationIds, process_uuids)
             if match:
-                process_id = match[0]
-                processes[process_id]['files'].append(file_data)
+                process_uuid = match[0]
+                processes[process_uuid]['files'].append(file_data)
             else:
                 unmatched_files.append(file_data)
 
@@ -114,8 +114,8 @@ def view(request, specimen_id):
         specimen['processes'] = []
 
         # stick processes into specimen
-        for process_id in process_ids:
-            process = processes[process_id]
+        for process_uuid in process_uuids:
+            process = processes[process_uuid]
             specimen['processes'].append(process)
 
         context = {'specimen' : specimen, 'project' : project}
@@ -130,7 +130,7 @@ def view(request, specimen_id):
 
 
 @login_required
-def create(request, project_id):
+def create(request, project_uuid):
     """Create a new specimen related to a project"""
     #######
     # GET #
@@ -139,12 +139,12 @@ def create(request, project_id):
 
         # get the project
         a = client(request)
-        project_raw = a.meta.getMetadata(uuid=project_id)
+        project_raw = a.meta.getMetadata(uuid=project_uuid)
         project = collapse_meta(project_raw)
 
-        context = {'form': SpecimenForm(initial=specimen),
-                   'specimen': None,
-                   'project': project}
+        context = {'form': SpecimenForm(),
+                   'project': project,
+                   'specimen': None}
 
         return render(request, 'ids_projects/specimens/create.html', context)
 
@@ -166,7 +166,7 @@ def create(request, project_id):
             propagation = form.cleaned_data['propagation']
             estimated_genome_size = form.cleaned_data['estimated_genome_size']
 
-            associationIds = [project_id]
+            associationIds = [project_uuid]
 
             new_specimen = {
                 "name":"idsvc.specimen",
@@ -193,7 +193,7 @@ def create(request, project_id):
                 return HttpResponseRedirect('/specimen/{}'.format(response['uuid']))
 
         messages.info(request, 'Did not create new specimen.')
-        return HttpResponseRedirect('/project/{}'.format(project_id))
+        return HttpResponseRedirect('/project/{}'.format(project_uuid))
 
     #########
     # OTHER #
@@ -203,7 +203,7 @@ def create(request, project_id):
 
 
 @login_required
-def edit(request, specimen_id):
+def edit(request, specimen_uuid):
     """ """
     #######
     # GET #
@@ -213,7 +213,7 @@ def edit(request, specimen_id):
         a = client(request)
         try:
             # get the specimen metadata object
-            specimen = a.meta.getMetadata(uuid=specimen_id)
+            specimen = a.meta.getMetadata(uuid=specimen_uuid)
         except:
             logger.error('Error editing specimen. {} {}'.format(e.errno, e.strerror))
             messages.error(request, 'Specimen not found.')
@@ -242,6 +242,20 @@ def edit(request, specimen_id):
 
         form = SpecimenForm(request.POST)
 
+        # get the association fields
+        # TODO: I need to store this in hidden form field, but having trouble with that.
+        a = client(request)
+        try:
+            # get the specimen metadata object
+            specimen = a.meta.getMetadata(uuid=specimen_uuid)
+        except:
+            logger.error('Error editing specimen. {} {}'.format(e.errno, e.strerror))
+            messages.error(request, 'Specimen not found.')
+
+            return HttpResponseRedirect('/projects/')
+        else:
+            associationIds = specimen['associationIds']
+
         if form.is_valid():
 
             taxon_name = form.cleaned_data['taxon_name']
@@ -254,6 +268,8 @@ def edit(request, specimen_id):
             estimated_genome_size = form.cleaned_data['estimated_genome_size']
 
             new_specimen = {
+                "name" : 'idsvc.specimen',
+                "associationIds" : associationIds,
                 "value": {
                     "taxon_name":taxon_name,
                     "specimen_id":specimen_id,
@@ -268,16 +284,16 @@ def edit(request, specimen_id):
 
             a = client(request)
             try:
-                response = a.meta.updateMetadata(uuid=specimen_id, body=new_specimen)
+                response = a.meta.updateMetadata(uuid=specimen_uuid, body=new_specimen)
             except Exception as e:
                 logger.debug('Error while attempting to edit specimen metadata: %s' % e)
                 messages.error(request, 'Error while attempting to edit specimen.')
             else:
                 messages.success(request, 'Successfully edited specimen.')
-                return HttpResponseRedirect('/specimen/{}'.format(response['uuid']))
+                return HttpResponseRedirect('/specimen/{}'.format(specimen_uuid))
 
         messages.info(request, 'Did not edit specimen.')
-        return HttpResponseRedirect('/project/{}'.format(project_id))
+        return HttpResponseRedirect('/specimen/{}'.format(specimen_uuid))
 
     #########
     # OTHER #
@@ -287,7 +303,7 @@ def edit(request, specimen_id):
 
 
 @login_required
-def delete(request, specimen_id):
+def delete(request, specimen_uuid):
     """Delete a specimen"""
     #######
     # GET #
@@ -298,7 +314,7 @@ def delete(request, specimen_id):
 
         # get the specimen
         a = client(request)
-        specimen_raw = a.meta.getMetadata(uuid=specimen_id)
+        specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
         specimen = collapse_meta(specimen_raw)
 
         project = None
@@ -313,7 +329,7 @@ def delete(request, specimen_id):
                 project = result
 
         try:
-            a.meta.deleteMetadata(uuid=specimen_id)
+            a.meta.deleteMetadata(uuid=specimen_uuid)
         except:
             logger.error('Error deleting specimen. {} {}'.format(e.errno, e.strerror) )
             messages.error(request, 'Specimen deletion unsuccessful.')
