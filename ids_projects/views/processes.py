@@ -215,7 +215,7 @@ def edit(request, process_uuid):
                 if result['name'] == 'idsvc.specimen':
                     specimen = result
 
-            context = {'form': SpecimenForm(initial=specimen),
+            context = {'form': ProcessForm(initial=process),
                        'specimen': specimen,
                        'project': project,
                        'process': process}
