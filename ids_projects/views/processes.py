@@ -95,7 +95,6 @@ def create(request, specimen_uuid):
         associationIds = specimen['associationIds']
 
         project = None
-        specimen = None
 
         # find the project
         query = {'uuid': { '$in': associationIds }}
@@ -103,16 +102,12 @@ def create(request, specimen_uuid):
         results = map(collapse_meta, results_raw)
         for result in results:
             if result['name'] == 'idsvc.project':
-                project == result
-            if result['name'] == 'idsvc.specimen':
-                specimen == result
+                project = result
 
         context = {'form': ProcessForm(),
                    'project': project,
                    'specimen': specimen,
                    'process': None}
-
-        import pdb; pdb.set_trace()
 
         return render(request, 'ids_projects/processes/create.html', context)
 
@@ -136,7 +131,7 @@ def create(request, specimen_uuid):
         results = map(collapse_meta, results_raw)
         for result in results:
             if result['name'] == 'idsvc.project':
-                project == result
+                project = result
 
         # add specimen uuid to association ids
         associationIds.append(specimen_uuid)
