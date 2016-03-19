@@ -30,7 +30,10 @@ def list(request, project_uuid):
         specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
         specimens = map(collapse_meta, specimens_raw)
 
-        context = {'specimens' : specimens, 'project_uuid': project_uuid}
+        project_raw = a.meta.getMetadata(uuid=project_uuid)
+        project = collapse_meta(project_raw)
+
+        context = {'specimens' : specimens, 'project': project}
 
         return render(request, 'ids_projects/specimens/index.html', context)
 
@@ -213,9 +216,10 @@ def edit(request, specimen_uuid):
         a = client(request)
         try:
             # get the specimen metadata object
-            specimen = a.meta.getMetadata(uuid=specimen_uuid)
-        except:
-            logger.error('Error editing specimen. {} {}'.format(e.errno, e.strerror))
+            specimens_raw= a.meta.getMetadata(uuid=specimen_uuid)
+            specimen = collapse_meta(specimens_raw)
+        except Exception as e:
+            logger.error('Error editing specimen. {}'.format(e.message))
             messages.error(request, 'Specimen not found.')
 
             return HttpResponseRedirect('/projects/')
@@ -247,9 +251,10 @@ def edit(request, specimen_uuid):
         a = client(request)
         try:
             # get the specimen metadata object
-            specimen = a.meta.getMetadata(uuid=specimen_uuid)
+            specimen_raw= a.meta.getMetadata(uuid=specimen_uuid)
+            specimen = collapse_meta(specimens_raw)
         except:
-            logger.error('Error editing specimen. {} {}'.format(e.errno, e.strerror))
+            logger.error('Error editing specimen. {}'.format(e.message))
             messages.error(request, 'Specimen not found.')
 
             return HttpResponseRedirect('/projects/')
@@ -331,7 +336,7 @@ def delete(request, specimen_uuid):
         try:
             a.meta.deleteMetadata(uuid=specimen_uuid)
         except:
-            logger.error('Error deleting specimen. {} {}'.format(e.errno, e.strerror) )
+            logger.error('Error deleting specimen. {}'.format(e.message) )
             messages.error(request, 'Specimen deletion unsuccessful.')
 
             if project:

@@ -6,11 +6,11 @@ hr {
     margin: 12px 0;
 }
 
-.specimen-panel {
+.info-panel {
     background-color: #fafafa; /*#f9f9f0;*/
     border: 1px solid #f5f5f5;
     border-radius: 4px;
-    padding: 8px;
+    margin-top: 10px
 }
 
 .fix-me {
@@ -27,7 +27,7 @@ hr {
     padding: 10px 15px;
     border-radius: 4px;
     border: 1px solid #ddd;
-    margin-bottom: 10px;
+    /*margin-bottom: 10px;*/
 }
 
 .object-header .header-link {
@@ -46,8 +46,8 @@ hr {
 }
 
 .dark {
-    background-color: rgba(69, 97, 115, 0.22);
-    border-color: rgba(69, 97, 115, 0.26);
+    background-color: rgba(69, 97, 115, 0.18);
+    border-color: rgba(69, 97, 115, 0.2);
     color: #666;
 }
 
@@ -58,7 +58,8 @@ hr {
 }
 
 .info-item {
-    margin-bottom: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
 .suggest-in {

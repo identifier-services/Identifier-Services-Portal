@@ -6,21 +6,23 @@
 
 {% block breadcrumbs %}
     {{ block.super }}
+
     {% breadcrumb "Projects" "ids_projects:projects-list" %}
-    {% breadcrumb "Project" "" %}
+
+    {% if project %}
+        {% breadcrumb "Edit Project" "ids_projects:projects-view" project.uuid %}
+    {% else %}
+        {% breadcrumb "Create Project" "ids_projects:projects-list" %}
+    {% endif %}
+    
 {% endblock %}
 
 {% block title %}Create Project{% endblock %}
 
 {% block content %}
 <div class="container">
-    <!-- <h1>Projects</h1> -->
     {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
-    {% if project %}
-        {{ project }}
-    {% else %}
-        {{ project }}
-    {% endif %}
+
     <form method="post">
         {% csrf_token %}
         {% bootstrap_form form %}

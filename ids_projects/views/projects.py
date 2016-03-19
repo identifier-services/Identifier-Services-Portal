@@ -208,7 +208,8 @@ def edit(request, project_uuid):
 
         a = client(request)
         try:
-            project = a.meta.getMetadata(uuid=project_uuid)
+            project_raw = a.meta.getMetadata(uuid=project_uuid)
+            project = collapse_meta(project_raw)
         except:
             logger.error('Error while attempting to edit project, not found.')
             messages.error(request, 'Project not found.')
@@ -289,7 +290,7 @@ def delete(request, project_uuid):
         try:
             a.meta.deleteMetadata(uuid=project_uuid)
         except:
-            logger.error('Error deleting project. {} {}'.format(e.errno, e.strerror) )
+            logger.error('Error deleting project. {}'.format(e.message) )
             messages.error(request, 'Project deletion unsuccessful.')
 
             return HttpResponseRedirect('/projects/')

@@ -18,22 +18,22 @@ def collapse_meta(x):
     try:
         d = x['value']
     except Exception as e:
-        logger.exception('{} {}'.format(e.errno, e.strerror))
+        logger.exception('{}'.format(e.message))
 
     try:
         d['uuid'] = x['uuid']
     except Exception as e:
-        logger.error('{} {}'.format(e.errno, e.strerror))
+        logger.exception('{}'.format(e.message))
 
     try:
         d['associationIds'] = x['associationIds']
     except Exception as e:
-        logger.error('{} {}'.format(e.errno, e.strerror))
+        logger.exception('{}'.format(e.message))
 
     try:
         d['name'] = x['name']
     except Exception as e:
-        logger.error('{} {}'.format(e.errno, e.strerror))
+        logger.exception('{}'.format(e.message))
 
     def make_short(s):
         if len(s) > 18:
@@ -45,7 +45,7 @@ def collapse_meta(x):
     if 'title' in keys:
         d['short'] = make_short(d['title'])
     elif 'taxon_name' in keys:
-        d['short'] = make_short(d['taxon_name'] + d['specimen_id'])
+        d['short'] = make_short(d['taxon_name'] + ' ' + d['specimen_id'])
     elif 'process_type' in keys:
         d['short'] = make_short(d['process_type'])
 

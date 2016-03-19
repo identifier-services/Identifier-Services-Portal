@@ -6,8 +6,15 @@
 
 {% block breadcrumbs %}
     {{ block.super }}
+
     {% breadcrumb "Projects" "ids_projects:projects-list" %}
-    {% breadcrumb "Project" "" %}
+
+    {% if project.short %}
+        {% breadcrumb project.short "ids_projects:projects-view" project.uuid %}
+    {% else %}
+        {% breadcrumb "Project" "ids_projects:projects-view" project.uuid %}
+    {% endif %}
+    
 {% endblock %}
 
 {% block title %}Projects{% endblock %}
@@ -15,9 +22,11 @@
 {% block content %}
 <div class="container">
     <div class="row">
-        <div class="col-xs-12">
+        <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">
             {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
         </div>
+    </div>
+    <div class="row">
         <!-- Left Column - Project Basic Info -->
         <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-5">
             <div class="panel panel-default">
@@ -87,154 +96,165 @@
 
                 {% for specimen in project.specimens %}
 
-                <div class="specimen-panel">
+                <div class="info-panel">
 
-                <div class="object-header darker">
-                    <a href="/specimen/{{specimen.uuid}}" class="header-link">{{ specimen.taxon_name }} {{ specimen.specimen_id }}</a>
-                </div>
-
-                <div>
-                    <div class="row info-item">
-                        <div class="col-xs-6">
-                            <b>Taxon Name</b>
-                        </div>
-                        <div class="col-xs-6">
-                            {{ specimen.taxon_name }}
-                        </div>
-                    </div>
-                    <div class="row info-item">
-                        <div class="col-xs-6">
-                            <b>Specimen ID</b>
-                        </div>
-                        <div class="col-xs-6">
-                            {{ specimen.specimen_id }}
-                        </div>
-                    </div>
-                    <div class="row info-item">
-                        <div class="col-xs-6">
-                            <b>Organ/Tissue</b>
-                        </div>
-                        <div class="col-xs-6">
-                            {{ specimen.organ_or_tissue }}
-                        </div>
-                    </div>
-                    <div class="row info-item">
-                        <div class="col-xs-6">
-                            <b>Developmental Stage</b>
-                        </div>
-                        <div class="col-xs-6">
-                            {{ specimen.developmental_stage }}
-                        </div>
-                    </div>
-                    <div class="row info-item">
-                        <div class="col-xs-6">
-                            <b>Haploid Chromosone Count</b>
-                        </div>
-                        <div class="col-xs-6">
-                            {{ specimen.haploid_chromosome_count }}
-                        </div>
-                    </div>
-                    <div class="row info-item">
-                        <div class="col-xs-6">
-                            <b>Ploidy</b>
-                        </div>
-                        <div class="col-xs-6">
-                            {{ specimen.ploidy }}
-                        </div>
-                    </div>
-                    <div class="row info-item">
-                        <div class="col-xs-6">
-                            <b>Propagation</b>
-                        </div>
-                        <div class="col-xs-6">
-                            {{ specimen.propagation }}
-                        </div>
-                    </div>
-                    <div class="row info-item">
-                        <div class="col-xs-6">
-                            <b>Estimated Genome Size</b>
-                        </div>
-                        <div class="col-xs-6">
-                            {{ specimen.estimated_genome_size }}
-                        </div>
+                    <div class="object-header darker">
+                        <a href="/specimen/{{specimen.uuid}}" class="header-link">{{ specimen.taxon_name }} {{ specimen.specimen_id }}</a>
                     </div>
 
-                        {% if not specimen.processes %}
-                        <div class="object-header dark">
-                            <div>
-                                No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
-                                <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <div>
+                        <div class="row info-item">
+                            <div class="col-xs-6">
+                                <b>Taxon Name</b>
+                            </div>
+                            <div class="col-xs-6">
+                                {{ specimen.taxon_name }}
                             </div>
                         </div>
-                        {% else %}
-                        <div class="object-header dark">
-                            <div>
-                                Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
-                                <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                        <div class="row info-item">
+                            <div class="col-xs-6">
+                                <b>Specimen ID</b>
+                            </div>
+                            <div class="col-xs-6">
+                                {{ specimen.specimen_id }}
+                            </div>
+                        </div>
+                        <div class="row info-item">
+                            <div class="col-xs-6">
+                                <b>Organ/Tissue</b>
+                            </div>
+                            <div class="col-xs-6">
+                                {{ specimen.organ_or_tissue }}
+                            </div>
+                        </div>
+                        <div class="row info-item">
+                            <div class="col-xs-6">
+                                <b>Developmental Stage</b>
+                            </div>
+                            <div class="col-xs-6">
+                                {{ specimen.developmental_stage }}
+                            </div>
+                        </div>
+                        <div class="row info-item">
+                            <div class="col-xs-6">
+                                <b>Haploid Chromosone Count</b>
+                            </div>
+                            <div class="col-xs-6">
+                                {{ specimen.haploid_chromosome_count }}
+                            </div>
+                        </div>
+                        <div class="row info-item">
+                            <div class="col-xs-6">
+                                <b>Ploidy</b>
+                            </div>
+                            <div class="col-xs-6">
+                                {{ specimen.ploidy }}
+                            </div>
+                        </div>
+                        <div class="row info-item">
+                            <div class="col-xs-6">
+                                <b>Propagation</b>
+                            </div>
+                            <div class="col-xs-6">
+                                {{ specimen.propagation }}
+                            </div>
+                        </div>
+                        <div class="row info-item">
+                            <div class="col-xs-6">
+                                <b>Estimated Genome Size</b>
+                            </div>
+                            <div class="col-xs-6">
+                                {{ specimen.estimated_genome_size }}
                             </div>
                         </div>
 
-                            {% for process in specimen.processes %}
-
-                            <div class="object-header">
-                                <a href="/process/{{process.uuid}}" class="header-link">{{ process.process_type }}</a>
+                            {% if not specimen.processes %}
+                            <div class="object-header dark">
+                                <div>
+                                    {% if specimen.short %}
+                                        No processes for {{ specimen.short }}
+                                    {% else %}
+                                        No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                                    {% endif %}
+                                    <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="object-header dark">
+                                <div>
+                                    {% if specimen.short %}
+                                        Processes for {{ specimen.short }}
+                                    {% else %}
+                                        Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                                    {% endif %}
+                                    <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                                </div>
                             </div>
 
-                            <div class="row info-item">
-                                <div class="col-xs-6">
-                                    <b>Process Type</b>
-                                </div>
-                                <div class="col-xs-6">
-                                    {{ process.process_type }}
-                                </div>
-                            </div>
-                            {% if process.sequence_method %}
-                            <div class="row info-item">
-                                <div class="col-xs-6">
-                                    <b>Sequence Method</b>
-                                </div>
-                                <div class="col-xs-6">
-                                    {{ process.sequence_method }}
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% if process.sequence_hardware %}
-                            <div class="row info-item">
-                                <div class="col-xs-6">
-                                    <b>Sequence Hardware</b>
-                                </div>
-                                <div class="col-xs-6">
-                                    {{ process.sequence_hardware }}
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% if process.assembly_method %}
-                            <div class="row info-item">
-                                <div class="col-xs-6">
-                                    <b>Assembly Method</b>
-                                </div>
-                                <div class="col-xs-6">
-                                    {{ process.assembly_method }}
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% if process.reference_sequence %}
-                            <div class="row info-item">
-                                <div class="col-xs-6">
-                                    <b>Reference Sequence</b>
-                                </div>
-                                <div class="col-xs-6">
-                                    {{ process.reference_sequence }}
-                                </div>
-                            </div>
-                            {% endif %}
+                                <!-- TODO: fix this -->
+                                <br>
 
-                            {% endfor %} <!-- processes -->
-                        {% endif %} <!-- specimen.processes -->
+                                {% for process in specimen.processes %}
+
+                                <div class="object-header">
+                                    <a href="/process/{{process.uuid}}" class="header-link">{{ process.process_type }}</a>
+                                </div>
+
+                                <div class="row info-item">
+                                    <div class="col-xs-6">
+                                        <b>Process Type</b>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        {{ process.process_type }}
+                                    </div>
+                                </div>
+                                {% if process.sequence_method %}
+                                <div class="row info-item">
+                                    <div class="col-xs-6">
+                                        <b>Sequence Method</b>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        {{ process.sequence_method }}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if process.sequence_hardware %}
+                                <div class="row info-item">
+                                    <div class="col-xs-6">
+                                        <b>Sequence Hardware</b>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        {{ process.sequence_hardware }}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if process.assembly_method %}
+                                <div class="row info-item">
+                                    <div class="col-xs-6">
+                                        <b>Assembly Method</b>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        {{ process.assembly_method }}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if process.reference_sequence %}
+                                <div class="row info-item">
+                                    <div class="col-xs-6">
+                                        <b>Reference Sequence</b>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        {{ process.reference_sequence }}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                {% endfor %} <!-- processes -->
+                            {% endif %} <!-- specimen.processes -->
+
+                            </div>
 
                         </div>
-
-                    </div>
 
                     <hr>
 

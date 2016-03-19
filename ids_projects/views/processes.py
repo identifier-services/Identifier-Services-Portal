@@ -91,7 +91,8 @@ def create(request, specimen_uuid):
 
         # get association ids
         a = client(request)
-        specimen = a.meta.getMetadata(uuid=specimen_uuid)
+        specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
+        specimen = collapse_meta(specimen_raw)
         associationIds = specimen['associationIds']
 
         project = None
@@ -120,7 +121,8 @@ def create(request, specimen_uuid):
 
         # inherit specimen association ids
         a = client(request)
-        specimen = a.meta.getMetadata(uuid=specimen_uuid)
+        specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
+        specimen = collapse_meta(specimen_raw)
         associationIds = specimen['associationIds']
 
         project = None
@@ -194,9 +196,10 @@ def edit(request, process_uuid):
         a = client(request)
         try:
             # get the process metadata object
-            process = a.meta.getMetadata(uuid=process_uuid)
+            process_raw = a.meta.getMetadata(uuid=process_uuid)
+            process = collapse_meta(process_raw)
         except:
-            logger.error('Error editing process. {} {}'.format(e.errno, e.strerror))
+            logger.error('Error editing process. {}'.format(e.message))
             messages.error(request, 'Process not found.')
 
             return HttpResponseRedirect('/projects/')
@@ -232,9 +235,10 @@ def edit(request, process_uuid):
         a = client(request)
         try:
             # get the specimen metadata object
-            process = a.meta.getMetadata(uuid=process_uuid)
+            process_raw = a.meta.getMetadata(uuid=process_uuid)
+            process = collapse_meta(process_raw)
         except:
-            logger.error('Error editing specimen. {} {}'.format(e.errno, e.strerror))
+            logger.error('Error editing specimen. {}'.format(e.message))
             messages.error(request, 'Process not found.')
 
             return HttpResponseRedirect('/projects/')
@@ -320,7 +324,7 @@ def delete(request, process_uuid):
         try:
             a.meta.deleteMetadata(uuid=process_uuid)
         except Exception as e:
-            logger.error('Error deleting process. {} {}'.format(e.errno, e.strerror) )
+            logger.error('Error deleting process. {}'.format(e.message) )
             messages.error(request, 'Process deletion unsuccessful.')
             # return HttpResponseServerError("Error deleting project.")
             if specimen:

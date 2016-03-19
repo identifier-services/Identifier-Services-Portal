@@ -6,9 +6,35 @@
 
 {% block breadcrumbs %}
     {{ block.super }}
+
     {% breadcrumb "Projects" "ids_projects:projects-list" %}
-    {% breadcrumb "Specimens" "ids_projects:specimens-list" %}
-    {% breadcrumb "Specimen" "" %}
+
+    {% if project %}
+        {% if project.short %}
+            {% breadcrumb project.short "ids_projects:projects-view" project.uuid %}
+        {% else %}
+            {% breadcrumb "Project" "ids_projects:projects-view" project.uuid %}
+        {% endif %}
+    {% endif %}
+
+    {% breadcrumb "Specimens" "ids_projects:specimens-list" project.uuid %}
+
+    {% if specimen %}
+        {% if specimen.short %}
+            {% breadcrumb specimen.short "ids_projects:specimens-view" specimen.uuid %}
+        {% else %}
+            {% breadcrumb "Specimen" "ids_projects:specimens-view" specimen.uuid %}
+        {% endif %}
+    {% endif %}
+
+    {% breadcrumb "Processes" "ids_projects:processes-list" specimen.uuid %}
+
+    {% if process %}
+        {% breadcrumb "Edit Process" "ids_projects:process-edit" process.uuid %}
+    {% else %}
+        {% breadcrumb "Define Process" "ids_projects:process-create" process.uuid %}
+    {% endif %}
+
 {% endblock %}
 
 {% block title %}Create Process{% endblock %}
@@ -16,8 +42,6 @@
 {% block content %}
 <div class="container">
     {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
-    {{ project }}
-    {{ specimen }}
 
     <form method="post">
         {% csrf_token %}
