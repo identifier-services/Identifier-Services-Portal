@@ -43,13 +43,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'bootstrap3',
+    'django_bootstrap_breadcrumbs',
 
     'ids_auth',
     'ids_projects',
-    'ids_specimens',
-    'ids_datasets',
-    'ids_data',
-    'ids_systems',
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -87,6 +84,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.request',
             ],
         },
     },

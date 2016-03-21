@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% load django_bootstrap_breadcrumbs %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+
+    {% breadcrumb "Projects" "ids_projects:projects-list" %}
+
+    {% if project %}
+        {% if project.short %}
+            {% breadcrumb project.short "ids_projects:projects-view" project.uuid %}
+        {% else %}
+            {% breadcrumb "Project" "ids_projects:projects-view" project.uuid %}
+        {% endif %}
+    {% endif %}
+
+    {% breadcrumb "Specimens" "ids_projects:specimens-list" project.uuid %}
+
+    {% if specimen %}
+        {% if specimen.short %}
+            {% breadcrumb specimen.short "ids_projects:specimens-view" specimen.uuid %}
+        {% else %}
+            {% breadcrumb "Specimen" "ids_projects:specimens-view" specimen.uuid %}
+        {% endif %}
+    {% endif %}
+
+{% endblock %}
+
+{% block title %}Specimen{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">
+            {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Specimen</h1>
+                </div>
+                <div class="panel-body">
+                    <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                    <p><b>Taxon Name</b> {{ specimen.taxon_name }}</p>
+                    <p><b>Specimen ID</b> {{ specimen.specimen_id }}</p>
+                    <p><b>Organ/Tissue</b> {{ specimen.organ_or_tissue }}</p>
+                    <p><b>Development Stage</b> {{ specimen.developmental_stage }}</p>
+                    <p><b>Haploid Chromosone Count</b> {{ specimen.haploid_chromosome_count }}</p>
+                    <p><b>Ploidy</b> {{ specimen.ploidy }}</p>
+                    <p><b>Propagation</b> {{ specimen.propagation }}</p>
+                    <p><b>Estimated Genome Size</b> {{ specimen.estimated_genome_size }}</p>
+
+                    <div class="row">
+                        <div class="col-xs-1">
+                            <a href="/specimen/{{specimen.uuid}}/edit" class="btn btn-primary">Edit</a>
+                        </div>
+                        <div class="col-xs-1 pull-right col-xs-pull-2 col-sm-pull-3 col-md-pull-2">
+                            <a href="/specimen/{{specimen.uuid}}/delete" class="btn btn-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">
+            {% if not specimen.processes %}
+            <div class="object-header dark">
+                <div>
+                    {% if specimen.short %}
+                        No processes for {{ specimen.short }}
+                    {% else %}
+                        No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                    {% endif %}
+                    <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                </div>
+            </div>
+            {% else %}
+            <div class="object-header dark">
+                <div>
+                    Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                    <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                </div>
+            </div>
+
+                <div class="info-panel">
+
+                    {% for process in specimen.processes %}
+
+                    <div class="object-header">
+                        <a href="/process/{{process.uuid}}" class="header-link">{{ process.process_type }}</a>
+                    </div>
+
+                    <div class="row info-item">
+                        <div class="col-xs-6">
+                            <b>Process Type</b>
+                        </div>
+                        <div class="col-xs-6">
+                            {{ process.process_type }}
+                        </div>
+                    </div>
+                    {% if process.sequence_method %}
+                    <div class="row info-item">
+                        <div class="col-xs-6">
+                            <b>Sequence Method</b>
+                        </div>
+                        <div class="col-xs-6">
+                            {{ process.sequence_method }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if process.sequence_hardware %}
+                    <div class="row info-item">
+                        <div class="col-xs-6">
+                            <b>Sequence Hardware</b>
+                        </div>
+                        <div class="col-xs-6">
+                            {{ process.sequence_hardware }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if process.assembly_method %}
+                    <div class="row info-item">
+                        <div class="col-xs-6">
+                            <b>Assembly Method</b>
+                        </div>
+                        <div class="col-xs-6">
+                            {{ process.assembly_method }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if process.reference_sequence %}
+                    <div class="row info-item">
+                        <div class="col-xs-6">
+                            <b>Reference Sequence</b>
+                        </div>
+                        <div class="col-xs-6">
+                            {{ process.reference_sequence }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% endfor %} <!-- processes -->
+
+                </div>
+            {% endif %} <!-- specimen.processes -->
+        </div>
+    </div>
+</div>
+{% endblock %}

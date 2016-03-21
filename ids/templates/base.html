@@ -19,7 +19,15 @@
 
     {% include 'includes/messages.html' %}
 
-    {% block content %}{% endblock %}
+    {% load django_bootstrap_breadcrumbs %}
+
+    {% block breadcrumbs %}
+        {% clear_breadcrumbs %}
+        {% breadcrumb "Home" "homepage" %}
+    {% endblock %}
+
+    {% block content %}
+    {% endblock %}
 
     {% include 'includes/footer.html' %}
     <!-- scripts -->

@@ -2,3 +2,5 @@ Django==1.9
 agavepy
 requests
 django-bootstrap3
+django-bootstrap-breadcrumbs
+python-dateutil

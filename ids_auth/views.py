@@ -67,6 +67,9 @@ def agave_oauth_callback(request):
         token['created'] = int(time.time())
         request.session[getattr(settings, 'AGAVE_TOKEN_SESSION_ID')] = token
 
+        logger.debug('{{ url: {}, key: {}, secret: {}, token: {} }}'.format(
+            tenant_base_url, client_key, client_sec, token))
+
         # log user in
         user = authenticate(backend='agave', token=token['access_token'])
         if user:

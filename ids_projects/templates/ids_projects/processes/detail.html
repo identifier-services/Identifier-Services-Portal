@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% load django_bootstrap_breadcrumbs %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+
+    {% breadcrumb "Projects" "ids_projects:projects-list" %}
+
+    {% if project %}
+        {% if project.short %}
+            {% breadcrumb project.short "ids_projects:projects-view" project.uuid %}
+        {% else %}
+            {% breadcrumb "Project" "ids_projects:projects-view" project.uuid %}
+        {% endif %}
+    {% endif %}
+
+    {% breadcrumb "Specimens" "ids_projects:specimens-list" project.uuid %}
+
+    {% if specimen %}
+        {% if specimen.short %}
+            {% breadcrumb specimen.short "ids_projects:specimens-view" specimen.uuid %}
+        {% else %}
+            {% breadcrumb "Specimen" "ids_projects:specimens-view" specimen.uuid %}
+        {% endif %}
+    {% endif %}
+
+    {% breadcrumb "Processes" "ids_projects:processes-list" specimen.uuid %}
+
+    {% if process.short %}
+        {% breadcrumb process.short "ids_projects:process-view" process.uuid %}
+    {% else %}
+        {% breadcrumb "Process" "ids_projects:process-view" process.uuid %}
+    {% endif %}
+
+{% endblock %}
+
+{% block title %}Process{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-9">
+            {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
+        </div>
+        <div class="col-xs-3">
+            <a href="/project" class="btn btn-primary pull-right">Add Data</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6 col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">{{ process.process_type }}</h1>
+                </div>
+                <div class="panel-body">
+                    <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                    <p><b>Process Type</b> {{ process.process_type }}</p>
+                    <p><b>Sequence Method</b> {{ process.sequence_method }}</p>
+                    <p><b>Sequence Hardware</b> {{ process.sequence_hardware }}</p>
+                    <p><b>Assembly Method</b> {{ process.assembly_method }}</p>
+                    <p><b>Reference Sequence</b> {{ process.reference_sequence }}</p>
+                    <div class="row">
+                        <div class="col-xs-1">
+                            <a href="/process/{{process.uuid}}/edit" class="btn btn-primary">Edit</a>
+                        </div>
+                        <div class="col-xs-1 pull-right col-xs-pull-2 col-sm-pull-3 col-md-pull-2">
+                            <a href="/process/{{process.uuid}}/delete" class="btn btn-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
