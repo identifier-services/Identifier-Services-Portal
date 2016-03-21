@@ -1,20 +1,20 @@
+from agavepy.agave import Agave, AgaveException
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import (HttpResponse, HttpResponseRedirect, JsonResponse,
-                         HttpResponseNotAllowed)
-from agavepy.agave import Agave
-import json, logging, urllib
-from forms import DirectoryForm, DataForm
+from django.contrib import messages
+from django.http import (HttpResponse,
+                         HttpResponseRedirect,
+                         HttpResponseBadRequest,
+                         HttpResponseForbidden,
+                         HttpResponseNotFound,
+                         HttpResponseServerError)
 from django.shortcuts import render
+import json, logging
+from ..forms.projects import ProjectForm
+from helper import client, collapse_meta
+
 
 logger = logging.getLogger(__name__)
-
-
-def _client(request):
-    token = request.session.get(getattr(settings, 'AGAVE_TOKEN_SESSION_ID'))
-    access_token = token.get('access_token', None)
-    url = getattr(settings, 'AGAVE_TENANT_BASEURL')
-    return Agave(api_server = url, token = access_token)
 
 
 def index(request, parent_id=''):
