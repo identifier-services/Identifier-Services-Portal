@@ -5,19 +5,19 @@ from django.conf.urls import patterns, include, url
 #########
 # Files #
 #########
-# urlpatterns = patterns(
-#     'ids_projects.views.files',
-#     # list all files associated with a process
-#     url(r'^process/(?P<process_uuid>.+)/files/?$', 'list', name='files-list'),
-#     # create a file metadat object associated with a process
-#     url(r'^process/(?P<process_uuid>.+)/file/?$', 'create', name='files-create'),
-#     # edit a file metadata object
-#     url(r'^file/(?P<data_id>.+)/edit$', 'edit', name='files-edit'),
-#     # edit a file metadata object
-#     url(r'^file/(?P<data_id>.+)/delete$', 'delete', name='files-delete'),
-#     # view a file metadata object
-#     url(r'^file/(?P<data_id>.+)/?$', 'view', name='files-view'),
-# )
+urlpatterns = patterns(
+    'ids_projects.views.files',
+    # # list all files associated with a process
+    # url(r'^process/(?P<process_uuid>.+)/files/?$', 'list', name='files-list'),
+    # create a file metadata object associated with a process
+    url(r'^process/(?P<process_uuid>.+)/file/?$', 'create', name='files-create'),
+    # # edit a file metadata object
+    # # url(r'^file/(?P<data_id>.+)/edit$', 'edit', name='files-edit'),
+    # # edit a file metadata object
+    # url(r'^file/(?P<data_id>.+)/delete$', 'delete', name='files-delete'),
+    # # view a file metadata object
+    # url(r'^file/(?P<data_id>.+)/?$', 'view', name='files-view'),
+)
 
 #############
 # Processes #

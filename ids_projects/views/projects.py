@@ -17,6 +17,11 @@ from helper import client, collapse_meta
 logger = logging.getLogger(__name__)
 
 
+## notes
+## SRA example to test api
+## end of day crontab
+## related identifier - and find in system - and take data, and use in doi request
+
 @login_required
 def list(request):
     """List all projects"""
@@ -48,6 +53,10 @@ def view(request, project_uuid):
     if request.method == 'GET':
 
         # get the project meta
+        # proj = Project(uuid=project_uuid)
+        # proj.fetch()
+        # return render(...)
+
         a = client(request)
         project_raw = a.meta.getMetadata(uuid=project_uuid)
         project = collapse_meta(project_raw)
