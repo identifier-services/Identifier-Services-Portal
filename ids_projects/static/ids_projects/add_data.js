@@ -47,7 +47,10 @@
                         '<i class="glyphicon glyphicon-refresh"></i> Loading files...' +
                         '</p></td></tr>');
 
-            $.getJSON('/data/listing/' + system_id + '/' + file_path)
+            // $.getJSON('/data/listing/' + system_id + '/' + file_path)
+            // $.getJSON('/system/' + system_id + '/listing/' + file_path)
+            $.getJSON('/listing/' + system_id + '/' + file_path)
+
 
             .then(function(listing) {
                 var file_rows = [];

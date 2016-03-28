@@ -2,7 +2,8 @@ from agavepy.agave import Agave, AgaveException
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import (HttpResponse,
+from django.http import (JsonResponse,
+                         HttpResponse,
                          HttpResponseRedirect,
                          HttpResponseBadRequest,
                          HttpResponseForbidden,
@@ -55,7 +56,7 @@ def _pack_contents(raw):
 def files_list(request, system_id, file_path=None):
     if file_path is None:
         file_path = '/'
-    a = _client(request)
+    a = client(request)
     try:
         listing = a.files.list(systemId=system_id, filePath=file_path)
         return JsonResponse(listing, safe=False)
@@ -103,15 +104,15 @@ def create(request, parent_id):
 
 
 @login_required
-def add_data(request, process_id):
-    a = _client(request)
+def add_data(request, process_uuid):
+    a = client(request)
 
     context = {
-        'dataset': a.meta.getMetadata(uuid=process_id),
+        'dataset': a.meta.getMetadata(uuid=process_uuid),
         'systems': a.systems.list(type='STORAGE'),
     }
 
-    return render(request, 'ids_datasets/add_data.html', context)
+    return render(request, 'ids_projects/data/add_data.html', context)
 
 
 @login_required
