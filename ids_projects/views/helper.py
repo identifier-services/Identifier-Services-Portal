@@ -15,6 +15,7 @@ def client(request):
 
 
 def collapse_meta(x):
+    """Collapses key-value pairs from nested 'value' field"""
     try:
         d = x['value']
     except Exception as e:

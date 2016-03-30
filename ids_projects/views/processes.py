@@ -68,9 +68,21 @@ def view(request, process_uuid):
             if result['name'] == 'idsvc.project':
                 project = result
 
+        # find data associated with the process
+        query = {'associationIds': process_uuid }
+        results_raw = a.meta.listMetadata(q=json.dumps(query))
+        # results = map(collapse_meta, results_raw)
+        results = results_raw
+
+        files = []
+        for result in results:
+            if result['name'] == 'idsvc.data':
+                files.append(result)
+
         context = {'process' : process,
                    'project' : project,
-                   'specimen' : specimen}
+                   'specimen' : specimen,
+                   'files' : files}
 
         return render(request, 'ids_projects/processes/detail.html', context)
 

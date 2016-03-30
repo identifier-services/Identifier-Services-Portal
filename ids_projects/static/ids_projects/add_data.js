@@ -15,6 +15,32 @@
         return bytes.toFixed(1)+' '+units[u];
     }
 
+    // The following lifted from stack overflow post by sigurd
+    // http://stackoverflow.com/a/6533544/1344499
+    $(function () {
+        $.ajaxSetup({
+            headers: { "X-CSRFToken": getCookie("csrftoken") }
+        });
+    });
+
+    // The following lifted from stack overflow post by sigurd
+    // http://stackoverflow.com/a/6533544/1344499
+    function getCookie(c_name)
+    {
+        if (document.cookie.length > 0)
+        {
+            c_start = document.cookie.indexOf(c_name + "=");
+            if (c_start != -1)
+            {
+                c_start = c_start + c_name.length + 1;
+                c_end = document.cookie.indexOf(";", c_start);
+                if (c_end == -1) c_end = document.cookie.length;
+                return unescape(document.cookie.substring(c_start,c_end));
+            }
+        }
+        return "";
+     }
+
     var bind_chooser_events = function bind_chooser_events() {
         $('a.file').on('click', function(e) {
             e.preventDefault();
@@ -35,8 +61,28 @@
 
         $('button[name="file-select"]').on('click', function(e) {
             e.preventDefault();
+            var file_path = e.target['dataset']['filePath']
+            select_file(file_path);
         });
     };
+
+    var select_file = function select_file(file_path) {
+
+        var postdata={
+            system_id : $('#id_system_id').val(),
+            file_path : file_path
+        }
+
+        console.log(postdata);
+
+        var url = window.location.pathname;
+        var new_url = url.replace('file','')
+
+        if (postdata.system_id && postdata.file_path) {
+            $.post(url, postdata)
+            window.location.replace(new_url);
+        }
+    }
 
     var do_listing = function do_listing() {
         var system_id = $('#id_system_id').val();

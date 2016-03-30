@@ -10,7 +10,7 @@ from django.http import (JsonResponse,
                          HttpResponseNotFound,
                          HttpResponseServerError)
 from django.shortcuts import render
-import json, logging
+import json, logging, urllib
 from helper import client, collapse_meta
 
 
@@ -54,16 +54,21 @@ def _pack_contents(raw):
 
 @login_required
 def files_list(request, system_id, file_path=None):
-    if file_path is None:
-        file_path = '/'
-    a = client(request)
-    try:
-        listing = a.files.list(systemId=system_id, filePath=file_path)
-        return JsonResponse(listing, safe=False)
-    except:
-        error_msg = 'The path=%s could not be listed on system=%s. ' \
-                    'Please choose another path or system.' % (file_path, system_id)
-        return JsonResponse({'message': error_msg}, status=404)
+    ########
+    # GET #
+    ########
+    if request.method == 'GET':
+
+        if file_path is None:
+            file_path = '/'
+        a = client(request)
+        try:
+            listing = a.files.list(systemId=system_id, filePath=file_path)
+            return JsonResponse(listing, safe=False)
+        except:
+            error_msg = 'The path=%s could not be listed on system=%s. ' \
+                        'Please choose another path or system.' % (file_path, system_id)
+            return JsonResponse({'message': error_msg}, status=404)
 
 
 @login_required
@@ -105,15 +110,73 @@ def create(request, parent_id):
 
 @login_required
 def add_data(request, process_uuid):
-    a = client(request)
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+        a = client(request)
 
-    context = {
-        'dataset': a.meta.getMetadata(uuid=process_uuid),
-        'systems': a.systems.list(type='STORAGE'),
-    }
+        context = {
+            'process': a.meta.getMetadata(uuid=process_uuid),
+            'systems': a.systems.list(type='STORAGE'),
+        }
 
-    return render(request, 'ids_projects/data/add_data.html', context)
+        return render(request, 'ids_projects/data/add_data.html', context)
 
+    ########
+    # POST #
+    ########
+    elif request.method == 'POST':
+        body = urllib.unquote(request.body)
+        response_tuples = map(lambda x: (x.split('=')[0],x.split('=')[1]), body.split('&'))
+        response = {}
+        for key, value in response_tuples:
+            response[key] = value
+
+        a = client(request)
+
+        system_id = response['system_id']
+        file_path = response['file_path']
+
+        try:
+            listing = a.files.list(systemId=system_id, filePath=file_path)
+        except:
+            error_msg = 'The path=%s could not be listed on system=%s. ' \
+                        'Please choose another path or system.' % (file_path, system_id)
+            logger.deubg(error_msg)
+
+        process = a.meta.getMetadata(uuid=process_uuid)
+        associationIds = process['associationIds']
+        associationIds.append(process_uuid)
+
+        for file_info in listing:
+            lm = file_info['lastModified']
+            data = {
+                'name': file_info.name,
+                'last_modified': lm.strftime('%b %-d %I:%M'),
+                'length':file_info.length,
+                'link': file_info._links['self']['href'],
+                'system': file_info.system,
+                'path': file_info.path,
+                'type': file_info.type,
+                'permissions': file_info.permissions
+            }
+
+            body = {
+                "name":"idsvc.data",
+                "associationIds": associationIds,
+                "value": data
+            }
+
+            response = a.meta.addMetadata(body=body)
+
+        return HttpResponseRedirect('/process/{}'.format(process_uuid))
+
+    #########
+    # OTHER #
+    #########
+    else:
+        django.http.HttpResponseNotAllowed("Method not allowed")
 
 @login_required
 def delete(request, data_id):

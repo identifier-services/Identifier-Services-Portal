@@ -6,9 +6,11 @@
 
 {% block content %}
 <div class="container">
-    <h1>Add Data to Dataset<br>
-        <small>{{dataset.value.process_type}} {{dataset.uuid}}</small>
+    <h1>Add Data to Process<br>
+        <small>{{process.value.process_type}} <!-- {{process.uuid}}--></small>
     </h1>
+
+    <meta id="process-info" data-name="{{process.value.process_type}}" data-uuid="{{process.uuid}}">
 
     <form name="browse_system_form" id="id_browse_system_form">
         <div class="form-group">
