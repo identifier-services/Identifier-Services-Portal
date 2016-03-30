@@ -4,6 +4,66 @@ from django import forms
 
 logger = logging.getLogger(__name__)
 
+IDS_CONFIG = {
+    'processes': [
+        {
+            'type': 'sequencing',
+            'label': 'Sequencing',
+            'fields': [
+                {
+                    'id': 'sequence_method',
+                    'widget': 'Textarea'
+                },
+                {
+                    'id': 'sequence_hardware',
+                },
+                {
+                    'id': 'assembly_method',
+                },
+                {
+                    'id': 'reference_sequence',
+                },
+            ]
+        },
+        {
+            'type': 'alignment',
+            'label': 'Alignment',
+            'fields': [
+                {
+                    'id': 'homer_simpson'
+                },
+                {
+                    'id': 'marge_simpson'
+                },
+                {
+                    'id': 'bart_simpson'
+                },
+            ]
+        }
+    ]
+}
+
+
+class AProcessForm(forms.Form):
+    process_type = forms.ChoiceField()
+
+    def __init__(self, choices, *args, **kwargs):
+        super(AProcessForm, self).__init__(*args, **kwargs)
+        self.fields['process_type'].choices = choices
+
+
+class BProcessForm(forms.Form):
+
+    def __init__(self, fields, *args, **kwargs):
+        super(BProcessForm, self).__init__(*args, **kwargs)
+        for f in fields:
+            logger.debug(f)
+            klass = f.get('field_class', 'CharField')
+            widget = f.get('widget', 'TextInput')
+            logger.debug(klass)
+            field_class = getattr(forms, klass)
+            self.fields[f['id']] = field_class(widget=getattr(forms, widget))
+
 
 class ProcessForm(forms.Form):
     SEQUENCING = 'Sequencing'
