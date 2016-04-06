@@ -4,3 +4,4 @@ requests
 django-bootstrap3
 django-bootstrap-breadcrumbs
 python-dateutil
+pyyaml
