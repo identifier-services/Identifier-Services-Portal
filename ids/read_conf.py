@@ -1,6 +1,6 @@
 from os.path import abspath, dirname, join, join, isdir, isfile
 from os import listdir
-import yaml
+import yaml, pprint
 
 
 BASE_DIR = dirname(dirname(abspath(__file__)))
@@ -14,6 +14,7 @@ def process(path):
     for description in files:
         with open(join(path, description)) as f:
             data = yaml.safe_load(f)
+        description = description.split('.')[0]
         descriptions[description] = data
     return descriptions
 
@@ -34,4 +35,4 @@ def read(location=None):
 
 
 if __name__ == '__main__':
-    print read()
+    pprint.pprint(read())
