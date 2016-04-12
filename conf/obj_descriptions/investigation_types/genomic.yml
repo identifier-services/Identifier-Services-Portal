@@ -2,31 +2,30 @@ project:
     fields:
         - id: title
           label: Title
-          widget: text
           required: True
         - id: description
           label: Description
-          widget: text_long
+          widget: TextArea
         - id: existing id
           label: Existing ID
-          widget: list-text-combo
-          options:
-              - UUID - Universally Unique Identifier
-              - ARK - Archival Resource id
-              - DOI - Digital Object Identifier
-              - URL/URI
-              - NCBI SRA
-              - NCBI BioProject
-              - NCBI BioSample
-              - Local identifier
+          choices:
+              - (UUID, Universally Unique Identifier)
+              - (ARK, Archival Resource id)
+              - (DOI, Digital Object Identifier)
+              - (URL/URI, URL/URI)
+              - (NCBI SRA, NCBI SRA)
+              - (NCBI BioProject, NCBI BioProject)
+              - (NCBI BioSample, NCBI BioSample)
+              - (Local identifier, Local identifier)
+        - id: existing id
+          label: Existing ID
     system:
         - id: creator
           label: Creator
-          widget: text
         - id: identifier
           label: Identifier
-          widget: list-text-combo
-          options:
+
+          choices:
               - ARK - Archival Resource id
               - DOI - Digital Object Identifier
           display: True
@@ -35,51 +34,44 @@ specimen:
     fields:
         - id: specimen id
           label: Specimen ID
-          widget: text
           required: True
         - id: subspecific genetic lineage
           label: Subspecific Genetic Lineage
-          widget: text
         - id: taxon name
           label: Taxon Name
-          widget: text
           required: True
         - id: haploid chromosome count
           label: Haploid Chromosome Count
-          widget: text
         - id: ploidy
           label: Ploidy
-          widget: text
         - id: organ or tissue
           label: Organ or Tissue
-          widget: text
           required: True
         - id: developmental stage
           label: Developmental Stage
-          widget: text
         - id: estimated genome size
           label: Estimated Genome Size
-          widget: text
         - id: propagation
           label: Propagation
-          widget: text
         - id: existing id
           label: Existing ID
-          widget: list-text-combo
-          options:
-              - UUID - Universally Unique Identifier
-              - ARK - Archival Resource id
-              - DOI - Digital Object Identifier
-              - URL/URI
-              - NCBI SRA
-              - NCBI BioProject
-              - NCBI BioSample
-              - Local identifier
+          choices:
+              - (UUID, Universally Unique Identifier)
+              - (ARK, Archival Resource id)
+              - (DOI, Digital Object Identifier)
+              - (URL/URI, URL/URI)
+              - (NCBI SRA, NCBI SRA)
+              - (NCBI BioProject, NCBI BioProject)
+              - (NCBI BioSample, NCBI BioSample)
+              - (Local identifier, Local identifier)
+        - id: existing id
+          label: Existing ID
+
     system:
         - id: identifier
           label: Identifier
-          widget: list-text-combo
-          options:
+
+          choices:
               - ARK - Archival Resource id
               - DOI - Digital Object Identifier
           display: True
@@ -89,66 +81,61 @@ processes:
         fields:
             - id: sequencing method
               label: Sequencing Method
-              widget: text
               required: True
             - id: sequencing hardware
               label: Sequencing Hardware
-              widget: text
             - id: existing id
               label: Existing ID
-              widget: list-text-combo
-              options:
-                  - UUID - Universally Unique Identifier
-                  - ARK - Archival Resource id
-                  - DOI - Digital Object Identifier
+              choices:
+                  - UUID Universally Unique Identifier
+                  - ARK Archival Resource id
+                  - DOI Digital Object Identifier
                   - URL/URI
                   - NCBI SRA
                   - NCBI BioProject
                   - NCBI BioSample
                   - Local identifier
+            - id: existing id
+              label: Existing ID
+
         system:
             - id: identifier
               label: Identifier
-              widget: list-text-combo
-              options:
-                  - ARK - Archival Resource id
+              choices:
+                  - ARK - Archival Resource ID
                   - DOI - Digital Object Identifier
               display: True
     assembly:
         fields:
               - id: assembly method
                 label: Assembly Method
-                widget: text
                 required: True
               - id: reference sequence
                 label: Reference Sequence
-                widget: text
               - id: assembly software
                 label: Assembly Software
-                widget: text
               - id: assembly software version
                 label: Assembly Software Version
-                widget: text
               - id: input file widget
                 label: Input File Widget
-                widget: text
               - id: existing id
                 label: Existing ID
-                widget: list-text-combo
-                options:
-                    - UUID - Universally Unique Identifier
-                    - ARK - Archival Resource id
-                    - DOI - Digital Object Identifier
-                    - URL/URI
-                    - NCBI SRA
-                    - NCBI BioProject
-                    - NCBI BioSample
-                    - Local identifier
+                choices:
+                    - (UUID, Universally Unique Identifier)
+                    - (ARK, Archival Resource id)
+                    - (DOI, Digital Object Identifier)
+                    - (URL/URI, URL/URI)
+                    - (NCBI SRA, NCBI SRA)
+                    - (NCBI BioProject, NCBI BioProject)
+                    - (NCBI BioSample, NCBI BioSample)
+                    - (Local identifier, Local identifier)
+              - id: existing id
+                label: Existing ID
+
         system:
             - id: identifier
               label: Identifier
-              widget: list-text-combo
-              options:
+              choices:
                   - ARK - Archival Resource id
                   - DOI - Digital Object Identifier
               display: True
@@ -156,28 +143,27 @@ processes:
         fields:
             - id: anaylsis method
               label: Anaylsis Method
-              widget: text
               required: True
             - id: analysis software
               label: Analysis Software
-              widget: text
             - id: existing id
               label: Existing ID
-              widget: list-text-combo
-              options:
-                  - UUID - Universally Unique Identifier
-                  - ARK - Archival Resource id
-                  - DOI - Digital Object Identifier
-                  - URL/URI
-                  - NCBI SRA
-                  - NCBI BioProject
-                  - NCBI BioSample
-                  - Local identifier
+              choices:
+                  - (UUID, Universally Unique Identifier)
+                  - (ARK, Archival Resource id)
+                  - (DOI, Digital Object Identifier)
+                  - (URL/URI, URL/URI)
+                  - (NCBI SRA, NCBI SRA)
+                  - (NCBI BioProject, NCBI BioProject)
+                  - (NCBI BioSample, NCBI BioSample)
+                  - (Local identifier, Local identifier)
+            - id: existing id
+              label: Existing ID
+
         system:
             - id: identifier
               label: Identifier
-              widget: list-text-combo
-              options:
+              choices:
                   - ARK - Archival Resource id
                   - DOI - Digital Object Identifier
               display: True
@@ -185,53 +171,48 @@ data:
     fields:
         - id: description
           label: Description
-          widget: text_long
+          widget: TextArea
         - id: existing id
           label: Existing ID
-          widget: list-text-combo
-          options:
-              - UUID - Universally Unique Identifier
-              - ARK - Archival Resource id
-              - DOI - Digital Object Identifier
-              - URL/URI
-              - NCBI SRA
-              - NCBI BioProject
-              - NCBI BioSample
-              - Local identifier
+          choices:
+              - (UUID, Universally Unique Identifier)
+              - (ARK, Archival Resource id)
+              - (DOI, Digital Object Identifier)
+              - (URL/URI, URL/URI)
+              - (NCBI SRA, NCBI SRA)
+              - (NCBI BioProject, NCBI BioProject)
+              - (NCBI BioSample, NCBI BioSample)
+              - (Local identifier, Local identifier)
+        - id: existing id
+          label: Existing ID
+
 
     system:
         - id: system
           label: System
-          widget: text
           display: True
         - id: path
           label: Path
-          widget: text
           display: True
         - id: file name
           label: File Name
-          widget: text
           display: True
         - id: size
           label: Size
-          widget: text
           display: True
         - id: last modified
           label: Last Modified
-          widget: text
           display: True
         - id: checksum
           label: Checksum
-          widget: text
           display: True
         - id: checksum date
           label: Checksum Date
-          widget: text
           display: True
         - id: identifier
           label: Identifier
-          widget: list-text-combo
-          options:
+
+          choices:
               - ARK - Archival Resource id
               - DOI - Digital Object Identifier
           display: True

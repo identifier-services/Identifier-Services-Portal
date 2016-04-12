@@ -97,10 +97,6 @@ def view(request, process_uuid):
 def create(request, specimen_uuid):
     """Create a new process realted to a specimen"""
 
-    project_processes = (('', 'Choose one'),)
-    for proc in IDS_CONFIG['processes']:
-        project_processes += ((proc['type'], proc['label']),)
-
     # get association ids
     a = client(request)
     specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
@@ -116,6 +112,14 @@ def create(request, specimen_uuid):
         if result['name'] == 'idsvc.project':
             project = result
 
+    investigation_type = project['investigation_type'].lower()
+
+    object_descriptions = getattr(settings, 'OBJ_DESCR')
+    investigation_types = object_descriptions['investigation_types']
+    project_description = investigation_types[investigation_type]
+    project_processes = project_description['processes']
+    process_type_list = [(x,x.title()) for x in project_processes.keys()]
+
     context = {'project': project,
                'specimen': specimen,
                'process': None}
@@ -127,8 +131,9 @@ def create(request, specimen_uuid):
         process_fields = []
         if 'process_type' in request.POST:
             process_type = request.POST.get('process_type')
-            process_fields = next((p['fields'] for p in IDS_CONFIG['processes']
-                                   if p['type'] == process_type), [])
+            # process_fields = next((p['fields'] for p in IDS_CONFIG['processes']
+            #                        if p['type'] == process_type), [])
+            process_fields = project_processes[process_type]['fields']
 
         form_a = AProcessForm(project_processes, request.POST)
 
@@ -170,7 +175,7 @@ def create(request, specimen_uuid):
                 return HttpResponseRedirect('/process/{}'.format(response['uuid']))
 
     else:
-        form_a = AProcessForm(project_processes)
+        form_a = AProcessForm(process_type_list)
         form_b = None
 
     context['form_a'] = form_a

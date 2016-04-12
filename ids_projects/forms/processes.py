@@ -44,6 +44,18 @@ IDS_CONFIG = {
 }
 
 
+def _construct_form_field(f):
+    field_class_name = f.get('field_class', 'CharField')
+    widget = f.get('widget', 'TextInput')
+    choices = f.get('choices', None)
+    field_class = getattr(forms, field_class_name)
+    if choices:
+        choice_tuple = tuple([(x,x) for x in choices])
+        return field_class(choices=tuple([(x,x) for x in choices]))
+    else:
+        return field_class(widget=getattr(forms, widget))
+
+
 class AProcessForm(forms.Form):
     process_type = forms.ChoiceField()
 
@@ -57,12 +69,8 @@ class BProcessForm(forms.Form):
     def __init__(self, fields, *args, **kwargs):
         super(BProcessForm, self).__init__(*args, **kwargs)
         for f in fields:
-            logger.debug(f)
-            klass = f.get('field_class', 'CharField')
-            widget = f.get('widget', 'TextInput')
-            logger.debug(klass)
-            field_class = getattr(forms, klass)
-            self.fields[f['id']] = field_class(widget=getattr(forms, widget))
+            # logger.debug(f)
+            self.fields[f['id']] = _construct_form_field(f)
 
 
 class ProcessForm(forms.Form):
