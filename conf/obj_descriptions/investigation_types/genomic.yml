@@ -1,15 +1,18 @@
 project:
     fields:
-        - key: title
-          type: text
+        - id: title
+          label: Title
+          widget: text
           required: True
-        - key: description
-          type: text_long
-        - key: existing ID
-          type: list-text-combo
+        - id: description
+          label: Description
+          widget: text_long
+        - id: existing id
+          label: Existing ID
+          widget: list-text-combo
           options:
               - UUID - Universally Unique Identifier
-              - ARK - Archival Resource Key
+              - ARK - Archival Resource id
               - DOI - Digital Object Identifier
               - URL/URI
               - NCBI SRA
@@ -17,43 +20,55 @@ project:
               - NCBI BioSample
               - Local identifier
     system:
-        - key: creator
-          type: text
-        - key: identifier
-          type: list-text-combo
+        - id: creator
+          label: Creator
+          widget: text
+        - id: identifier
+          label: Identifier
+          widget: list-text-combo
           options:
-              - ARK - Archival Resource Key
+              - ARK - Archival Resource id
               - DOI - Digital Object Identifier
           display: True
 
 specimen:
     fields:
-        - key: specimen ID
-          type: text
+        - id: specimen id
+          label: Specimen ID
+          widget: text
           required: True
-        - key: subspecific genetic lineage
-          type: text
-        - key: taxon name
-          type: text
+        - id: subspecific genetic lineage
+          label: Subspecific Genetic Lineage
+          widget: text
+        - id: taxon name
+          label: Taxon Name
+          widget: text
           required: True
-        - key: haploid chromosome count
-          type: text
-        - key: ploidy
-          type: text
-        - key: organ or tissue
-          type: text
+        - id: haploid chromosome count
+          label: Haploid Chromosome Count
+          widget: text
+        - id: ploidy
+          label: Ploidy
+          widget: text
+        - id: organ or tissue
+          label: Organ or Tissue
+          widget: text
           required: True
-        - key: developmental stage
-          type: text
-        - key: estimated genome size
-          type: text
-        - key: propagation
-          type: text
-        - key: existing ID
-          type: list-text-combo
+        - id: developmental stage
+          label: Developmental Stage
+          widget: text
+        - id: estimated genome size
+          label: Estimated Genome Size
+          widget: text
+        - id: propagation
+          label: Propagation
+          widget: text
+        - id: existing id
+          label: Existing ID
+          widget: list-text-combo
           options:
               - UUID - Universally Unique Identifier
-              - ARK - Archival Resource Key
+              - ARK - Archival Resource id
               - DOI - Digital Object Identifier
               - URL/URI
               - NCBI SRA
@@ -61,26 +76,30 @@ specimen:
               - NCBI BioSample
               - Local identifier
     system:
-        - key: identifier
-          type: list-text-combo
+        - id: identifier
+          label: Identifier
+          widget: list-text-combo
           options:
-              - ARK - Archival Resource Key
+              - ARK - Archival Resource id
               - DOI - Digital Object Identifier
           display: True
 
 processes:
-    - sequencing:
+    sequencing:
         fields:
-            - key: sequencing method
-              type: text
+            - id: sequencing method
+              label: Sequencing Method
+              widget: text
               required: True
-            - key: sequencing hardware
-              type: text
-            - key: existing ID
-              type: list-text-combo
+            - id: sequencing hardware
+              label: Sequencing Hardware
+              widget: text
+            - id: existing id
+              label: Existing ID
+              widget: list-text-combo
               options:
                   - UUID - Universally Unique Identifier
-                  - ARK - Archival Resource Key
+                  - ARK - Archival Resource id
                   - DOI - Digital Object Identifier
                   - URL/URI
                   - NCBI SRA
@@ -88,30 +107,37 @@ processes:
                   - NCBI BioSample
                   - Local identifier
         system:
-            - key: identifier
-              type: list-text-combo
+            - id: identifier
+              label: Identifier
+              widget: list-text-combo
               options:
-                  - ARK - Archival Resource Key
+                  - ARK - Archival Resource id
                   - DOI - Digital Object Identifier
               display: True
-    - assembly:
+    assembly:
         fields:
-              - key: assembly method
-                type: text
+              - id: assembly method
+                label: Assembly Method
+                widget: text
                 required: True
-              - key: reference sequence
-                type: text
-              - key: assembly software
-                type: text
-              - key: assembly software version
-                type: text
-              - key: input file type
-                type: text
-              - key: existing ID
-                type: list-text-combo
+              - id: reference sequence
+                label: Reference Sequence
+                widget: text
+              - id: assembly software
+                label: Assembly Software
+                widget: text
+              - id: assembly software version
+                label: Assembly Software Version
+                widget: text
+              - id: input file widget
+                label: Input File Widget
+                widget: text
+              - id: existing id
+                label: Existing ID
+                widget: list-text-combo
                 options:
                     - UUID - Universally Unique Identifier
-                    - ARK - Archival Resource Key
+                    - ARK - Archival Resource id
                     - DOI - Digital Object Identifier
                     - URL/URI
                     - NCBI SRA
@@ -119,24 +145,28 @@ processes:
                     - NCBI BioSample
                     - Local identifier
         system:
-            - key: identifier
-              type: list-text-combo
+            - id: identifier
+              label: Identifier
+              widget: list-text-combo
               options:
-                  - ARK - Archival Resource Key
+                  - ARK - Archival Resource id
                   - DOI - Digital Object Identifier
               display: True
-    - analysis:
+    analysis:
         fields:
-            - key: anaylsis method
-              type: text
+            - id: anaylsis method
+              label: Anaylsis Method
+              widget: text
               required: True
-            - key: analysis software
-              type: text
-            - key: existing ID
-              type: list-text-combo
+            - id: analysis software
+              label: Analysis Software
+              widget: text
+            - id: existing id
+              label: Existing ID
+              widget: list-text-combo
               options:
                   - UUID - Universally Unique Identifier
-                  - ARK - Archival Resource Key
+                  - ARK - Archival Resource id
                   - DOI - Digital Object Identifier
                   - URL/URI
                   - NCBI SRA
@@ -144,21 +174,24 @@ processes:
                   - NCBI BioSample
                   - Local identifier
         system:
-            - key: identifier
-              type: list-text-combo
+            - id: identifier
+              label: Identifier
+              widget: list-text-combo
               options:
-                  - ARK - Archival Resource Key
+                  - ARK - Archival Resource id
                   - DOI - Digital Object Identifier
               display: True
 data:
     fields:
-        - key: description
-          type: text_long
-        - key: existing ID
-          type: list-text-combo
+        - id: description
+          label: Description
+          widget: text_long
+        - id: existing id
+          label: Existing ID
+          widget: list-text-combo
           options:
               - UUID - Universally Unique Identifier
-              - ARK - Archival Resource Key
+              - ARK - Archival Resource id
               - DOI - Digital Object Identifier
               - URL/URI
               - NCBI SRA
@@ -167,30 +200,38 @@ data:
               - Local identifier
 
     system:
-        - key: system
-          type: text
+        - id: system
+          label: System
+          widget: text
           display: True
-        - key: path
-          type: text
+        - id: path
+          label: Path
+          widget: text
           display: True
-        - key: file name
-          type: text
+        - id: file name
+          label: File Name
+          widget: text
           display: True
-        - key: size
-          type: text
+        - id: size
+          label: Size
+          widget: text
           display: True
-        - key: last modified
-          type: text
+        - id: last modified
+          label: Last Modified
+          widget: text
           display: True
-        - key: checksum
-          type: text
+        - id: checksum
+          label: Checksum
+          widget: text
           display: True
-        - key: checksum date
-          type: text
+        - id: checksum date
+          label: Checksum Date
+          widget: text
           display: True
-        - key: identifier
-          type: list-text-combo
+        - id: identifier
+          label: Identifier
+          widget: list-text-combo
           options:
-              - ARK - Archival Resource Key
+              - ARK - Archival Resource id
               - DOI - Digital Object Identifier
           display: True
