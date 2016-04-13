@@ -10,7 +10,7 @@ from django.http import (HttpResponse,
                          HttpResponseServerError)
 from django.shortcuts import render
 import json, logging
-from ..forms.processes import ProcessForm, AProcessForm, BProcessForm, IDS_CONFIG
+from ..forms.processes import ProcessForm, AProcessForm, BProcessForm
 from helper import client, collapse_meta
 
 
@@ -131,17 +131,14 @@ def create(request, specimen_uuid):
         process_fields = []
         if 'process_type' in request.POST:
             process_type = request.POST.get('process_type')
-            # process_fields = next((p['fields'] for p in IDS_CONFIG['processes']
-            #                        if p['type'] == process_type), [])
             process_fields = project_processes[process_type]['fields']
 
-        form_a = AProcessForm(project_processes, request.POST)
+        form_a = AProcessForm(process_type_list, request.POST)
 
         if 'form_b_set' in request.POST:
             form_b = BProcessForm(process_fields, request.POST)
         else:
             form_b = BProcessForm(process_fields)
-        # form = ProcessForm(request.POST)
 
         # add specimen uuid to association ids
         associationIds.append(specimen_uuid)

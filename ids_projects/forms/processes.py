@@ -4,56 +4,20 @@ from django import forms
 
 logger = logging.getLogger(__name__)
 
-IDS_CONFIG = {
-    'processes': [
-        {
-            'type': 'sequencing',
-            'label': 'Sequencing',
-            'fields': [
-                {
-                    'id': 'sequence_method',
-                    'widget': 'Textarea'
-                },
-                {
-                    'id': 'sequence_hardware',
-                },
-                {
-                    'id': 'assembly_method',
-                },
-                {
-                    'id': 'reference_sequence',
-                },
-            ]
-        },
-        {
-            'type': 'alignment',
-            'label': 'Alignment',
-            'fields': [
-                {
-                    'id': 'homer_simpson'
-                },
-                {
-                    'id': 'marge_simpson'
-                },
-                {
-                    'id': 'bart_simpson'
-                },
-            ]
-        }
-    ]
-}
-
 
 def _construct_form_field(f):
     field_class_name = f.get('field_class', 'CharField')
+    field_id = f.get('id', None)
+    field_label = f.get('label', field_id)
     widget = f.get('widget', 'TextInput')
     choices = f.get('choices', None)
     field_class = getattr(forms, field_class_name)
     if choices:
-        choice_tuple = tuple([(x,x) for x in choices])
-        return field_class(choices=tuple([(x,x) for x in choices]))
+        choices_tuple = tuple([(x,x) for x in choices])
+        print choices_tuple
+        return forms.ChoiceField(label=field_label, choices=choices_tuple)
     else:
-        return field_class(widget=getattr(forms, widget))
+        return field_class(label=field_label, widget=getattr(forms, widget))
 
 
 class AProcessForm(forms.Form):
