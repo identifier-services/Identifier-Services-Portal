@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% load bootstrap3 %}
+{% load bootstrap3 staticfiles %}
 
 {% load django_bootstrap_breadcrumbs %}
 
@@ -49,7 +49,7 @@
 
         {% if form_b %}
             {% bootstrap_form form_b %}
-            <input type="hidden" id="id_form_b_set" name="form_b_set" value="1">
+            <input type="hidden" id="id_type_selected" name="type_selected" value="1">
             <div>
                 <button type="submit" class="btn btn-primary">Save</button>
                 <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-default">Back</a>
@@ -63,4 +63,7 @@
         {% endif %}
     </form>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'ids_projects/add_process.js' %}"></script>
 {% endblock %}

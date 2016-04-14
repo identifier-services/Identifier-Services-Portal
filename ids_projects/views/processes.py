@@ -10,7 +10,7 @@ from django.http import (HttpResponse,
                          HttpResponseServerError)
 from django.shortcuts import render
 import json, logging
-from ..forms.processes import ProcessForm, AProcessForm, BProcessForm
+from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
 from helper import client, collapse_meta
 
 
@@ -128,20 +128,35 @@ def create(request, specimen_uuid):
     # POST #
     ########
     if request.method == 'POST':
+
+        print "\n\nrequest: {}\n\n".format(request)
+
+        print "\n\nrequest.POST: {}\n\n".format(request.POST)
+
         process_fields = []
         if 'process_type' in request.POST:
             process_type = request.POST.get('process_type')
+
+            print "\n\nprocess type: {}\n\n".format(process_type)
+
             process_fields = project_processes[process_type]['fields']
 
-        form_a = AProcessForm(process_type_list, request.POST)
+            print "\n\nfields: {}\n\n".format(process_fields)
 
-        if 'form_b_set' in request.POST:
-            form_b = BProcessForm(process_fields, request.POST)
+        form_a = ProcessTypeForm(process_type_list, request.POST)
+
+        if 'type_selected' in request.POST:
+            print "\n\nyoyoyo\n\n"
+            form_b = ProcessFieldsForm(process_fields, request.POST)
         else:
-            form_b = BProcessForm(process_fields)
+            form_b = ProcessFieldsForm(process_fields)
 
         # add specimen uuid to association ids
         associationIds.append(specimen_uuid)
+
+        print "\n\nform a valid{}\n\n".format(form_a.is_valid())
+        print "\n\nform b valid{}\n\n".format(form_b.is_valid())
+
 
         if form_a.is_valid() and form_b.is_valid():
             data = form_a.cleaned_data.copy()
@@ -172,7 +187,10 @@ def create(request, specimen_uuid):
                 return HttpResponseRedirect('/process/{}'.format(response['uuid']))
 
     else:
-        form_a = AProcessForm(process_type_list)
+
+        print "\n\nrequest: {}\n\n".format(request)
+
+        form_a = ProcessTypeForm(process_type_list)
         form_b = None
 
     context['form_a'] = form_a
