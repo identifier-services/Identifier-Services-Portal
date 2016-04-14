@@ -2,6 +2,7 @@ from agavepy.agave import Agave, AgaveException
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.http import (HttpResponse,
                          HttpResponseRedirect,
                          HttpResponseBadRequest,
@@ -18,20 +19,32 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def list(request, project_uuid):
+# def list(request, project_uuid):
+def list(request):
     """List all specimens related to a project"""
     #######
     # GET #
     #######
     if request.method == 'GET':
 
+        project_uuid = request.GET.get('project_uuid', False)
+
         a = client(request)
-        specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_uuid)}
+        if project_uuid:
+            specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_uuid)}
+        else:
+            specimens_query = {'name':'idsvc.specimen'}
+
+        print(specimens_query)
+
         specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
         specimens = map(collapse_meta, specimens_raw)
 
-        project_raw = a.meta.getMetadata(uuid=project_uuid)
-        project = collapse_meta(project_raw)
+        if project_uuid:
+            project_raw = a.meta.getMetadata(uuid=project_uuid)
+            project = collapse_meta(project_raw)
+        else:
+            project = None
 
         context = {'specimens' : specimens, 'project': project}
 
@@ -133,12 +146,18 @@ def view(request, specimen_uuid):
 
 
 @login_required
-def create(request, project_uuid):
+def create(request):
     """Create a new specimen related to a project"""
     #######
     # GET #
     #######
     if request.method == 'GET':
+
+        project_uuid = request.GET.get('project_uuid', False)
+
+        if not project_uuid:
+            messages.error(request, 'No project uuid')
+            return HttpResponseRedirect(reverse('ids_projects:specimens-list'))
 
         # get the project
         a = client(request)

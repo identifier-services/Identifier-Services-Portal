@@ -34,6 +34,7 @@
             <a href="/project/{{project.uuid}}/specimen" class="btn btn-primary pull-right">Create Specimen</a>
         </div>
     </div>
+    {% if project %}
     <div class="row">
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
@@ -57,6 +58,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
         {% for specimen in specimens %}
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">

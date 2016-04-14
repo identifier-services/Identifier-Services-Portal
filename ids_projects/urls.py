@@ -98,9 +98,11 @@ urlpatterns += patterns(
 urlpatterns += patterns(
     'ids_projects.views.specimens',
     # list all specimens related to a project
-    url(r'^project/(?P<project_uuid>.+?)/specimens/?$', 'list', name='specimens-list'),
+    # url(r'^project/(?P<project_uuid>.+?)/specimens/?$', 'list', name='specimens-list'),
+    url(r'^specimens/?$', 'list', name='specimens-list'),
     # create a specimen related to a project
-    url(r'^project/(?P<project_uuid>.+?)/specimen/?$', 'create', name='specimens-create'),
+    # url(r'^project/(?P<project_uuid>.+?)/specimen/?$', 'create', name='specimens-create'),
+    url(r'^specimen/create/?$', 'create', name='specimens-create'),
     # edit a specimen
     url(r'^specimen/(?P<specimen_uuid>.+?)/edit$', 'edit', name='specimens-edit'), # or specimen_edit/...?
     # delete a specimen
