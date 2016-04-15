@@ -27,10 +27,10 @@ def list(request, specimen_uuid):
 
         a = client(request)
         process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_uuid)}
-        process_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
+        process_raw = a.meta.listMetadata(q=json.dumps(process_query))
         processes = map(collapse_meta, process_raw)
 
-        context = {'processes' : specimens, 'specimen_uuid': specimen_uuid}
+        context = {'processes' : processes, 'specimen_uuid': specimen_uuid}
 
         return render(request, 'ids_projects/processes/index.html', context)
 
@@ -119,7 +119,7 @@ def create(request, specimen_uuid):
     project_description = investigation_types[investigation_type]
     project_processes = project_description['processes']
     process_type_list = [(x,x.title()) for x in project_processes.keys()]
-
+    process_type_list = [('', 'Choose one'),] + process_type_list
     context = {'project': project,
                'specimen': specimen,
                'process': None}
@@ -144,6 +144,8 @@ def create(request, specimen_uuid):
             print "\n\nfields: {}\n\n".format(process_fields)
 
         form_a = ProcessTypeForm(process_type_list, request.POST)
+        form_a.fields['process_type'].widget.attrs['readonly'] = True
+        form_a.fields['process_type'].widget.attrs['disabled'] = True
 
         if 'type_selected' in request.POST:
             print "\n\nyoyoyo\n\n"
@@ -154,37 +156,37 @@ def create(request, specimen_uuid):
         # add specimen uuid to association ids
         associationIds.append(specimen_uuid)
 
-        print "\n\nform a valid{}\n\n".format(form_a.is_valid())
-        print "\n\nform b valid{}\n\n".format(form_b.is_valid())
+        # print "\n\nform a valid{}\n\n".format(form_a.is_valid())
+        # print "\n\nform b valid{}\n\n".format(form_b.is_valid())
 
+        if not request.is_ajax():
+            if form_a.is_valid() and form_b.is_valid():
+                data = form_a.cleaned_data.copy()
+                data.update(form_b.cleaned_data.copy())
 
-        if form_a.is_valid() and form_b.is_valid():
-            data = form_a.cleaned_data.copy()
-            data.update(form_b.cleaned_data.copy())
+                logger.debug('Process form is valid')
 
-            logger.debug('Process form is valid')
+                # process_type = data['process_type']
+                # sequence_method = data['sequence_method']
+                # sequence_hardware = data['sequence_hardware']
+                # assembly_method = data['assembly_method']
+                # reference_sequence = data['reference_sequence']
+                # associationIds = form.cleaned_data['associationIds']
+                # project_uuid = form.cleaned_data['project_uuid']
 
-            # process_type = data['process_type']
-            # sequence_method = data['sequence_method']
-            # sequence_hardware = data['sequence_hardware']
-            # assembly_method = data['assembly_method']
-            # reference_sequence = data['reference_sequence']
-            # associationIds = form.cleaned_data['associationIds']
-            # project_uuid = form.cleaned_data['project_uuid']
+                new_process = {
+                    "name":"idsvc.process",
+                    "associationIds": associationIds,
+                    "value": data
+                }
 
-            new_process = {
-                "name":"idsvc.process",
-                "associationIds": associationIds,
-                "value": data
-            }
-
-            try:
-                response = a.meta.addMetadata(body=new_process)
-            except Exception as e:
-                logger.debug('Error while attempting to create process metadata: %s' % e)
-            else:
-                messages.success(request, 'Successfully created process.')
-                return HttpResponseRedirect('/process/{}'.format(response['uuid']))
+                try:
+                    response = a.meta.addMetadata(body=new_process)
+                except Exception as e:
+                    logger.debug('Error while attempting to create process metadata: %s' % e)
+                else:
+                    messages.success(request, 'Successfully created process.')
+                    return HttpResponseRedirect('/process/{}'.format(response['uuid']))
 
     else:
 
@@ -196,7 +198,10 @@ def create(request, specimen_uuid):
     context['form_a'] = form_a
     context['form_b'] = form_b
 
-    return render(request, 'ids_projects/processes/create.html', context)
+    if request.is_ajax():
+        return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
+    else:
+        return render(request, 'ids_projects/processes/create.html', context)
 
 
 @login_required
