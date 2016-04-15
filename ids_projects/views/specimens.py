@@ -154,7 +154,7 @@ def create(request):
 
         if not project_uuid:
             messages.error(request, 'No project uuid')
-            return HttpResponseRedirect(reverse('ids_projects:specimens-list'))
+            return HttpResponseRedirect(reverse('ids_projects:projects-list'))
 
         # get the project
         a = client(request)
@@ -173,6 +173,7 @@ def create(request):
     elif request.method == 'POST':
 
         import pprint; pprint.pprint(request.POST)
+
 
         project_uuid = request.POST.get('project_uuid', False)
         form = SpecimenForm(request.POST)

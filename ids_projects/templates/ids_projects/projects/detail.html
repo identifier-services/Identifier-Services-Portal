@@ -14,7 +14,7 @@
     {% else %}
         {% breadcrumb "Project" "ids_projects:projects-view" project.uuid %}
     {% endif %}
-    
+
 {% endblock %}
 
 {% block title %}Projects{% endblock %}
@@ -83,14 +83,14 @@
             <div class="object-header dark">
                 <div>
                     No Specimens yet.
-                    <a href="/project/{{project.uuid}}/specimen" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="/specimen/create?project_uuid={{project.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
             {% else %}
             <div class="object-header dark">
                 <div>
                     Specimens
-                    <a href="/project/{{project.uuid}}/specimen" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="/specimen/create?project_uuid={{project.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
 
