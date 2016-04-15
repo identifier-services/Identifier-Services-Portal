@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-# def list(request, project_uuid):
 def list(request):
     """List all specimens related to a project"""
     #######
@@ -34,8 +33,6 @@ def list(request):
             specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_uuid)}
         else:
             specimens_query = {'name':'idsvc.specimen'}
-
-        print(specimens_query)
 
         specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
         specimens = map(collapse_meta, specimens_raw)
@@ -175,6 +172,9 @@ def create(request):
     ########
     elif request.method == 'POST':
 
+        import pprint; pprint.pprint(request.POST)
+
+        project_uuid = request.POST.get('project_uuid', False)
         form = SpecimenForm(request.POST)
 
         if form.is_valid():
@@ -215,8 +215,10 @@ def create(request):
                 return HttpResponseRedirect('/specimen/{}'.format(response['uuid']))
 
         messages.info(request, 'Did not create new specimen.')
-        return HttpResponseRedirect('/project/{}'.format(project_uuid))
-
+        if project_uuid:
+            return HttpResponseRedirect('/project/{}'.format(project_uuid))
+        else:
+            return HttpResponseRedirect('/projects')
     #########
     # OTHER #
     #########
