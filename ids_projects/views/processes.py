@@ -129,35 +129,22 @@ def create(request, specimen_uuid):
     ########
     if request.method == 'POST':
 
-        print "\n\nrequest: {}\n\n".format(request)
-
-        print "\n\nrequest.POST: {}\n\n".format(request.POST)
-
         process_fields = []
         if 'process_type' in request.POST:
             process_type = request.POST.get('process_type')
-
-            print "\n\nprocess type: {}\n\n".format(process_type)
-
             process_fields = project_processes[process_type]['fields']
-
-            print "\n\nfields: {}\n\n".format(process_fields)
 
         form_a = ProcessTypeForm(process_type_list, request.POST)
         form_a.fields['process_type'].widget.attrs['readonly'] = True
         form_a.fields['process_type'].widget.attrs['disabled'] = True
 
         if 'type_selected' in request.POST:
-            print "\n\nyoyoyo\n\n"
             form_b = ProcessFieldsForm(process_fields, request.POST)
         else:
             form_b = ProcessFieldsForm(process_fields)
 
         # add specimen uuid to association ids
         associationIds.append(specimen_uuid)
-
-        # print "\n\nform a valid{}\n\n".format(form_a.is_valid())
-        # print "\n\nform b valid{}\n\n".format(form_b.is_valid())
 
         if not request.is_ajax():
             if form_a.is_valid() and form_b.is_valid():
@@ -189,9 +176,6 @@ def create(request, specimen_uuid):
                     return HttpResponseRedirect('/process/{}'.format(response['uuid']))
 
     else:
-
-        print "\n\nrequest: {}\n\n".format(request)
-
         form_a = ProcessTypeForm(process_type_list)
         form_b = None
 
