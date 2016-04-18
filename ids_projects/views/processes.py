@@ -18,12 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def list(request, specimen_uuid):
+def list(request):
     """List all processes related to a specimen"""
     #######
     # GET #
     #######
     if request.method == 'GET':
+
+        specimen_uuid = request.GET.get('specimen_uuid', False)
 
         a = client(request)
         process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_uuid)}
@@ -94,12 +96,14 @@ def view(request, process_uuid):
 
 
 @login_required
-def create(request, specimen_uuid):
+def create(request):
     """Create a new process realted to a specimen"""
     #######
     # GET #
     #######
     if request.method == 'GET':
+
+        specimen_uuid = request.GET.get('specimen_uuid', None)
 
         # get association ids
         a = client(request)
@@ -128,6 +132,8 @@ def create(request, specimen_uuid):
     # POST #
     ########
     elif request.method == 'POST':
+
+        specimen_uuid = request.POST.get('specimen_uuid', None)
 
         form = ProcessForm(request.POST)
 
@@ -243,7 +249,6 @@ def edit(request, process_uuid):
     elif request.method == 'POST':
 
         # get the association fields
-        # TODO: I need to store this in hidden form field, but having trouble with that.
         a = client(request)
         try:
             # get the specimen metadata object

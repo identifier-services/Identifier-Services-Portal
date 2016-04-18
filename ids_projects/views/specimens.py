@@ -26,7 +26,7 @@ def list(request):
     #######
     if request.method == 'GET':
 
-        project_uuid = request.GET.get('project_uuid', False)
+        project_uuid = request.GET.get('project_uuid', None)
 
         a = client(request)
         if project_uuid:
@@ -154,7 +154,7 @@ def create(request):
 
         if not project_uuid:
             messages.error(request, 'No project uuid')
-            return HttpResponseRedirect(reverse('ids_projects:projects-list'))
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
 
         # get the project
         a = client(request)
@@ -171,9 +171,6 @@ def create(request):
     # POST #
     ########
     elif request.method == 'POST':
-
-        import pprint; pprint.pprint(request.POST)
-
 
         project_uuid = request.POST.get('project_uuid', False)
         form = SpecimenForm(request.POST)
@@ -269,11 +266,10 @@ def edit(request, specimen_uuid):
         form = SpecimenForm(request.POST)
 
         # get the association fields
-        # TODO: I need to store this in hidden form field, but having trouble with that.
         a = client(request)
         try:
             # get the specimen metadata object
-            specimen_raw= a.meta.getMetadata(uuid=specimen_uuid)
+            specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
             specimen = collapse_meta(specimens_raw)
         except:
             logger.error('Error editing specimen. {}'.format(e.message))
