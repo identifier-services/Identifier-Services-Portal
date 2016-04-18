@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{% block title %}Home{% endblock %}
 
+{% block content %}
 <div class="homepage-main-feature">
   <div class="container">
     <div class="row">
@@ -54,7 +55,7 @@
                 originating data, analysis data, and specimen data, as well
                 as publications or other documents relating to your data.</p>
           </div>
-          <a href="/project" class="homepage-feature-action btn btn-primary btn-block">Create Project</a>
+          <a href="/project/create" class="homepage-feature-action btn btn-primary btn-block">Create Project</a>
         </div>
         {% else %}
         <div class="homepage-feature">

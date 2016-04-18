@@ -7,27 +7,27 @@
 {% block breadcrumbs %}
     {{ block.super }}
 
-    {% breadcrumb "Projects" "ids_projects:projects-list" %}
+    {% breadcrumb "Projects" "ids_projects:project-list" %}
 
     {% if project %}
         {% if project.short %}
-            {% breadcrumb project.short "ids_projects:projects-view" project.uuid %}
+            {% breadcrumb project.short "ids_projects:project-view" project.uuid %}
         {% else %}
-            {% breadcrumb "Project" "ids_projects:projects-view" project.uuid %}
+            {% breadcrumb "Project" "ids_projects:project-view" project.uuid %}
         {% endif %}
     {% endif %}
 
-    {% breadcrumb "Specimens" "ids_projects:specimens-list" project.uuid %}
+    {% breadcrumb "Specimens" "ids_projects:specimen-list" project.uuid %}
 
     {% if specimen %}
         {% if specimen.short %}
-            {% breadcrumb specimen.short "ids_projects:specimens-view" specimen.uuid %}
+            {% breadcrumb specimen.short "ids_projects:specimen-view" specimen.uuid %}
         {% else %}
-            {% breadcrumb "Specimen" "ids_projects:specimens-view" specimen.uuid %}
+            {% breadcrumb "Specimen" "ids_projects:specimen-view" specimen.uuid %}
         {% endif %}
     {% endif %}
 
-    {% breadcrumb "Processes" "ids_projects:processes-list" specimen.uuid %}
+    {% breadcrumb "Processes" "ids_projects:process-list" specimen.uuid %}
 
     {% if process %}
         {% breadcrumb "Edit Process" "ids_projects:process-edit" process.uuid %}
@@ -43,13 +43,15 @@
 <div class="container">
     {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
 
+    <input type="hidden" id="id_specimen_uuid" name="specimen_uuid" value="{{specimen.uuid}}">
+
     <form method="post">
         {% csrf_token %}
         {% bootstrap_form form %}
 
         <div>
             <button type="submit" class="btn btn-primary">Save</button>
-            <a href="/specimen/{{specimen.uuid}}" class="btn btn-warning pull-right">Cancel</a>
+            <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-warning pull-right">Cancel</a>
         </div>
     </form>
 </div>

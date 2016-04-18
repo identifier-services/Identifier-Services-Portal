@@ -7,27 +7,27 @@
 {% block breadcrumbs %}
     {{ block.super }}
 
-    {% breadcrumb "Projects" "ids_projects:projects-list" %}
+    {% breadcrumb "Projects" "ids_projects:project-list" %}
 
     {% if project %}
         {% if project.short %}
-            {% breadcrumb project.short "ids_projects:projects-view" project.uuid %}
+            {% breadcrumb project.short "ids_projects:project-view" project.uuid %}
         {% else %}
-            {% breadcrumb "Project" "ids_projects:projects-view" project.uuid %}
+            {% breadcrumb "Project" "ids_projects:project-view" project.uuid %}
         {% endif %}
     {% endif %}
 
-    {% breadcrumb "Specimens" "ids_projects:specimens-list" project.uuid %}
+    {% breadcrumb "Specimens" "ids_projects:specimen-list" project.uuid %}
 
     {% if specimen %}
         {% if specimen.short %}
-            {% breadcrumb specimen.short "ids_projects:specimens-view" specimen.uuid %}
+            {% breadcrumb specimen.short "ids_projects:specimen-view" specimen.uuid %}
         {% else %}
-            {% breadcrumb "Specimen" "ids_projects:specimens-view" specimen.uuid %}
+            {% breadcrumb "Specimen" "ids_projects:specimen-view" specimen.uuid %}
         {% endif %}
     {% endif %}
 
-    {% breadcrumb "Processes" "ids_projects:processes-list" specimen.uuid %}
+    {% breadcrumb "Processes" "ids_projects:process-list" specimen.uuid %}
 
     {% if process.short %}
         {% breadcrumb process.short "ids_projects:process-view" process.uuid %}
@@ -46,7 +46,7 @@
             {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
         </div>
         <div class="col-xs-3">
-            <a href="/process/{{process.uuid}}/file" class="btn btn-primary pull-right">Add Data</a>
+            <a href="{% url 'ids_projects:add-data' process_uuid=process.uuid %}" class="btn btn-primary pull-right">Add Data</a>
         </div>
     </div>
     <div class="row">
@@ -64,10 +64,10 @@
                     <p><b>Reference Sequence</b> {{ process.reference_sequence }}</p>
                     <div class="row">
                         <div class="col-xs-1">
-                            <a href="/process/{{process.uuid}}/edit" class="btn btn-primary">Edit</a>
+                            <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
                         </div>
                         <div class="col-xs-1 pull-right col-xs-pull-2 col-sm-pull-3 col-md-pull-2">
-                            <a href="/process/{{process.uuid}}/delete" class="btn btn-danger">Delete</a>
+                            <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
                         </div>
                     </div>
                 </div>
@@ -78,14 +78,14 @@
             <div class="object-header dark">
                 <div>
                     No files for {{ process.process_type }}
-                    <a href="/process/{{process.uuid}}/file" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="{% url 'ids_projects:add-data' process_uuid=process.uuid %}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
             {% else %}
             <div class="object-header dark">
                 <div>
                     Files for {{ process.process_type }}
-                    <a href="/process/{{process.uuid}}/file" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="{% url 'ids_projects:add-data' process_uuid=process.uuid %}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
 
@@ -94,8 +94,10 @@
                     {% for file in files %}
 
                     <div class="object-header">
-                        <a href="/process/{{process.uuid}}" class="header-link">{{ file.value.name }}</a>
-                        <a href="/file/{{file.uuid}}/delete" class="btn btn-danger btn-sm pull-right fix-me">Delete</a>
+                        <!-- TODO: view file -->
+                        <a href="#" class="header-link">{{ file.value.name }}</a>
+                        <!-- TODO: edit file -->
+                        <a href="#" class="btn btn-danger btn-sm pull-right fix-me">Delete</a>
                     </div>
 
                     {% endfor %}

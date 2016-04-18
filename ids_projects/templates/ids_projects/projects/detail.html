@@ -7,12 +7,12 @@
 {% block breadcrumbs %}
     {{ block.super }}
 
-    {% breadcrumb "Projects" "ids_projects:projects-list" %}
+    {% breadcrumb "Projects" "ids_projects:project-list" %}
 
     {% if project.short %}
-        {% breadcrumb project.short "ids_projects:projects-view" project.uuid %}
+        {% breadcrumb project.short "ids_projects:project-view" project.uuid %}
     {% else %}
-        {% breadcrumb "Project" "ids_projects:projects-view" project.uuid %}
+        {% breadcrumb "Project" "ids_projects:project-view" project.uuid %}
     {% endif %}
 
 {% endblock %}
@@ -21,6 +21,7 @@
 
 {% block content %}
 <div class="container">
+
     <div class="row">
         <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-12">
             {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
@@ -40,10 +41,10 @@
                     <p><b>Description: </b> {{ project.description }}</p>
                     <div class="row">
                         <div class="col-xs-3">
-                            <a href="/project/{{project.uuid}}/edit" class="btn btn-primary">Edit Project</a>
+                            <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit Project</a>
                         </div>
                         <div class="col-xs-3 col-xs-offset-4 col-sm-offset-3 col-md-offset-4">
-                            <a href="/project/{{project.uuid}}/delete" class="btn btn-danger">Delete Project</a>
+                            <a href="{% url 'ids_projects:projects-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete Project</a>
                         </div>
                     </div>
                 </div>
@@ -54,7 +55,7 @@
                     <h4>Specimens: {{ specimen_count }}</h4>
                 </div>
                 <div class="col-xs-3 col-xs-offset-2">
-                    <a href="/project/{{project.uuid}}/edit" class="btn btn-primary">Add </a>
+                    <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a>
                 </div>
             </div><hr>
             <div class="row">
@@ -62,7 +63,7 @@
                     <h4>Processes: {{ process_count }}</h4>
                 </div>
                 <div class="col-xs-3 col-xs-offset-2">
-                    <a href="/project/{{project.uuid}}/edit" class="btn btn-primary">Add </a>
+                    <a href="{% url 'ids_projects:process-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a>
                 </div>
             </div><hr>
             <div class="row">
@@ -70,7 +71,7 @@
                     <h4>Files: {{ file_count }}</h4>
                 </div>
                 <div class="col-xs-3 col-xs-offset-2">
-                    <a href="/project/{{project.uuid}}/edit" class="btn btn-primary">Add </a>
+                    <a href="{% url 'ids_projects:add-data' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a>
                 </div>
             </div><hr>
 
@@ -83,14 +84,14 @@
             <div class="object-header dark">
                 <div>
                     No Specimens yet.
-                    <a href="/specimen/create?project_uuid={{project.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
             {% else %}
             <div class="object-header dark">
                 <div>
                     Specimens
-                    <a href="/specimen/create?project_uuid={{project.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
 
@@ -99,7 +100,7 @@
                 <div class="info-panel">
 
                     <div class="object-header darker">
-                        <a href="/specimen/{{specimen.uuid}}" class="header-link">{{ specimen.taxon_name }} {{ specimen.specimen_id }}</a>
+                        <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="header-link">{{ specimen.taxon_name }} {{ specimen.specimen_id }}</a>
                     </div>
 
                     <div>
@@ -176,7 +177,7 @@
                                     {% else %}
                                         No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
                                     {% endif %}
-                                    <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                                    <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                                 </div>
                             </div>
                             {% else %}
@@ -187,7 +188,7 @@
                                     {% else %}
                                         Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
                                     {% endif %}
-                                    <a href="/specimen/{{specimen.uuid}}/process" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                                    <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                                 </div>
                             </div>
 
@@ -197,7 +198,7 @@
                                 {% for process in specimen.processes %}
 
                                 <div class="object-header">
-                                    <a href="/process/{{process.uuid}}" class="header-link">{{ process.process_type }}</a>
+                                    <a href="{% url 'ids_projects:process-view' process_uuid=process.uuid %}" class="header-link">{{ process.process_type }}</a>
                                 </div>
 
                                 <div class="row info-item">

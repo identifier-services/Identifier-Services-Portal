@@ -7,17 +7,17 @@
 {% block breadcrumbs %}
     {{ block.super }}
 
-    {% breadcrumb "Projects" "ids_projects:projects-list" %}
+    {% breadcrumb "Projects" "ids_projects:project-list" %}
 
     {% if project %}
         {% if project.short %}
-            {% breadcrumb project.short "ids_projects:projects-view" project.uuid %}
+            {% breadcrumb project.short "ids_projects:project-view" project.uuid %}
         {% else %}
-            {% breadcrumb "Project" "ids_projects:projects-view" project.uuid %}
+            {% breadcrumb "Project" "ids_projects:project-view" project.uuid %}
         {% endif %}
     {% endif %}
 
-    {% breadcrumb "Specimens" "ids_projects:specimens-list" project.uuid %}
+    {% breadcrumb "Specimens" "ids_projects:specimen-list" project.uuid %}
 
     {% if specimen %}
         {% breadcrumb "Edit Specimen" "" %}
@@ -41,12 +41,12 @@
 
         <div>
             <button type="submit" class="btn btn-primary">Save</button>
-            {% if specimen %}
-                <a href="/specimen/{{specimen.uuid}}" class="btn btn-warning pull-right">Cancel</a>
+            {% if specimen %} {# specimen exists if we are editing #}
+                <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-warning pull-right">Cancel</a>
             {% elif project %}
-                <a href="/project/{{project.uuid}}" class="btn btn-warning pull-right">Cancel</a>
+                <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-warning pull-right">Cancel</a>
             {% else %}
-                <a href="/projects/" class="btn btn-warning pull-right">Cancel</a>
+                <a href="{% url 'ids_projects:project-list' %}" class="btn btn-warning pull-right">Cancel</a>
             {% endif %}
         </div>
     </form>
