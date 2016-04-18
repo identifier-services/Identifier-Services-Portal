@@ -24,7 +24,8 @@ urlpatterns = patterns(
     # # list all files associated with a process
     # url(r'^process/(?P<process_uuid>.+?)/files/?$', 'list', name='files-list'),
     # create a file metadata object associated with a process
-    url(r'^process/(?P<process_uuid>.+?)/file/?$', 'add_data', name='add_data'),
+    # url(r'^process/(?P<process_uuid>.+?)/file/?$', 'add_data', name='add_data'),
+    url(r'^data/create/?$', 'add_data', name='add-data'),
     # # edit a file metadata object
     # url(r'^file/(?P<data_id>.+?)/edit$', 'edit', name='files-edit'),
     # # edit a file metadata object
