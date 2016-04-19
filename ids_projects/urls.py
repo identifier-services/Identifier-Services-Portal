@@ -88,7 +88,7 @@ urlpatterns += patterns(
     # edit project
     url(r'^project/edit/(?P<project_uuid>.+?)/?$', 'edit', name='project-edit'),
     # delete project
-    url(r'^project/delete/(?P<project_uuid>.+?)/?$', 'delete', name='projects-delete'),
+    url(r'^project/delete/(?P<project_uuid>.+?)/?$', 'delete', name='project-delete'),
     # view a specific project
     url(r'^project/(?P<project_uuid>.+?)/?$', 'view', name='project-view'),
 )
