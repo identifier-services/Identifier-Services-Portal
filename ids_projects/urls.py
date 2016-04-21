@@ -1,44 +1,19 @@
 from django.conf.urls import patterns, include, url
 
-# urlpatterns = patterns('')
 
 #########
 # Files #
 #########
-# urlpatterns = patterns(
-#     'ids_projects.views.files',
-#     # list all files associated with a process
-#     url(r'^process/(?P<process_uuid>.+)/files/?$', 'list', name='files-list'),
-#     # create a file metadata object associated with a process
-#     url(r'^process/(?P<process_uuid>.+)/file/?$', 'create', name='files-create'),
-#     # edit a file metadata object
-#     url(r'^file/(?P<data_id>.+)/edit$', 'edit', name='files-edit'),
-#     # edit a file metadata object
-#     url(r'^file/(?P<data_id>.+)/delete$', 'delete', name='files-delete'),
-#     # view a file metadata object
-#     url(r'^file/(?P<data_id>.+)/?$', 'view', name='files-view'),
-# )
-
 urlpatterns = patterns(
-    'ids_projects.views.files',
-    # # list all files associated with a process
-    # url(r'^process/(?P<process_uuid>.+?)/files/?$', 'list', name='files-list'),
+    'ids_projects.views.data',
     # create a file metadata object associated with a process
-    # url(r'^process/(?P<process_uuid>.+?)/file/?$', 'add_data', name='add_data'),
-    url(r'^data/create/?$', 'add_data', name='add-data'),
-    # # edit a file metadata object
-    # url(r'^file/(?P<data_id>.+?)/edit$', 'edit', name='files-edit'),
-    # # edit a file metadata object
-    # url(r'^file/(?P<data_id>.+?)/delete$', 'delete', name='files-delete'),
-    # # view a file metadata object
-    # url(r'^file/(?P<data_id>.+)/?$', 'view', name='files-view'),
-    ############################################################################
+    url(r'^file/select/?$', 'file_select', name='file-select'),
     # list content at given path on system
-    # url(r'^system/(?P<system_id>.+?)/listing/(?P<path>.+)$', 'listing', name='systems-listing'),
-    # url(r'^listing/(?P<system_id>[^/]+)/(?P<file_path>.+)?', 'files_list', name='files_list_json'),
-    url(r'^listing/(?P<system_id>[^/]+)/(?P<file_path>.+)?', 'files_list', name='files-list'),
-    ############################################################################
+    url(r'^dir/list/(?P<system_id>[^/]+)/(?P<file_path>.+)?', 'dir_list', name='dir-list'),
+    # delete a data metadata object associated with a process
+    url(r'^data/delete/(?P<data_uuid>.+?)$', 'data_delete', name='data-delete'),
 )
+
 
 #############
 # Processes #
@@ -50,12 +25,13 @@ urlpatterns += patterns(
     # create a processes related to a specimen
     url(r'^process/create/?$', 'create', name='process-create'),
     # edit a process
-    url(r'^process/edit/(?P<process_uuid>.+?)/?$', 'edit', name='process-edit'),
+    url(r'^process/edit/(?P<process_uuid>.+?)$', 'edit', name='process-edit'),
     # delete a process
-    url(r'^process/delete/(?P<process_uuid>.+?)/?$', 'delete', name='process-delete'),
+    url(r'^process/delete/(?P<process_uuid>.+?)$', 'delete', name='process-delete'),
     # view a process
-    url(r'^process/(?P<process_uuid>.+?)/?$', 'view', name='process-view'),
+    url(r'^process/(?P<process_uuid>.+?)$', 'view', name='process-view'),
 )
+
 
 #############
 # Specimens #
@@ -69,12 +45,13 @@ urlpatterns += patterns(
     # create a specimen related to a project, view takes project_uuid query parameter
     url(r'^specimen/create/?$', 'create', name='specimen-create'),
     # edit a specimen
-    url(r'^specimen/edit/(?P<specimen_uuid>.+?)/$', 'edit', name='specimen-edit'),
+    url(r'^specimen/edit/(?P<specimen_uuid>.+?)$', 'edit', name='specimen-edit'),
     # delete a specimen
-    url(r'^specimen/delete/(?P<specimen_uuid>.+?)/$', 'delete', name='specimen-delete'),
+    url(r'^specimen/delete/(?P<specimen_uuid>.+?)$', 'delete', name='specimen-delete'),
     # view a specimen
-    url(r'^specimen/(?P<specimen_uuid>.+?)/?$', 'view', name='specimen-view'),
+    url(r'^specimen/(?P<specimen_uuid>.+?)$', 'view', name='specimen-view'),
 )
+
 
 ############
 # Projects #
@@ -86,9 +63,9 @@ urlpatterns += patterns(
     # create project
     url(r'^project/create/?$', 'create', name='project-create'),
     # edit project
-    url(r'^project/edit/(?P<project_uuid>.+?)/?$', 'edit', name='project-edit'),
+    url(r'^project/edit/(?P<project_uuid>.+?)$', 'edit', name='project-edit'),
     # delete project
-    url(r'^project/delete/(?P<project_uuid>.+?)/?$', 'delete', name='project-delete'),
+    url(r'^project/delete/(?P<project_uuid>.+?)$', 'delete', name='project-delete'),
     # view a specific project
-    url(r'^project/(?P<project_uuid>.+?)/?$', 'view', name='project-view'),
+    url(r'^project/(?P<project_uuid>.+?)$', 'view', name='project-view'),
 )
