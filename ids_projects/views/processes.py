@@ -76,15 +76,15 @@ def view(request, process_uuid):
         # results = map(collapse_meta, results_raw)
         results = results_raw
 
-        files = []
+        datas = []
         for result in results:
             if result['name'] == 'idsvc.data':
-                files.append(result)
+                datas.append(result)
 
         context = {'process' : process,
                    'project' : project,
                    'specimen' : specimen,
-                   'files' : files}
+                   'datas' : datas}
 
         return render(request, 'ids_projects/processes/detail.html', context)
 
