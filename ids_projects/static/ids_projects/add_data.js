@@ -68,15 +68,19 @@
 
     var select_file = function select_file(file_path) {
 
+        var process_uuid = $('meta[id=process-info]').attr("data-uuid");
+
         var postdata={
             system_id : $('#id_system_id').val(),
-            file_path : file_path
+            file_path : file_path,
+            process_uuid : process_uuid
         }
 
         console.log(postdata);
 
-        var url = window.location.pathname;
-        var new_url = url.replace('file','')
+        // TODO: query string necessary?
+        var url = window.location.pathname + '?process_uuid=' + process_uuid;
+        var newurl = window.location.origin + '/process/' + process_uuid;
 
         if (postdata.system_id && postdata.file_path) {
             $.post(url, postdata)
@@ -85,6 +89,7 @@
     }
 
     var do_listing = function do_listing() {
+
         var system_id = $('#id_system_id').val();
         var file_path = $('#id_file_path').val();
         if (system_id && file_path) {
@@ -93,10 +98,7 @@
                         '<i class="glyphicon glyphicon-refresh"></i> Loading files...' +
                         '</p></td></tr>');
 
-            // $.getJSON('/data/listing/' + system_id + '/' + file_path)
-            // $.getJSON('/system/' + system_id + '/listing/' + file_path)
-            $.getJSON('/listing/' + system_id + '/' + file_path)
-
+            $.getJSON('/dir/list/' + system_id + '/' + file_path)
 
             .then(function(listing) {
                 var file_rows = [];
