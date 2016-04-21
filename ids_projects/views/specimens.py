@@ -270,7 +270,7 @@ def edit(request, specimen_uuid):
         try:
             # get the specimen metadata object
             specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
-            specimen = collapse_meta(specimens_raw)
+            specimen = collapse_meta(specimen_raw)
         except Exception as e:
             logger.error('Error editing specimen. {}'.format(e.message))
             messages.error(request, 'Specimen not found.')
