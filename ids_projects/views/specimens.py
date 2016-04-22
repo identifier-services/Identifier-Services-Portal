@@ -2,6 +2,7 @@ from agavepy.agave import Agave, AgaveException
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.http import (HttpResponse,
                          HttpResponseRedirect,
                          HttpResponseBadRequest,
@@ -18,20 +19,29 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def list(request, project_uuid):
+def list(request):
     """List all specimens related to a project"""
     #######
     # GET #
     #######
     if request.method == 'GET':
 
+        project_uuid = request.GET.get('project_uuid', None)
+
         a = client(request)
-        specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_uuid)}
+        if project_uuid:
+            specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_uuid)}
+        else:
+            specimens_query = {'name':'idsvc.specimen'}
+
         specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
         specimens = map(collapse_meta, specimens_raw)
 
-        project_raw = a.meta.getMetadata(uuid=project_uuid)
-        project = collapse_meta(project_raw)
+        if project_uuid:
+            project_raw = a.meta.getMetadata(uuid=project_uuid)
+            project = collapse_meta(project_raw)
+        else:
+            project = None
 
         context = {'specimens' : specimens, 'project': project}
 
@@ -133,12 +143,18 @@ def view(request, specimen_uuid):
 
 
 @login_required
-def create(request, project_uuid):
+def create(request):
     """Create a new specimen related to a project"""
     #######
     # GET #
     #######
     if request.method == 'GET':
+
+        project_uuid = request.GET.get('project_uuid', False)
+
+        if not project_uuid:
+            messages.error(request, 'No project uuid')
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
 
         # get the project
         a = client(request)
@@ -156,6 +172,7 @@ def create(request, project_uuid):
     ########
     elif request.method == 'POST':
 
+        project_uuid = request.POST.get('project_uuid', False)
         form = SpecimenForm(request.POST)
 
         if form.is_valid():
@@ -196,8 +213,10 @@ def create(request, project_uuid):
                 return HttpResponseRedirect('/specimen/{}'.format(response['uuid']))
 
         messages.info(request, 'Did not create new specimen.')
-        return HttpResponseRedirect('/project/{}'.format(project_uuid))
-
+        if project_uuid:
+            return HttpResponseRedirect('/project/{}'.format(project_uuid))
+        else:
+            return HttpResponseRedirect('/projects')
     #########
     # OTHER #
     #########
@@ -247,13 +266,12 @@ def edit(request, specimen_uuid):
         form = SpecimenForm(request.POST)
 
         # get the association fields
-        # TODO: I need to store this in hidden form field, but having trouble with that.
         a = client(request)
         try:
             # get the specimen metadata object
-            specimen_raw= a.meta.getMetadata(uuid=specimen_uuid)
-            specimen = collapse_meta(specimens_raw)
-        except:
+            specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
+            specimen = collapse_meta(specimen_raw)
+        except Exception as e:
             logger.error('Error editing specimen. {}'.format(e.message))
             messages.error(request, 'Specimen not found.')
 
