@@ -32,7 +32,7 @@ class IdsMetadata(object):
         if name:
             query['name'] = name
 
-        for k, v in six.iteritems(kwargs)
+        for k, v in six.iteritems(kwargs):
             key = 'value.%s' % k
             query[key] = v
 
@@ -77,7 +77,7 @@ class ProcessFieldsForm(DynamicForm):
 #
 # inputs = p.inputs
 #
-# 
+#
 # p.get_associated(name='idsvc.data', type='sra_data')
 # query = {
 #     'name': 'idsvc.data',
