@@ -1,0 +1,214 @@
+project:
+    fields:
+        - id: title
+          label: Title
+          required: True
+        - id: description
+          label: Description
+          widget: TextArea
+        - id: existing id type
+          label: Existing ID Type
+          choices:
+              - None
+              - UUID Universally Unique Identifier
+              - ARK Archival Resource id
+              - DOI Digital Object Identifier
+              - URL/URI
+              - NCBI SRA
+              - NCBI BioProject
+              - NCBI BioSample
+              - Local identifier
+        - id: existing id
+          label: Existing ID
+    system:
+        - id: creator
+          label: Creator
+        - id: identifier
+          label: Identifier
+          choices:
+              - ARK - Archival Resource id
+              - DOI - Digital Object Identifier
+          display: True
+specimen:
+    fields:
+        - id: specimen id
+          label: Specimen ID
+          required: True
+        - id: subspecific genetic lineage
+          label: Subspecific Genetic Lineage
+        - id: taxon name
+          label: Taxon Name
+          required: True
+        - id: haploid chromosome count
+          label: Haploid Chromosome Count
+        - id: ploidy
+          label: Ploidy
+        - id: organ or tissue
+          label: Organ or Tissue
+          required: True
+        - id: developmental stage
+          label: Developmental Stage
+        - id: estimated genome size
+          label: Estimated Genome Size
+        - id: propagation
+          label: Propagation
+        - id: existing id type
+          label: Existing ID Type
+          choices:
+              - None
+              - UUID Universally Unique Identifier
+              - ARK Archival Resource id
+              - DOI Digital Object Identifier
+              - URL/URI
+              - NCBI SRA
+              - NCBI BioProject
+              - NCBI BioSample
+              - Local identifier
+        - id: existing id
+          label: Existing ID
+    system:
+        - id: identifier
+          label: Identifier
+          choices:
+              - ARK - Archival Resource id
+              - DOI - Digital Object Identifier
+          display: True
+processes:
+    sequencing:
+        fields:
+            - id: sequencing method
+              label: Sequencing Method
+              required: True
+            - id: sequencing hardware
+              label: Sequencing Hardware
+            - id: existing id type
+              label: Existing ID Type
+              choices:
+                  - None
+                  - UUID Universally Unique Identifier
+                  - ARK Archival Resource id
+                  - DOI Digital Object Identifier
+                  - URL/URI
+                  - NCBI SRA
+                  - NCBI BioProject
+                  - NCBI BioSample
+                  - Local identifier
+            - id: existing id
+              label: Existing ID
+
+        system:
+            - id: identifier
+              label: Identifier
+              choices:
+                  - ARK - Archival Resource ID
+                  - DOI - Digital Object Identifier
+              display: True
+    assembly:
+        fields:
+              - id: assembly method
+                label: Assembly Method
+                required: True
+              - id: reference sequence
+                label: Reference Sequence
+              - id: assembly software
+                label: Assembly Software
+              - id: assembly software version
+                label: Assembly Software Version
+              - id: input file
+                label: Input File
+              - id: existing id type
+                label: Existing ID Type
+                choices:
+                    - None
+                    - UUID Universally Unique Identifier
+                    - ARK Archival Resource id
+                    - DOI Digital Object Identifier
+                    - URL/URI
+                    - NCBI SRA
+                    - NCBI BioProject
+                    - NCBI BioSample
+                    - Local identifier
+              - id: existing id
+                label: Existing ID
+        system:
+            - id: identifier
+              label: Identifier
+              choices:
+                  - ARK - Archival Resource id
+                  - DOI - Digital Object Identifier
+              display: True
+    analysis:
+        fields:
+            - id: anaylsis method
+              label: Anaylsis Method
+              required: True
+            - id: analysis software
+              label: Analysis Software
+            - id: existing id type
+              label: Existing ID Type
+              choices:
+                  - None
+                  - UUID Universally Unique Identifier
+                  - ARK Archival Resource id
+                  - DOI Digital Object Identifier
+                  - URL/URI
+                  - NCBI SRA
+                  - NCBI BioProject
+                  - NCBI BioSample
+                  - Local identifier
+            - id: existing id
+              label: Existing ID
+        system:
+            - id: identifier
+              label: Identifier
+              choices:
+                  - ARK - Archival Resource id
+                  - DOI - Digital Object Identifier
+              display: True
+data:
+    fields:
+        - id: description
+          label: Description
+          widget: TextArea
+        - id: existing id type
+          label: Existing ID Type
+          choices:
+              - None
+              - UUID Universally Unique Identifier
+              - ARK Archival Resource id
+              - DOI Digital Object Identifier
+              - URL/URI
+              - NCBI SRA
+              - NCBI BioProject
+              - NCBI BioSample
+              - Local identifier
+        - id: existing id
+          label: Existing ID
+    system:
+        - id: system
+          label: System
+          display: True
+        - id: path
+          label: Path
+          display: True
+        - id: file name
+          label: File Name
+          display: True
+        - id: size
+          label: Size
+          display: True
+        - id: last modified
+          label: Last Modified
+          display: True
+        - id: checksum
+          label: Checksum
+          display: True
+        - id: checksum date
+          label: Checksum Date
+          display: True
+        - id: identifier
+          label: Identifier
+          choices:
+              - ARK - Archival Resource id
+              - DOI - Digital Object Identifier
+          display: True

@@ -11,9 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 # -*- coding: utf-8 -*-
 
-import os
-
-# TODO gettext
+import os, read_conf
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,9 +21,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '=mthwukkexh4p3qshr%ht_&g#r^=2x@=%#k429eu-&jqu3+(v3'
-
-# SESSIONS
-# TODO cookie stuff
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'True'
@@ -53,9 +48,6 @@ AUTHENTICATION_BACKENDS = (
     'ids_auth.backends.AgaveOAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
-
-# TODO CACHES = {
-# }
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -96,8 +88,6 @@ WSGI_APPLICATION = 'ids.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-# TODO mysql if DATABASE_HOST (see designsafe)
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -125,30 +115,14 @@ LANGUAGES = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-# TODO STATIC_ROOT = ''
-
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'ids', 'static'),
 )
 
-# TODO STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
-
-# TODO STATICFILES_FINDERS = (
-#     'django.contrib.staticfiles.finders.FileSystemFinder',
-#     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#     'pipeline.finders.PipelineFinder',
-# )
-
-# TODO MEDIA_ROOT = ''
-
-# TODO maybe djangocms
-
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
-
-# TODO maybe djangocms_forms
 
 #####
 #
@@ -158,8 +132,6 @@ LOGIN_REDIRECT_URL = '/'
 BOOTSTRAP3 = {
     'required_css_class': 'required',
 }
-
-# TODO Django Impersonate
 
 LOGGING = {
     'version': 1,
@@ -209,12 +181,6 @@ LOGGING = {
     }
 }
 
-# TODO smtp
-
-# TODO pipeline
-
-# TODO agave
-
 ##
 # Agave
 #
@@ -229,3 +195,9 @@ AGAVE_SUPER_TOKEN = os.environ.get('AGAVE_SUPER_TOKEN')
 #
 # Other agave stuff
 AGAVE_TOKEN_SESSION_ID = 'agave_token'
+
+#######################
+# Object Descriptions #
+#######################
+
+OBJ_DESCR = read_conf.read()

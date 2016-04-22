@@ -10,7 +10,7 @@ from django.http import (HttpResponse,
                          HttpResponseServerError)
 from django.shortcuts import render
 import json, logging
-from ..forms.processes import ProcessForm
+from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
 from helper import client, collapse_meta
 
 
@@ -27,10 +27,10 @@ def list(request, specimen_uuid):
 
         a = client(request)
         process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_uuid)}
-        process_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
+        process_raw = a.meta.listMetadata(q=json.dumps(process_query))
         processes = map(collapse_meta, process_raw)
 
-        context = {'processes' : specimens, 'specimen_uuid': specimen_uuid}
+        context = {'processes' : processes, 'specimen_uuid': specimen_uuid}
 
         return render(request, 'ids_projects/processes/index.html', context)
 
@@ -96,105 +96,96 @@ def view(request, process_uuid):
 @login_required
 def create(request, specimen_uuid):
     """Create a new process realted to a specimen"""
-    #######
-    # GET #
-    #######
-    if request.method == 'GET':
 
-        # get association ids
-        a = client(request)
-        specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
-        specimen = collapse_meta(specimen_raw)
-        associationIds = specimen['associationIds']
+    # get association ids
+    a = client(request)
+    specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
+    specimen = collapse_meta(specimen_raw)
+    associationIds = specimen['associationIds']
+    project = None
 
-        project = None
+    # find the project
+    query = {'uuid': {'$in': associationIds}}
+    results_raw = a.meta.listMetadata(q=json.dumps(query))
+    results = map(collapse_meta, results_raw)
+    for result in results:
+        if result['name'] == 'idsvc.project':
+            project = result
 
-        # find the project
-        query = {'uuid': { '$in': associationIds }}
-        results_raw = a.meta.listMetadata(q=json.dumps(query))
-        results = map(collapse_meta, results_raw)
-        for result in results:
-            if result['name'] == 'idsvc.project':
-                project = result
+    investigation_type = project['investigation_type'].lower()
 
-        context = {'form': ProcessForm(),
-                   'project': project,
-                   'specimen': specimen,
-                   'process': None}
-
-        return render(request, 'ids_projects/processes/create.html', context)
+    object_descriptions = getattr(settings, 'OBJ_DESCR')
+    investigation_types = object_descriptions['investigation_types']
+    project_description = investigation_types[investigation_type]
+    project_processes = project_description['processes']
+    process_type_list = [(x,x.title()) for x in project_processes.keys()]
+    process_type_list = [('', 'Choose one'),] + process_type_list
+    context = {'project': project,
+               'specimen': specimen,
+               'process': None}
 
     ########
     # POST #
     ########
-    elif request.method == 'POST':
+    if request.method == 'POST':
 
-        form = ProcessForm(request.POST)
+        process_fields = []
+        if 'process_type' in request.POST:
+            process_type = request.POST.get('process_type')
+            process_fields = project_processes[process_type]['fields']
 
-        # inherit specimen association ids
-        a = client(request)
-        specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
-        specimen = collapse_meta(specimen_raw)
-        associationIds = specimen['associationIds']
+        form_a = ProcessTypeForm(process_type_list, request.POST)
+        form_a.fields['process_type'].widget.attrs['readonly'] = True
+        form_a.fields['process_type'].widget.attrs['disabled'] = True
 
-        project = None
-
-        # find the project
-        query = {'uuid': { '$in': associationIds }}
-        results_raw = a.meta.listMetadata(q=json.dumps(query))
-        results = map(collapse_meta, results_raw)
-        for result in results:
-            if result['name'] == 'idsvc.project':
-                project = result
+        if 'type_selected' in request.POST:
+            form_b = ProcessFieldsForm(process_fields, request.POST)
+        else:
+            form_b = ProcessFieldsForm(process_fields)
 
         # add specimen uuid to association ids
         associationIds.append(specimen_uuid)
 
-        if form.is_valid():
+        if not request.is_ajax():
+            if form_a.is_valid() and form_b.is_valid():
+                data = form_a.cleaned_data.copy()
+                data.update(form_b.cleaned_data.copy())
 
-            logger.debug('Process form is valid')
+                logger.debug('Process form is valid')
 
-            process_type = form.cleaned_data['process_type']
-            sequence_method = form.cleaned_data['sequence_method']
-            sequence_hardware = form.cleaned_data['sequence_hardware']
-            assembly_method = form.cleaned_data['assembly_method']
-            reference_sequence = form.cleaned_data['reference_sequence']
-            # associationIds = form.cleaned_data['associationIds']
-            # project_uuid = form.cleaned_data['project_uuid']
+                # process_type = data['process_type']
+                # sequence_method = data['sequence_method']
+                # sequence_hardware = data['sequence_hardware']
+                # assembly_method = data['assembly_method']
+                # reference_sequence = data['reference_sequence']
+                # associationIds = form.cleaned_data['associationIds']
+                # project_uuid = form.cleaned_data['project_uuid']
 
-            new_process = {
-                "name":"idsvc.process",
-                "associationIds": associationIds,
-                "value": {
-                    "process_type":process_type,
-                    "sequence_method":sequence_method,
-                    "sequence_hardware":sequence_hardware,
-                    "assembly_method":assembly_method,
-                    "reference_sequence":reference_sequence
+                new_process = {
+                    "name":"idsvc.process",
+                    "associationIds": associationIds,
+                    "value": data
                 }
-            }
 
-            try:
-                response = a.meta.addMetadata(body=new_process)
-            except Exception as e:
-                logger.debug('Error while attempting to create process metadata: %s' % e)
-            else:
-                messages.success(request, 'Successfully created process.')
-                return HttpResponseRedirect('/process/{}'.format(response['uuid']))
+                try:
+                    response = a.meta.addMetadata(body=new_process)
+                except Exception as e:
+                    logger.debug('Error while attempting to create process metadata: %s' % e)
+                else:
+                    messages.success(request, 'Successfully created process.')
+                    return HttpResponseRedirect('/process/{}'.format(response['uuid']))
 
-        else:
-
-            logger.debug('Process form is not valid')
-
-        messages.info(request, 'Did not create new process.')
-        # return HttpResponseRedirect('/specimen/{}'.format(specimen_uuid))
-        return HttpResponseRedirect('/project/{}'.format(project.uuid))
-
-    #########
-    # OTHER #
-    #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        form_a = ProcessTypeForm(process_type_list)
+        form_b = None
+
+    context['form_a'] = form_a
+    context['form_b'] = form_b
+
+    if request.is_ajax():
+        return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
+    else:
+        return render(request, 'ids_projects/processes/create.html', context)
 
 
 @login_required

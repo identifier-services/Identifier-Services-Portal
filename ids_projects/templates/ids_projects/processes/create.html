@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% load bootstrap3 %}
+{% load bootstrap3 staticfiles %}
 
 {% load django_bootstrap_breadcrumbs %}
 
@@ -45,12 +45,23 @@
 
     <form method="post">
         {% csrf_token %}
-        {% bootstrap_form form %}
+        <fieldset id="id_form_a">
+            {% bootstrap_form form_a %}
+        </fieldset>
 
-        <div>
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a href="/specimen/{{specimen.uuid}}" class="btn btn-warning pull-right">Cancel</a>
-        </div>
+        <fieldset id="id_form_b">
+            {% if form_b %}
+                {% include "ids_projects/processes/get_fields_ajax.html" %}
+            {% else %}
+                <div>
+                    <button type="submit" class="btn btn-primary">Next</button>
+                    <a href="/specimen/{{specimen.uuid}}" class="btn btn-warning pull-right">Cancel</a>
+                </div>
+            {% endif %}
+        </fieldset>
     </form>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'ids_projects/add_process.js' %}"></script>
 {% endblock %}
