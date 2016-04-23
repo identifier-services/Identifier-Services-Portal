@@ -97,7 +97,18 @@ def view(request, process_uuid):
 
 @login_required
 def create(request):
-    """Create a new process realted to a specimen"""
+    """Create a new process related to a specimen"""
+
+    specimen_uuid = None
+
+    if request.method == 'GET':
+        specimen_uuid = request.GET.get('specimen_uuid')
+    elif request.method == 'POST':
+        specimen_uuid = request.POST.get('specimen_uuid')
+
+    ###
+    # we need to get the project so that we know what types of processes to list
+    ###
 
     # get association ids
     a = client(request)
@@ -115,6 +126,10 @@ def create(request):
             project = result
 
     investigation_type = project['investigation_type'].lower()
+
+    ###
+    # now that we know the type of project, we can list relevant process types
+    ###
 
     object_descriptions = getattr(settings, 'OBJ_DESCR')
     investigation_types = object_descriptions['investigation_types']
