@@ -30,7 +30,9 @@
         var url = window.location.pathname;
 
         var postdata={
-            process_type : $('#id_process_type').val()
+            process_type : $('#id_process_type').val(),
+            specimen_uuid : $('#id_specimen_uuid').val(),
+            project_uuid : $('#id_project_uuid').val()
         }
 
         if (postdata.process_type) {
