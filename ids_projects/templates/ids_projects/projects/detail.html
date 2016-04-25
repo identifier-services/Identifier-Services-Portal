@@ -36,9 +36,9 @@
                 </div>
                 <div class="panel-body">
                     <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                    <p><b>Project Name: </b> {{ project.title }}</p>
-                    <p><b>Investigation Type: </b> {{ project.investigation_type }}</p>
-                    <p><b>Description: </b> {{ project.description }}</p>
+                    <p><b>Project Name: </b> {{ project.value.title }}</p>
+                    <p><b>Investigation Type: </b> {{ project.value.investigation_type }}</p>
+                    <p><b>Description: </b> {{ project.value.description }}</p>
                     <div class="row">
                         <div class="col-xs-3">
                             <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit Project</a>
@@ -101,7 +101,7 @@
                 <div class="info-panel">
 
                     <div class="object-header darker">
-                        <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="header-link">{{ specimen.taxon_name }} {{ specimen.specimen_id }}</a>
+                        <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="header-link">{{ specimen.value.taxon_name }} {{ specimen.value.specimen_id }}</a>
                     </div>
 
                     <div>
@@ -110,7 +110,7 @@
                                 <b>Taxon Name</b>
                             </div>
                             <div class="col-xs-6">
-                                {{ specimen.taxon_name }}
+                                {{ specimen.value.taxon_name }}
                             </div>
                         </div>
                         <div class="row info-item">
@@ -118,7 +118,7 @@
                                 <b>Specimen ID</b>
                             </div>
                             <div class="col-xs-6">
-                                {{ specimen.specimen_id }}
+                                {{ specimen.value.specimen_id }}
                             </div>
                         </div>
                         <div class="row info-item">
@@ -126,7 +126,7 @@
                                 <b>Organ/Tissue</b>
                             </div>
                             <div class="col-xs-6">
-                                {{ specimen.organ_or_tissue }}
+                                {{ specimen.value.organ_or_tissue }}
                             </div>
                         </div>
                         <div class="row info-item">
@@ -134,7 +134,7 @@
                                 <b>Developmental Stage</b>
                             </div>
                             <div class="col-xs-6">
-                                {{ specimen.developmental_stage }}
+                                {{ specimen.value.developmental_stage }}
                             </div>
                         </div>
                         <div class="row info-item">
@@ -142,7 +142,7 @@
                                 <b>Haploid Chromosone Count</b>
                             </div>
                             <div class="col-xs-6">
-                                {{ specimen.haploid_chromosome_count }}
+                                {{ specimen.value.haploid_chromosome_count }}
                             </div>
                         </div>
                         <div class="row info-item">
@@ -150,7 +150,7 @@
                                 <b>Ploidy</b>
                             </div>
                             <div class="col-xs-6">
-                                {{ specimen.ploidy }}
+                                {{ specimen.value.ploidy }}
                             </div>
                         </div>
                         <div class="row info-item">
@@ -158,7 +158,7 @@
                                 <b>Propagation</b>
                             </div>
                             <div class="col-xs-6">
-                                {{ specimen.propagation }}
+                                {{ specimen.value.propagation }}
                             </div>
                         </div>
                         <div class="row info-item">
@@ -166,17 +166,17 @@
                                 <b>Estimated Genome Size</b>
                             </div>
                             <div class="col-xs-6">
-                                {{ specimen.estimated_genome_size }}
+                                {{ specimen.value.estimated_genome_size }}
                             </div>
                         </div>
 
-                            {% if not specimen.processes %}
+                            {% if not specimen.value.processes %}
                             <div class="object-header dark">
                                 <div>
                                     {% if specimen.short %}
                                         No processes for {{ specimen.short }}
                                     {% else %}
-                                        No processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                                        No processes for {{ specimen.value.taxon_name }} {{ specimen.value.specimen_id }}
                                     {% endif %}
                                     <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                                 </div>
@@ -187,7 +187,7 @@
                                     {% if specimen.short %}
                                         Processes for {{ specimen.short }}
                                     {% else %}
-                                        Processes for {{ specimen.taxon_name }} {{ specimen.specimen_id }}
+                                        Processes for {{ specimen.value.taxon_name }} {{ specimen.value.specimen_id }}
                                     {% endif %}
                                     <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                                 </div>
@@ -207,46 +207,46 @@
                                         <b>Process Type</b>
                                     </div>
                                     <div class="col-xs-6">
-                                        {{ process.process_type }}
+                                        {{ process.value.process_type }}
                                     </div>
                                 </div>
-                                {% if process.sequence_method %}
+                                {% if process.value.sequence_method %}
                                 <div class="row info-item">
                                     <div class="col-xs-6">
                                         <b>Sequence Method</b>
                                     </div>
                                     <div class="col-xs-6">
-                                        {{ process.sequence_method }}
+                                        {{ process.value.sequence_method }}
                                     </div>
                                 </div>
                                 {% endif %}
-                                {% if process.sequence_hardware %}
+                                {% if process.value.sequence_hardware %}
                                 <div class="row info-item">
                                     <div class="col-xs-6">
                                         <b>Sequence Hardware</b>
                                     </div>
                                     <div class="col-xs-6">
-                                        {{ process.sequence_hardware }}
+                                        {{ process.value.sequence_hardware }}
                                     </div>
                                 </div>
                                 {% endif %}
-                                {% if process.assembly_method %}
+                                {% if process.value.assembly_method %}
                                 <div class="row info-item">
                                     <div class="col-xs-6">
                                         <b>Assembly Method</b>
                                     </div>
                                     <div class="col-xs-6">
-                                        {{ process.assembly_method }}
+                                        {{ process.value.assembly_method }}
                                     </div>
                                 </div>
                                 {% endif %}
-                                {% if process.reference_sequence %}
+                                {% if process.value.reference_sequence %}
                                 <div class="row info-item">
                                     <div class="col-xs-6">
                                         <b>Reference Sequence</b>
                                     </div>
                                     <div class="col-xs-6">
-                                        {{ process.reference_sequence }}
+                                        {{ process.value.reference_sequence }}
                                     </div>
                                 </div>
                                 {% endif %}
