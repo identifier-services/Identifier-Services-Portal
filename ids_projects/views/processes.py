@@ -11,6 +11,7 @@ from django.http import (HttpResponse,
 from django.shortcuts import render
 import json, logging
 from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
+from ..models import Project, Specimen, Process
 from helper import client, collapse_meta
 
 
@@ -25,14 +26,12 @@ def list(request):
     #######
     if request.method == 'GET':
 
-        specimen_uuid = request.GET.get('specimen_uuid', False)
-
-        a = client(request)
-        process_query = {'name':'idsvc.process','associationIds':'{}'.format(specimen_uuid)}
-        process_raw = a.meta.listMetadata(q=json.dumps(process_query))
-        processes = map(collapse_meta, process_raw)
-
-        context = {'processes' : processes, 'specimen_uuid': specimen_uuid}
+        specimen_uuid = request.GET.get('specimen_uuid', None)
+        specimen = Specimen(uuid = specimen_uuid)
+        context = { 'project': specimen.project,
+                    'specimen' : specimen,
+                    'processes': specimen.processes
+                  }
 
         return render(request, 'ids_projects/processes/index.html', context)
 
@@ -51,40 +50,12 @@ def view(request, process_uuid):
     #######
     if request.method == 'GET':
 
-        # get the process
-        a = client(request)
-        process_raw = a.meta.getMetadata(uuid=process_uuid)
-        process = collapse_meta(process_raw)
-
-        project = None
-        specimen = None
-
-        # find project & specimen the process is associated with
-        associationIds = process['associationIds']
-        query = {'uuid': { '$in': associationIds }}
-        results_raw = a.meta.listMetadata(q=json.dumps(query))
-        results = map(collapse_meta, results_raw)
-        for result in results:
-            if result['name'] == 'idsvc.specimen':
-                specimen = result
-            if result['name'] == 'idsvc.project':
-                project = result
-
-        # find data associated with the process
-        query = {'associationIds': process_uuid }
-        results_raw = a.meta.listMetadata(q=json.dumps(query))
-        # results = map(collapse_meta, results_raw)
-        results = results_raw
-
-        datas = []
-        for result in results:
-            if result['name'] == 'idsvc.data':
-                datas.append(result)
+        process = Process(uuid = process_uuid)
 
         context = {'process' : process,
-                   'project' : project,
-                   'specimen' : specimen,
-                   'datas' : datas}
+                   'project' : process.project,
+                   'specimen' : process.specimen,
+                   'datas' : process.data}
 
         return render(request, 'ids_projects/processes/detail.html', context)
 
