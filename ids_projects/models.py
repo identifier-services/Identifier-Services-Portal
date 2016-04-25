@@ -120,13 +120,11 @@ class Specimen(BaseMetadata):
     def project(self, reset=False):
         if self._project is None or reset:
             associationIds = self.body['associationIds']
-            query = {'uuid': { '$in': associationIds }}
-            results = Specimen().ag.meta.listMetadata(q=json.dumps(query))
-            for result in results:
-                if result['name'] == 'idsvc.project':
-                    self._project = Project(initial_data = result)
+            query = {'uuid': { '$in': associationIds }, 'name': Project.name}
+            results = self.ag.meta.listMetadata(q=json.dumps(query))
+            self._project = Project(initial_data = next(iter(results)))
 
-            return self._project
+        return self._project
 
     @property
     def processes(self, reset=False):
@@ -168,9 +166,31 @@ class Process(BaseMetadata):
 
     def __init__(self, *args, **kwargs):
         super(Process, self).__init__(*args, **kwargs)
+        self._project = None
+        self._specimen = None
         self._data = None
         self._inputs = None
         self._outputs = None
+
+    @property
+    def project(self, reset=False):
+        if self._project is None or reset:
+            associationIds = self.body['associationIds']
+            query = {'uuid': { '$in': associationIds }, 'name': Project.name}
+            results = self.ag.meta.listMetadata(q=json.dumps(query))
+            self._project = Project(initial_data = next(iter(results)))
+
+        return self._project
+
+    @property
+    def specimen(self, reset=False):
+        if self._specimen is None or reset:
+            associationIds = self.body['associationIds']
+            query = {'uuid': { '$in': associationIds }, 'name': Specimen.name}
+            results = self.ag.meta.listMetadata(q=json.dumps(query))
+            self._specimen = Specimen(initial_data = next(iter(results)))
+
+        return self._specimen
 
     @property
     def data(self, reset=False):
