@@ -11,16 +11,12 @@ from django.http import (HttpResponse,
 from django.shortcuts import render
 import json, logging
 from ..forms.projects import ProjectForm
+from ..models import Project
 from helper import client, collapse_meta
 
 
 logger = logging.getLogger(__name__)
 
-
-## notes
-## SRA example to test api
-## end of day crontab
-## related identifier - and find in system - and take data, and use in doi request
 
 @login_required
 def list(request):
@@ -29,13 +25,7 @@ def list(request):
     # GET #
     #######
     if request.method == 'GET':
-        a = client(request)
-        query = {'name':'idsvc.project'}
-        projects_raw = a.meta.listMetadata(q=json.dumps(query))
-        projects = map(collapse_meta, projects_raw)
-
-        context = {'projects':projects}
-
+        context = {'projects':Project().list()}
         return render(request, 'ids_projects/projects/index.html', context)
 
     #########
@@ -52,94 +42,12 @@ def view(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        # get the project meta
-        # proj = Project(uuid=project_uuid)
-        # proj.fetch()
-        # return render(...)
-
-        a = client(request)
-        project_raw = a.meta.getMetadata(uuid=project_uuid)
-        project = collapse_meta(project_raw)
-        # list for the project's specimens
-        project['specimens'] = []
-
-        # get everything related to the project (everything with the
-        # project_uuid in associationIds)
-        query = {'associationIds': project_uuid }
-        results_raw = a.meta.listMetadata(q=json.dumps(query))
-        results = map(collapse_meta, results_raw)
-
-        # create dicts to hold objects, key will be object uuid
-        specimens = {}
-        processes = {}
-        files = {}
-
-        # group by type
-        for result in results:
-            uuid = result['uuid']
-            name = result['name']
-            if name == 'idsvc.specimen':
-                # let's call the result a specimen
-                specimen = result
-                # create a list for processes
-                specimen['processes'] = []
-                # add to dictionary
-                specimens[uuid] = specimen
-            elif name == 'idsvc.process':
-                # let's call the result a process
-                process = result
-                # create a list for file metadata
-                process['files'] = []
-                # add to dictionary
-                processes[uuid] = process
-            elif name == 'idsvc.data':
-                # let's call the result file_data
-                file_data = result
-                # add to dictionary
-                files[uuid] = file_data
-
-
-        # get list of uuids for each object type
-        specimen_uuids = specimens.keys()
-        process_uuids = processes.keys()
-        file_ids = files.keys()
-
-        # place to put object created 'out of order'
-        unmatched_processes = []
-        unmatched_files = []
-
-        # match files to processes
-        for file_id in file_ids:
-            file_data = files[file_id]
-            associationIds = file_data['associationIds']
-            match = filter(lambda x: x in associationIds, process_uuids)
-            if match:
-                process_uuid = match[0]
-                processes[process_uuid]['files'].append(file_data)
-            else:
-                unmatched_files.append(file_data)
-
-        # match processes to specimens
-        for process_uuid in process_uuids:
-            process = processes[process_uuid]
-            associationIds = process['associationIds']
-
-            match = filter(lambda x: x in associationIds, specimen_uuids)
-            if match:
-                specimen_uuid = match[0]
-                specimens[specimen_uuid]['processes'].append(process)
-            else:
-                unmatched_processes.append(process)
-
-        # stick specimens into project
-        for specimen_uuid in specimen_uuids:
-            specimen = specimens[specimen_uuid]
-            project['specimens'].append(specimen)
+        project = Project(uuid = project_uuid)
 
         context = {'project' : project,
-                   'specimen_count' : len(specimens),
-                   'process_count' : len(processes),
-                   'file_count' : len(files)}
+                   'specimen_count' : len(project.specimens),
+                   'process_count' : len(project.processes),
+                   'file_count' : 1}#len(project.files)}
 
         return render(request, 'ids_projects/projects/detail.html', context)
 
