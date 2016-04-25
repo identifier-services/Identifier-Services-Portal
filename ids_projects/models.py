@@ -112,8 +112,21 @@ class Specimen(BaseMetadata):
 
     def __init__(self, *args, **kwargs):
         super(Specimen, self).__init__(*args, **kwargs)
+        self._project = None
         self._processes = None
         self._data = None
+
+    @property
+    def project(self, reset=False):
+        if self._project is None or reset:
+            associationIds = self.body['associationIds']
+            query = {'uuid': { '$in': associationIds }}
+            results = Specimen().ag.meta.listMetadata(q=json.dumps(query))
+            for result in results:
+                if result['name'] == 'idsvc.project':
+                    self._project = Project(initial_data = result)
+
+            return self._project
 
     @property
     def processes(self, reset=False):
