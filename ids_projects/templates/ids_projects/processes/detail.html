@@ -53,15 +53,15 @@
         <div class="col-xs-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h1 class="panel-title">{{ process.process_type }}</h1>
+                    <h1 class="panel-title">{{ process.value.process_type }}</h1>
                 </div>
                 <div class="panel-body">
                     <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                    <p><b>Process Type</b> {{ process.process_type }}</p>
-                    <p><b>Sequence Method</b> {{ process.sequence_method }}</p>
-                    <p><b>Sequence Hardware</b> {{ process.sequence_hardware }}</p>
-                    <p><b>Assembly Method</b> {{ process.assembly_method }}</p>
-                    <p><b>Reference Sequence</b> {{ process.reference_sequence }}</p>
+                    <p><b>Process Type</b> {{ process.value.process_type }}</p>
+                    <p><b>Sequence Method</b> {{ process.value.sequence_method }}</p>
+                    <p><b>Sequence Hardware</b> {{ process.svalue.equence_hardware }}</p>
+                    <p><b>Assembly Method</b> {{ process.value.assembly_method }}</p>
+                    <p><b>Reference Sequence</b> {{ process.value.reference_sequence }}</p>
                     <div class="row">
                         <div class="col-xs-1">
                             <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
@@ -77,14 +77,14 @@
             {% if not datas %}
             <div class="object-header dark">
                 <div>
-                    No data associated with {{ process.process_type }}
+                    No data associated with {{ process.value.process_type }}
                     <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
             {% else %}
             <div class="object-header dark">
                 <div>
-                    Data associated with {{ process.process_type }}
+                    Data associated with {{ process.value.process_type }}
                     <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 </div>
             </div>
