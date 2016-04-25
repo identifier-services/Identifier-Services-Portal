@@ -27,9 +27,9 @@
             <div class="panel panel-default">
                 <div class="panel-body">
                     <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                    <p><h4>{{ project.title }}</h4>
-                    <b>Type: </b>{{ project.investigation_type }}</p>
-                    <p><b>Description: </b>{{ project.description }}</p>
+                    <p><h4>{{ project.value.title }}</h4>
+                    <b>Type: </b>{{ project.value.investigation_type }}</p>
+                    <p><b>Description: </b>{{ project.value.description }}</p>
                     <div class="row">
                         <div class="col-xs-3">
                             <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-primary">View</a>
