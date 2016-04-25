@@ -155,6 +155,8 @@ def create(request):
         form_a.fields['process_type'].widget.attrs['readonly'] = True
         form_a.fields['process_type'].widget.attrs['disabled'] = True
 
+        import pdb; pdb.set_trace()
+
         if 'type_selected' in request.POST:
             form_b = ProcessFieldsForm(process_fields, request.POST)
         else:
@@ -169,14 +171,6 @@ def create(request):
                 data.update(form_b.cleaned_data.copy())
 
                 logger.debug('Process form is valid')
-
-                # process_type = data['process_type']
-                # sequence_method = data['sequence_method']
-                # sequence_hardware = data['sequence_hardware']
-                # assembly_method = data['assembly_method']
-                # reference_sequence = data['reference_sequence']
-                # associationIds = form.cleaned_data['associationIds']
-                # project_uuid = form.cleaned_data['project_uuid']
 
                 new_process = {
                     "name":"idsvc.process",

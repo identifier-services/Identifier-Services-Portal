@@ -12,6 +12,7 @@ from django.http import (HttpResponse,
 from django.shortcuts import render
 import json, logging
 from ..forms.specimens import SpecimenForm
+from ..models import Project, Specimen
 from helper import client, collapse_meta
 
 
@@ -27,24 +28,8 @@ def list(request):
     if request.method == 'GET':
 
         project_uuid = request.GET.get('project_uuid', None)
-
-        a = client(request)
-        if project_uuid:
-            specimens_query = {'name':'idsvc.specimen','associationIds':'{}'.format(project_uuid)}
-        else:
-            specimens_query = {'name':'idsvc.specimen'}
-
-        specimens_raw = a.meta.listMetadata(q=json.dumps(specimens_query))
-        specimens = map(collapse_meta, specimens_raw)
-
-        if project_uuid:
-            project_raw = a.meta.getMetadata(uuid=project_uuid)
-            project = collapse_meta(project_raw)
-        else:
-            project = None
-
-        context = {'specimens' : specimens, 'project': project}
-
+        project = Project(uuid = project_uuid)
+        context = {'project': project, 'specimens' : project.specimens}
         return render(request, 'ids_projects/specimens/index.html', context)
 
     #########
@@ -62,76 +47,10 @@ def view(request, specimen_uuid):
     #######
     if request.method == 'GET':
 
-        # get specimen metadata
-        a = client(request)
-        specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
-        specimen = collapse_meta(specimen_raw)
+        specimen = Specimen(uuid = specimen_uuid)
+        project = specimen.project
 
-        project = None
-
-        # find the project that the specimen is associated with
-        associationIds = specimen['associationIds']
-        query = {'uuid': { '$in': associationIds }}
-        results_raw = a.meta.listMetadata(q=json.dumps(query))
-        results = map(collapse_meta, results_raw)
-        for result in results:
-            if result['name'] == 'idsvc.project':
-                project = result
-
-        # get all objects with specimen_uuid in associationIds list
-        query = {'associationIds': specimen_uuid }
-        results_raw = a.meta.listMetadata(q=json.dumps(query))
-        results = map(collapse_meta, results_raw)
-
-        # create dicts to group by type
-        processes = {}
-        files = {}
-
-        # group by type
-        for result in results:
-            uuid = result['uuid']
-            name = result['name']
-            if name == 'idsvc.process':
-                # let's make things clear, call the result a process
-                process = result
-                # create a list for file metadata
-                process['files'] = []
-                # add to dict
-                processes[uuid] = process
-            elif name == 'idsvc.data':
-                # let's make things clear, call the result file_data
-                file_data = result
-                # add to dict
-                files[uuid] = file_data
-
-        # get the uuids
-        process_uuids = processes.keys()
-        file_ids = files.keys()
-
-        # place to put objects that were created 'out of order'
-        unmatched_processes = []
-        unmatched_files = []
-
-        # match files with processes
-        for file_id in file_ids:
-            file_data = files[file_id]
-            associationIds = file_data['associationIds']
-            match = filter(lambda x: x in associationIds, process_uuids)
-            if match:
-                process_uuid = match[0]
-                processes[process_uuid]['files'].append(file_data)
-            else:
-                unmatched_files.append(file_data)
-
-        # list to hold the specimen's processes
-        specimen['processes'] = []
-
-        # stick processes into specimen
-        for process_uuid in process_uuids:
-            process = processes[process_uuid]
-            specimen['processes'].append(process)
-
-        context = {'specimen' : specimen, 'project' : project}
+        context = {'project' : project, 'specimen' : specimen}
 
         return render(request, 'ids_projects/specimens/detail.html', context)
 
