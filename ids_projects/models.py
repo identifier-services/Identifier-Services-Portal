@@ -20,6 +20,7 @@ class BaseMetadata(object):
 
         if uuid is not None:
             self.uuid = uuid
+            self.load()
 
         if initial_data is not None:
             self.set_values(initial_data)
