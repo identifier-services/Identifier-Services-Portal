@@ -5,7 +5,6 @@ from django.conf import settings
 from agavepy.agave import Agave
 import json
 
-
 class BaseMetadata(object):
 
     def __init__(self, uuid=None, initial_data=None):
@@ -46,6 +45,7 @@ class BaseMetadata(object):
     @property
     def body(self):
         return {
+            'uuid': self.uuid,
             'associationIds': self.associationIds,
             'name': self.name,
             'value': self.value
@@ -66,7 +66,8 @@ class Project(BaseMetadata):
     def list(cls):
         query = {'name': cls.name}
         results = Project().ag.meta.listMetadata(q=json.dumps(query))
-        return [cls(r) for r in results]
+        projects =  [cls(initial_data = r) for r in results]
+        return [project.body for project in projects]
 
     @property
     def specimens(self, reset=False):
@@ -187,4 +188,3 @@ class Data(BaseMetadata):
 
     def __init__(self, *args, **kwargs):
         super(Data, self).__init__(*args, **kwargs)
-
