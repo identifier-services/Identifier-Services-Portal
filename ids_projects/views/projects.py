@@ -9,10 +9,11 @@ from django.http import (HttpResponse,
                          HttpResponseNotFound,
                          HttpResponseServerError)
 from django.shortcuts import render
-import json, logging
+from django.core.urlresolvers import reverse
 from ..forms.projects import ProjectForm
 from ..models import Project
 from helper import client, collapse_meta
+import json, logging
 
 
 logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ def view(request, project_uuid):
         context = {'project' : project,
                    'specimen_count' : len(project.specimens),
                    'process_count' : len(project.processes),
-                   'file_count' : 1}#len(project.files)}
+                   'file_count' : len(project.data)}
 
         return render(request, 'ids_projects/projects/detail.html', context)
 
@@ -78,32 +79,20 @@ def create(request):
 
         if form.is_valid():
 
+            body = {}
+            body['value'] = form.cleaned_data
             user_full = request.user.get_full_name()
+            body['value']['creator'] = user_full
+            project = Project(initial_data = body)
 
-            title = form.cleaned_data['title']
-            inv_type = form.cleaned_data['investigation_type']
-            desc = form.cleaned_data['description']
+            result = project.save()
 
-            new_project = {
-                'name' : 'idsvc.project',
-                'associationIds' : [],
-                'value' : {
-                    'title' : title,
-                    'creator' : user_full,
-                    'investigation_type' : inv_type,
-                    'description' : desc,
-                },
-            }
-
-            a = client(request)
-
-            try:
-                response = a.meta.addMetadata(body=new_project)
-            except Exception as e:
-                logger.debug('Error while attempting to create project metadata: %s' % e)
-            else:
-                messages.success(request, 'Successfully created project.')
-                return HttpResponseRedirect('/project/{}'.format(response['uuid']))
+            if 'uuid' in result:
+                project_uuid = result['uuid']
+                messages.info(request, 'New project created.')
+                return HttpResponseRedirect(
+                            reverse('ids_projects:project-view',
+                                    kwargs={'project_uuid': project_uuid}))
 
         messages.info(request, 'Did not create new project.')
         return HttpResponseRedirect('/projects/')
@@ -123,10 +112,8 @@ def edit(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        a = client(request)
         try:
-            project_raw = a.meta.getMetadata(uuid=project_uuid)
-            project = collapse_meta(project_raw)
+            project = Project(uuid = project_uuid)
         except:
             logger.error('Error while attempting to edit project, not found.')
             messages.error(request, 'Project not found.')
@@ -145,33 +132,17 @@ def edit(request, project_uuid):
 
         if form.is_valid():
 
-            user_full = request.user.get_full_name()
+            body = {}
+            body['value'] = form.cleaned_data
+            project = Project(uuid = project_uuid, initial_data = body)
+            result = oroject.save()
 
-            title = form.cleaned_data['title']
-            inv_type = form.cleaned_data['investigation_type']
-            desc = form.cleaned_data['description']
-
-            new_project = {
-                'name' : 'idsvc.project',
-                'associationIds' : [],
-                'value' : {
-                    'title' : title,
-                    'creator' : user_full,
-                    'investigation_type' : inv_type,
-                    'description' : desc,
-                },
-            }
-
-            a = client(request)
-            try:
-                response = a.meta.updateMetadata(uuid=project_uuid, body=new_project)
-            except Exception as e:
-                logger.error('Error while attempting to edit project metadata.')
-                messages.error(request, 'Error while attempting to edit specimen.')
-                return HttpResponseRedirect('/projects/')
-            else:
-                messages.success(request, 'Successfully edited project.')
-                return HttpResponseRedirect('/project/{}'.format(project_uuid))
+            if 'uuid' in result:
+                project_uuid = result['uuid']
+                messages.info(request, 'Project Successfully edited.')
+                return HttpResponseRedirect(
+                            reverse('ids_projects:project-view',
+                                    kwargs={'project_uuid': project_uuid}))
 
         messages.success(request, 'Did not edit project.')
         return HttpResponseRedirect('/project/{}'.format(project_uuid))
@@ -191,29 +162,16 @@ def delete(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        # TODO: ask user if they want to delete associated objects?
+        project = Project(uuid = project_uuid)
 
-        a = client(request)
+        for uuid in project.associationIds:
+            item = BaseMetadata(uuid = uuid)
+            item.delete()
 
-        # find all associated objects
-        query = {'associationIds':'{}'.format(project_uuid)}
-        results = a.meta.listMetadata(q=json.dumps(query))
+        project.delete()
 
-        # delete all associated objects
-        for result in results:
-            a.meta.deleteMetadata(uuid=result.uuid)
-
-        # delete project
-        try:
-            a.meta.deleteMetadata(uuid=project_uuid)
-        except:
-            logger.error('Error deleting project. {}'.format(e.message) )
-            messages.error(request, 'Project deletion unsuccessful.')
-
-            return HttpResponseRedirect('/projects/')
-        else:
-            messages.success(request, 'Successfully deleted project.')
-            return HttpResponseRedirect('/projects/')
+        messages.success(request, 'Successfully deleted project.')
+        return HttpResponseRedirect('/projects/')
 
     #########
     # OTHER #
