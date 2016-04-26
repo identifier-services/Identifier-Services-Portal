@@ -27,7 +27,7 @@
      }
 
     var get_fields = function get_fields() {
-        var url = window.location.pathname;
+        var url = window.location.href;
 
         var postdata={
             process_type : $('#id_process_type').val(),
