@@ -126,8 +126,6 @@ def create(request):
         form_a.fields['process_type'].widget.attrs['readonly'] = True
         form_a.fields['process_type'].widget.attrs['disabled'] = True
 
-        import pdb; pdb.set_trace()
-
         if 'type_selected' in request.POST:
             form_b = ProcessFieldsForm(process_fields, request.POST)
         else:
