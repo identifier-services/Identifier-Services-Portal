@@ -26,12 +26,18 @@ class BaseMetadata(object):
             self.set_values(initial_data)
 
     def set_values(self, metadata):
-        self.uuid = metadata['uuid']
-        self.associationIds = metadata['associationIds']
-        self.created = metadata['created']
-        self.lastUpdated = metadata['lastUpdated']
-        self.links = metadata['_links']
-        self.value = metadata['value']
+        if 'uuid' in metadata:
+            self.uuid = metadata['uuid']
+        if 'associationIds' in metadata:
+            self.associationIds = metadata['associationIds']
+        if 'created' in metadata:
+            self.created = metadata['created']
+        if 'lastUpdated' in metadata:
+            self.lastUpdated = metadata['lastUpdated']
+        if '_links' in metadata:
+            self.links = metadata['_links']
+        if 'value' in metadata:
+            self.value = metadata['value']
 
     def load(self):
         meta = self.ag.meta.getMetadata(uuid=self.uuid)
@@ -39,9 +45,13 @@ class BaseMetadata(object):
 
     def save(self):
         if self.uuid is None:
-            self.ag.meta.addMetadata(body=self.body)
+            return self.ag.meta.addMetadata(body=self.body)
         else:
-            self.ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
+            return self.ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
+
+    def delete(self):
+        if self.uuid:
+            self.ag.meta.deleteMetadata(uuid=self.uuid)
 
     @property
     def body(self):
