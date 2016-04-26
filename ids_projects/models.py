@@ -52,6 +52,7 @@ class BaseMetadata(object):
     def delete(self):
         if self.uuid:
             self.ag.meta.deleteMetadata(uuid=self.uuid)
+            self.uuid = None
 
     @property
     def body(self):
