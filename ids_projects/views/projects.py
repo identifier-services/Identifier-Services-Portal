@@ -119,7 +119,7 @@ def edit(request, project_uuid):
             messages.error(request, 'Project not found.')
             return HttpResponseRedirect('/projects/')
         else:
-            context = {'form': ProjectForm(initial=project),
+            context = {'form': ProjectForm(initial=project.body),
                        'project': project}
             return render(request, 'ids_projects/projects/create.html', context)
 
