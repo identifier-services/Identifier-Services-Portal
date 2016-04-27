@@ -13,6 +13,7 @@ import json, logging
 from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
 from ..models import Project, Specimen, Process
 from helper import client, collapse_meta
+from requests import HTTPError
 
 
 logger = logging.getLogger(__name__)
@@ -69,98 +70,82 @@ def view(request, process_uuid):
 @login_required
 def create(request):
     """Create a new process related to a specimen"""
+    specimen_uuid = request.GET.get('specimen_uuid', None)
+    specimen = Specimen(uuid=specimen_uuid)
 
-    specimen_uuid = None
-
-    if request.method == 'GET':
-        specimen_uuid = request.GET.get('specimen_uuid')
-    elif request.method == 'POST':
-        specimen_uuid = request.POST.get('specimen_uuid')
-
-    ###
-    # we need to get the project so that we know what types of processes to list
-    ###
-
-    # get association ids
-    a = client(request)
-    specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
-    specimen = collapse_meta(specimen_raw)
-    associationIds = specimen['associationIds']
-    project = None
-
-    # find the project
-    query = {'uuid': {'$in': associationIds}}
-    results_raw = a.meta.listMetadata(q=json.dumps(query))
-    results = map(collapse_meta, results_raw)
-    for result in results:
-        if result['name'] == 'idsvc.project':
-            project = result
-
-    investigation_type = project['investigation_type'].lower()
-
-    ###
-    # now that we know the type of project, we can list relevant process types
-    ###
+    project = specimen.project
+    investigation_type = project.value['investigation_type'].lower()
 
     object_descriptions = getattr(settings, 'OBJ_DESCR')
     investigation_types = object_descriptions['investigation_types']
+
     project_description = investigation_types[investigation_type]
     project_processes = project_description['processes']
-    process_type_list = [(x,x.title()) for x in project_processes.keys()]
-    process_type_list = [('', 'Choose one'),] + process_type_list
-    context = {'project': project,
-               'specimen': specimen,
-               'process': None}
+
+    process_type_choices = [('', 'Choose one'),] + \
+                            [(x,x.title()) for x in project_processes.keys()]
+
+    context = {'specimen':specimen}
+
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+        context['form_a'] = form_a = ProcessTypeForm(process_type_choices)
+        context['form_b'] = None
 
     ########
     # POST #
     ########
-    if request.method == 'POST':
+    elif request.method == 'POST':
 
-        process_fields = []
-        if 'process_type' in request.POST:
-            process_type = request.POST.get('process_type')
-            process_fields = project_processes[process_type]['fields']
+        process_type = request.POST.get('process_type')
+        process_fields = project_processes[process_type]['fields']
 
-        form_a = ProcessTypeForm(process_type_list, request.POST)
+        form_a = ProcessTypeForm(process_type_choices, request.POST)
         form_a.fields['process_type'].widget.attrs['readonly'] = True
-        form_a.fields['process_type'].widget.attrs['disabled'] = True
 
-        if 'type_selected' in request.POST:
-            form_b = ProcessFieldsForm(process_fields, request.POST)
-        else:
+        # bug fix, if we disable this field, we won't get the value on the next post
+        # form_a.fields['process_type'].widget.attrs['disabled'] = True
+
+        ######################################
+        # POST includes 'form_a' fields only #
+        ######################################
+        if not 'process_fields' in request.POST:
             form_b = ProcessFieldsForm(process_fields)
+            context['form_a'] = form_a
+            context['form_b'] = form_b
 
-        # add specimen uuid to association ids
-        associationIds.append(specimen_uuid)
+        ########################################
+        # POST includes form_a & form_b fields #
+        ########################################
+        else:
+            form_b = ProcessFieldsForm(process_fields, request.POST)
 
-        if not request.is_ajax():
             if form_a.is_valid() and form_b.is_valid():
-                data = form_a.cleaned_data.copy()
-                data.update(form_b.cleaned_data.copy())
-
                 logger.debug('Process form is valid')
 
-                new_process = {
-                    "name":"idsvc.process",
-                    "associationIds": associationIds,
-                    "value": data
-                }
+                data = {}
+                data.update(form_a.cleaned_data.copy())
+                data.update(form_b.cleaned_data.copy())
+
+                associationIds = specimen.associationIds
+                associationIds.append(specimen.uuid)
+
+                new_process = Process()
+                new_process.associationIds = associationIds
+                new_process.value = data
 
                 try:
-                    response = a.meta.addMetadata(body=new_process)
-                except Exception as e:
-                    logger.debug('Error while attempting to create process metadata: %s' % e)
-                else:
+                    response = new_process.save()
+                    process_uuid = response['uuid']
+                    logger.debug('Successfully created process: {}'.format(process_uuid))
                     messages.success(request, 'Successfully created process.')
-                    return HttpResponseRedirect('/process/{}'.format(response['uuid']))
-
-    else:
-        form_a = ProcessTypeForm(process_type_list)
-        form_b = None
-
-    context['form_a'] = form_a
-    context['form_b'] = form_b
+                    return HttpResponseRedirect('/process/{}'.format(process_uuid))
+                except HTTPError as e:
+                    logger.debug('Error while attempting to create process metadata: %s' % e)
+                    messages.error(request, 'Encountered error, process not created.')
+                    return HttpResponseRedirect('/specimen/{}'.format(specimen_uuid))
 
     if request.is_ajax():
         return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
