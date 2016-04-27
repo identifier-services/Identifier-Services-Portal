@@ -47,7 +47,6 @@
         {% csrf_token %}
         <fieldset id="id_form_a">
             {% bootstrap_form form_a %}
-
             <input type="hidden" id="id_specimen_uuid" name="specimen_uuid" value="{{specimen.uuid}}">
             <input type="hidden" id="id_project_uuid" name="project_uuid" value="{{project.uuid}}">
         </fieldset>
