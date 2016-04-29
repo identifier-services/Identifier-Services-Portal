@@ -19,7 +19,7 @@
         {% else %}
             <div>
                 <button type="submit" class="btn btn-primary">Next</button>
-                <a href="/specimen/{{specimen.uuid}}" class="btn btn-warning pull-right">Cancel</a>
+                <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-warning pull-right">Cancel</a>
             </div>
         {% endif %}
     </fieldset>
