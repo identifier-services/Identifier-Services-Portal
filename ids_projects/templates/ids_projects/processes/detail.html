@@ -6,35 +6,6 @@
 
 {% block breadcrumbs %}
     {{ block.super }}
-
-    {% breadcrumb "Projects" "ids_projects:project-list" %}
-
-    {% if project %}
-        {% if project.short %}
-            {% breadcrumb project.short "ids_projects:project-view" project.uuid %}
-        {% else %}
-            {% breadcrumb "Project" "ids_projects:project-view" project.uuid %}
-        {% endif %}
-    {% endif %}
-
-    {% breadcrumb "Specimens" "ids_projects:specimen-list" project.uuid %}
-
-    {% if specimen %}
-        {% if specimen.short %}
-            {% breadcrumb specimen.short "ids_projects:specimen-view" specimen.uuid %}
-        {% else %}
-            {% breadcrumb "Specimen" "ids_projects:specimen-view" specimen.uuid %}
-        {% endif %}
-    {% endif %}
-
-    {% breadcrumb "Processes" "ids_projects:process-list" specimen.uuid %}
-
-    {% if process.short %}
-        {% breadcrumb process.short "ids_projects:process-view" process.uuid %}
-    {% else %}
-        {% breadcrumb "Process" "ids_projects:process-view" process.uuid %}
-    {% endif %}
-
 {% endblock %}
 
 {% block title %}Process{% endblock %}
@@ -57,11 +28,11 @@
                 </div>
                 <div class="panel-body">
                     <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                    <p><b>Process Type</b> {{ process.value.process_type }}</p>
-                    <p><b>Sequence Method</b> {{ process.value.sequence_method }}</p>
-                    <p><b>Sequence Hardware</b> {{ process.value.equence_hardware }}</p>
-                    <p><b>Assembly Method</b> {{ process.value.assembly_method }}</p>
-                    <p><b>Reference Sequence</b> {{ process.value.reference_sequence }}</p>
+                    {% for key, value in process.value.items %}
+                        {% if key != "process_type" %}
+                        <p><b>{{ key }}</b> {{ value }}</p>
+                        {% endif %}
+                    {% endfor %}
                     <div class="row">
                         <div class="col-xs-1">
                             <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
