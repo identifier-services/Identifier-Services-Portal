@@ -19,12 +19,7 @@
 
     {% include 'includes/messages.html' %}
 
-    {% load django_bootstrap_breadcrumbs %}
-
-    {% block breadcrumbs %}
-        {% clear_breadcrumbs %}
-        {% breadcrumb "Home" "homepage" %}
-    {% endblock %}
+    {% include 'includes/breadcrumbs.html' %}
 
     {% block content %}
     {% endblock %}

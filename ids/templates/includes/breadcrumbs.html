@@ -1,0 +1,59 @@
+{% load django_bootstrap_breadcrumbs %}
+
+{% block breadcrumbs %}
+    {% clear_breadcrumbs %}
+    {% breadcrumb "Home" "homepage" %}
+
+    {#### Project ####}
+
+    {% if projects %}
+        {% breadcrumb "Projects" "ids_projects:project-list"%}
+    {% endif %}
+
+    {% if project %}
+        {% breadcrumb "Project" "ids_projects:project-view" project.uuid %}
+
+        {% if form_project_edit %}
+            {% breadcrumb "Edit Project" "ids_projects:project-edit" project.uuid %}
+        {% endif %}
+
+    {% endif %}
+
+    {% if form_project_create %}
+        {% breadcrumb "Create Project" "ids_projects:project-create" %}
+    {% endif %}
+
+    {#### Specimen ####}
+
+    {% if specimen %}
+        {% breadcrumb "Specimen" "ids_projects:specimen-view" specimen.uuid %}
+
+        {% if form_specimen_edit %}
+            {% breadcrumb "Edit Specimen" "ids_projects:specimen-edit" specimen.uuid %}
+        {% endif %}
+    {% endif %}
+
+    {% if form_specimen_create %}
+        {% breadcrumb "Define Specimen" "ids_projects:specimen-create" %}
+    {% endif %}
+
+    {#### Process ####}
+
+    {% if process %}
+        {% breadcrumb "Process" "ids_projects:process-view" process.uuid %}
+
+        {% if form_process_edit %}
+            {% breadcrumb "Edit Process" "ids_projects:process-edit" process.uuid %}
+        {% endif %}
+    {% endif %}
+
+    {% if form_process_create %}
+        {% breadcrumb "Define Process" "ids_projects:process-create" %}
+    {% endif %}
+
+    {#### Data ####}
+
+    {% if data %}
+        {% breadcrumb "Data" "ids_projects:data-view" data.uuid %}
+    {% endif %}
+{% endblock %}
