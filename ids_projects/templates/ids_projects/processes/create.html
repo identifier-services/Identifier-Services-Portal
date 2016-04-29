@@ -2,67 +2,28 @@
 
 {% load bootstrap3 staticfiles %}
 
-{% load django_bootstrap_breadcrumbs %}
-
-{% block breadcrumbs %}
-    {{ block.super }}
-
-    {% breadcrumb "Projects" "ids_projects:project-list" %}
-
-    {% if project %}
-        {% if project.short %}
-            {% breadcrumb project.short "ids_projects:project-view" project.uuid %}
-        {% else %}
-            {% breadcrumb "Project" "ids_projects:project-view" project.uuid %}
-        {% endif %}
-    {% endif %}
-
-    {% breadcrumb "Specimens" "ids_projects:specimen-list" project.uuid %}
-
-    {% if specimen %}
-        {% if specimen.short %}
-            {% breadcrumb specimen.short "ids_projects:specimen-view" specimen.uuid %}
-        {% else %}
-            {% breadcrumb "Specimen" "ids_projects:specimen-view" specimen.uuid %}
-        {% endif %}
-    {% endif %}
-
-    {% breadcrumb "Processes" "ids_projects:process-list" specimen.uuid %}
-
-    {% if process %}
-        {% breadcrumb "Edit Process" "ids_projects:process-edit" process.uuid %}
-    {% else %}
-        {% breadcrumb "Define Process" "ids_projects:process-create" process.uuid %}
-    {% endif %}
-
-{% endblock %}
-
 {% block title %}Create Process{% endblock %}
 
 {% block content %}
-<div class="container">
-    {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
+<form method="post">
+    {% csrf_token %}
+    <fieldset id="id_form_process_type">
+        {% bootstrap_form form_process_type %}
+        <input type="hidden" id="id_specimen_uuid" name="specimen_uuid" value="{{specimen.uuid}}">
+        <input type="hidden" id="id_project_uuid" name="project_uuid" value="{{project.uuid}}">
+    </fieldset>
 
-    <form method="post">
-        {% csrf_token %}
-        <fieldset id="id_form_a">
-            {% bootstrap_form form_a %}
-            <input type="hidden" id="id_specimen_uuid" name="specimen_uuid" value="{{specimen.uuid}}">
-            <input type="hidden" id="id_project_uuid" name="project_uuid" value="{{project.uuid}}">
-        </fieldset>
-
-        <fieldset id="id_form_b">
-            {% if form_b %}
-                {% include "ids_projects/processes/get_fields_ajax.html" %}
-            {% else %}
-                <div>
-                    <button type="submit" class="btn btn-primary">Next</button>
-                    <a href="/specimen/{{specimen.uuid}}" class="btn btn-warning pull-right">Cancel</a>
-                </div>
-            {% endif %}
-        </fieldset>
-    </form>
-</div>
+    <fieldset id="id_form_process_fields">
+        {% if form_process_fields %}
+            {% include "ids_projects/processes/get_fields_ajax.html" %}
+        {% else %}
+            <div>
+                <button type="submit" class="btn btn-primary">Next</button>
+                <a href="/specimen/{{specimen.uuid}}" class="btn btn-warning pull-right">Cancel</a>
+            </div>
+        {% endif %}
+    </fieldset>
+</form>
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'ids_projects/add_process.js' %}"></script>

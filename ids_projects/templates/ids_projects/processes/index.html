@@ -2,124 +2,87 @@
 
 {% load bootstrap3 %}
 
-{% load django_bootstrap_breadcrumbs %}
-
-{% block breadcrumbs %}
-    {{ block.super }}
-
-    {% breadcrumb "Projects" "ids_projects:project-list" %}
-
-    {% if project %}
-        {% if project.short %}
-            {% breadcrumb project.short "ids_projects:project-view" project.uuid %}
-        {% else %}
-            {% breadcrumb "Project" "ids_projects:project-view" project.uuid %}
-        {% endif %}
-    {% endif %}
-
-    {% breadcrumb "Specimens" "ids_projects:specimen-list" project.uuid %}
-
-    {% if specimen %}
-        {% if specimen.short %}
-            {% breadcrumb specimen.short "ids_projects:specimen-view" specimen.uuid %}
-        {% else %}
-            {% breadcrumb "Specimen" "ids_projects:specimen-view" specimen.uuid %}
-        {% endif %}
-    {% endif %}
-
-    {% breadcrumb "Processes" "ids_projects:process-list" specimen.uuid %}
-
-{% endblock %}
-
 {% block title %}Processes{% endblock %}
 
+{% block create_button %}
+    <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary pull-right">Create Process</a>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-xs-9">
-            <!-- <h2 id="projects-header">Processes</h2> -->
-            {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
+<div class="col-xs-6 col-md-4">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h1 class="panel-title">Project</h1>
         </div>
-        <div class="col-xs-3">
-            <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary pull-right">Create Process</a>
-        </div>
-    </div>
-
-    <div class="col-xs-6 col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h1 class="panel-title">Project</h1>
-            </div>
-            <div class="panel-body">
-                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                <p><b>Project Name: </b> {{ project.value.title }}</p>
-                <p><b>Investigation Type: </b> {{ project.value.investigation_type }}</p>
-                <p><b>Description: </b> {{ project.value.description }}</p>
-                <div class="row">
-                    <div class="col-xs-3">
-                        <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
-                    </div>
-                    <div class="col-xs-3 col-xs-offset-4 col-sm-offset-5">
-                        <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
-                    </div>
+        <div class="panel-body">
+            <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+            <p><b>Project Name: </b> {{ project.value.title }}</p>
+            <p><b>Investigation Type: </b> {{ project.value.investigation_type }}</p>
+            <p><b>Description: </b> {{ project.value.description }}</p>
+            <div class="row">
+                <div class="col-xs-3">
+                    <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
+                </div>
+                <div class="col-xs-3 col-xs-offset-4 col-sm-offset-5">
+                    <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-xs-6 col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h1 class="panel-title">{{specimen.value.taxon_name}} {{specimen.value.specimen_id}}</h1>
-            </div>
-            <div class="panel-body">
-                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                <p><b>Taxon Name</b> {{ specimen.value.taxon_name }}</p>
-                <p><b>Specimen ID</b> {{ specimen.value.specimen_id }}</p>
-                <p><b>Organ/Tissue</b> {{ specimen.value.organ_or_tissue }}</p>
-                <p><b>Developmental Stage</b> {{ specimen.value.developmental_stage }}</p>
-                <p><b>Haploid Chromosone Count</b> {{ specimen.value.haploid_chromosome_count }}</p>
-                <p><b>Ploidy</b> {{ specimen.value.ploidy }}</p>
-                <p><b>Propagation</b> {{ specimen.value.propagation }}</p>
-                <p><b>Estimated Genome Size</b> {{ specimen.value.estimated_genome_size }}</p>
-                <div class="row">
-                    <div class="col-xs-3">
-                        <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-primary">View</a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="{% url 'ids_projects:specimen-edit' specimen_uuid=specimen.uuid %}" class="btn btn-primary">Edit</a>
-                    </div>
-                    <div class="col-xs-3 col-xs-offset-1 col-sm-offset-2">
-                        <a href="{% url 'ids_projects:specimen-delete' specimen_uuid=specimen.uuid %}" class="btn btn-danger">Delete</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {% for process in processes %}
-    <div class="col-xs-6 col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h1 class="panel-title">{{ process.value.process_type }}</h1>
-            </div>
-            <div class="panel-body">
-                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                <p><b>Process Type</b> {{ process.value.process_type }}</p>
-                <p><b>Sequence Method</b> {{ process.value.sequence_method }}</p>
-                <p><b>Sequence Hardware</b> {{ process.svalue.equence_hardware }}</p>
-                <p><b>Assembly Method</b> {{ process.value.assembly_method }}</p>
-                <p><b>Reference Sequence</b> {{ process.value.reference_sequence }}</p>
-                <div class="row">
-                    <div class="col-xs-1">
-                        <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
-                    </div>
-                    <div class="col-xs-1 pull-right col-xs-pull-2 col-sm-pull-3 col-md-pull-2">
-                        <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
 </div>
+<div class="col-xs-6 col-md-4">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h1 class="panel-title">{{specimen.value.taxon_name}} {{specimen.value.specimen_id}}</h1>
+        </div>
+        <div class="panel-body">
+            <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+            <p><b>Taxon Name</b> {{ specimen.value.taxon_name }}</p>
+            <p><b>Specimen ID</b> {{ specimen.value.specimen_id }}</p>
+            <p><b>Organ/Tissue</b> {{ specimen.value.organ_or_tissue }}</p>
+            <p><b>Developmental Stage</b> {{ specimen.value.developmental_stage }}</p>
+            <p><b>Haploid Chromosone Count</b> {{ specimen.value.haploid_chromosome_count }}</p>
+            <p><b>Ploidy</b> {{ specimen.value.ploidy }}</p>
+            <p><b>Propagation</b> {{ specimen.value.propagation }}</p>
+            <p><b>Estimated Genome Size</b> {{ specimen.value.estimated_genome_size }}</p>
+            <div class="row">
+                <div class="col-xs-3">
+                    <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-primary">View</a>
+                </div>
+                <div class="col-xs-3">
+                    <a href="{% url 'ids_projects:specimen-edit' specimen_uuid=specimen.uuid %}" class="btn btn-primary">Edit</a>
+                </div>
+                <div class="col-xs-3 col-xs-offset-1 col-sm-offset-2">
+                    <a href="{% url 'ids_projects:specimen-delete' specimen_uuid=specimen.uuid %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for process in processes %}
+<div class="col-xs-6 col-md-4">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h1 class="panel-title">{{ process.value.process_type }}</h1>
+        </div>
+        <div class="panel-body">
+            <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+            <p><b>Process Type</b> {{ process.value.process_type }}</p>
+            <p><b>Sequence Method</b> {{ process.value.sequence_method }}</p>
+            <p><b>Sequence Hardware</b> {{ process.svalue.equence_hardware }}</p>
+            <p><b>Assembly Method</b> {{ process.value.assembly_method }}</p>
+            <p><b>Reference Sequence</b> {{ process.value.reference_sequence }}</p>
+            <div class="row">
+                <div class="col-xs-1">
+                    <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
+                </div>
+                <div class="col-xs-1 pull-right col-xs-pull-2 col-sm-pull-3 col-md-pull-2">
+                    <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

@@ -2,53 +2,24 @@
 
 {% load bootstrap3 %}
 
-{% load django_bootstrap_breadcrumbs %}
-
-{% block breadcrumbs %}
-    {{ block.super }}
-
-    {% breadcrumb "Projects" "ids_projects:project-list" %}
-
-    {% if project %}
-        {% if project.short %}
-            {% breadcrumb project.short "ids_projects:project-view" project.uuid %}
-        {% else %}
-            {% breadcrumb "Project" "ids_projects:project-view" project.uuid %}
-        {% endif %}
-    {% endif %}
-
-    {% breadcrumb "Specimens" "ids_projects:specimen-list" project.uuid %}
-
-    {% if specimen %}
-        {% breadcrumb "Edit Specimen" "" %}
-    {% else %}
-        {% breadcrumb "Define Specimen" "" %}
-    {% endif %}
-
-{% endblock %}
-
 {% block title %}Create Specimen{% endblock %}
 
 {% block content %}
-<div class="container">
-    {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
+<form method="post">
+    {% csrf_token %}
+    {% bootstrap_form form %}
 
-    <form method="post">
-        {% csrf_token %}
-        {% bootstrap_form form %}
+    <input type="hidden" id="id_project_uuid" name="project_uuid" value="{{project.uuid}}">
 
-        <input type="hidden" id="id_project_uuid" name="project_uuid" value="{{project.uuid}}">
-
-        <div>
-            <button type="submit" class="btn btn-primary">Save</button>
-            {% if specimen %} {# specimen exists if we are editing #}
-                <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-warning pull-right">Cancel</a>
-            {% elif project %}
-                <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-warning pull-right">Cancel</a>
-            {% else %}
-                <a href="{% url 'ids_projects:project-list' %}" class="btn btn-warning pull-right">Cancel</a>
-            {% endif %}
-        </div>
-    </form>
-</div>
+    <div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        {% if specimen %} {# specimen exists if we are editing #}
+            <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+        {% elif project %}
+            <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+        {% else %}
+            <a href="{% url 'ids_projects:project-list' %}" class="btn btn-warning pull-right">Cancel</a>
+        {% endif %}
+    </div>
+</form>
 {% endblock %}

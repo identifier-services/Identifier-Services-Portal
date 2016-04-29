@@ -2,78 +2,66 @@
 
 {% load bootstrap3 %}
 
-{% load django_bootstrap_breadcrumbs %}
-
-{% block breadcrumbs %}
-    {{ block.super }}
-{% endblock %}
-
 {% block title %}Process{% endblock %}
 
+{% block create_button %}
+    <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Data</a>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-xs-9">
-            {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
-        </div>
-        <div class="col-xs-3">
-            <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Data</a>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-6 col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h1 class="panel-title">{{ process.value.process_type }}</h1>
-                </div>
-                <div class="panel-body">
-                    <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                    {% for key, value in process.value.items %}
-                        {% if key != "process_type" %}
-                        <p><b>{{ key }}</b> {{ value }}</p>
-                        {% endif %}
-                    {% endfor %}
-                    <div class="row">
-                        <div class="col-xs-1">
-                            <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
-                        </div>
-                        <div class="col-xs-1 pull-right col-xs-pull-2 col-sm-pull-3 col-md-pull-2">
-                            <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
-                        </div>
+<div class="row">
+    <div class="col-xs-6 col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1 class="panel-title">{{ process.value.process_type }}</h1>
+            </div>
+            <div class="panel-body">
+                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                {% for key, value in process.value.items %}
+                    {% if key != "process_type" %}
+                    <p><b>{{ key }}</b> {{ value }}</p>
+                    {% endif %}
+                {% endfor %}
+                <div class="row">
+                    <div class="col-xs-1">
+                        <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
+                    </div>
+                    <div class="col-xs-1 pull-right col-xs-pull-2 col-sm-pull-3 col-md-pull-2">
+                        <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">
-            {% if not datas %}
-            <div class="object-header dark">
-                <div>
-                    No data associated with {{ process.value.process_type }}
-                    <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
-                </div>
-            </div>
-            {% else %}
-            <div class="object-header dark">
-                <div>
-                    Data associated with {{ process.value.process_type }}
-                    <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
-                </div>
-            </div>
-
-                <div class="info-panel">
-
-                    {% for data in datas %}
-
-                    <div class="object-header">
-                        <!-- TODO: view file -->
-                        <a href="#" class="header-link">{{ data.value.name }}</a>
-                        <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger btn-sm pull-right fix-me">Delete</a>
-                    </div>
-
-                    {% endfor %}
-                </div>
-            {% endif %}
-            </div>
     </div>
+    <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">
+        {% if not datas %}
+        <div class="object-header dark">
+            <div>
+                No data associated with {{ process.value.process_type }}
+                <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="object-header dark">
+            <div>
+                Data associated with {{ process.value.process_type }}
+                <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+            </div>
+        </div>
+
+            <div class="info-panel">
+
+                {% for data in datas %}
+
+                <div class="object-header">
+                    <!-- TODO: view file -->
+                    <a href="#" class="header-link">{{ data.value.name }}</a>
+                    <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger btn-sm pull-right fix-me">Delete</a>
+                </div>
+
+                {% endfor %}
+            </div>
+        {% endif %}
+        </div>
 </div>
 {% endblock %}

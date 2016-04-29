@@ -16,13 +16,28 @@
   <body>
     {% include 'includes/header.html' %}
     {% include 'includes/navigation.html' %}
-
     {% include 'includes/messages.html' %}
-
     {% include 'includes/breadcrumbs.html' %}
-
-    {% block content %}
-    {% endblock %}
+    {% load django_bootstrap_breadcrumbs %}
+    <div class="container">
+        <div class="row">
+            <!-- TODO: make this work -->
+            {% if self.create_button %}
+            <div class="col-xs-9">
+                {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
+            </div>
+            <div class="col-xs-3">
+                {% block create_button %}{% endblock %}
+            </div>
+            {% else %}
+            <div class="col-xs-12">
+                {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
+            </div>
+            {% endif %}
+        </div>
+        {% block content %}
+        {% endblock %}
+    </div>
 
     {% include 'includes/footer.html' %}
     <!-- scripts -->

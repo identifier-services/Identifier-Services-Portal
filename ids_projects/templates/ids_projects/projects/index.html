@@ -2,45 +2,33 @@
 
 {% load bootstrap3 %}
 
-{% load django_bootstrap_breadcrumbs %}
-
-{% block breadcrumbs %}
-    {{ block.super }}
-{% endblock %}
-
 {% block title %}Projects{% endblock %}
 
+{% block create_button %}
+    <a href="{% url 'ids_projects:project-create' %}" class="btn btn-primary pull-right">Create Project</a>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-xs-9">
-            {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
-        </div>
-        <div class="col-xs-3">
-            <a href="{% url 'ids_projects:project-create' %}" class="btn btn-primary pull-right">Create Project</a>
-        </div>
-    </div>
-    <div class="row">
-    {% for project in projects %}
-        <div class="col-xs-6 col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                    <p><h4>{{ project.value.title }}</h4>
-                    <b>Type: </b>{{ project.value.investigation_type }}</p>
-                    <p><b>Description: </b>{{ project.value.description }}</p>
-                    <div class="row">
-                        <div class="col-xs-3">
-                            <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-primary">View</a>
-                        </div>
-                        <div class="col-xs-3 col-xs-offset-4 col-sm-offset-5">
-                            <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
-                        </div>
+<div class="row">
+{% for project in projects %}
+    <div class="col-xs-6 col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                <p><h4>{{ project.value.title }}</h4>
+                <b>Type: </b>{{ project.value.investigation_type }}</p>
+                <p><b>Description: </b>{{ project.value.description }}</p>
+                <div class="row">
+                    <div class="col-xs-3">
+                        <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-primary">View</a>
+                    </div>
+                    <div class="col-xs-3 col-xs-offset-4 col-sm-offset-5">
+                        <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
                     </div>
                 </div>
             </div>
         </div>
-    {% endfor %}
     </div>
+{% endfor %}
 </div>
 {% endblock %}
