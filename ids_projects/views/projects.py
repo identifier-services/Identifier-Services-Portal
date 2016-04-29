@@ -67,7 +67,7 @@ def create(request):
     #######
     if request.method == 'GET':
 
-        context = {'form': ProjectForm(), 'project': None}
+        context = {'form_project_create': ProjectForm(), 'project': None}
         return render(request, 'ids_projects/projects/create.html', context)
 
     ########
@@ -119,7 +119,7 @@ def edit(request, project_uuid):
             messages.error(request, 'Project not found.')
             return HttpResponseRedirect('/projects/')
         else:
-            context = {'form': ProjectForm(initial=project.body),
+            context = {'form_project_edit': ProjectForm(initial=project.body),
                        'project': project}
             return render(request, 'ids_projects/projects/create.html', context)
 
