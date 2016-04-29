@@ -75,7 +75,7 @@ def file_select(request):
             'systems': a.systems.list(type='STORAGE'),
         }
 
-        return render(request, 'ids_projects/data/add_data.html', context)
+        return render(request, 'ids_projects/data/select_files.html', context)
 
     ########
     # POST #

@@ -38,7 +38,7 @@
         if (postdata.process_type) {
             $.post(url, postdata)
             .then(function(response) {
-                $('#id_form_b').html(response);
+                $('#id_form_process_fields').html(response);
                 $('#id_process_type').attr('disabled', true);
                 $('#id_process_type').attr('readonly', true);
             });

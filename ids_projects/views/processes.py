@@ -85,14 +85,15 @@ def create(request):
     process_type_choices = [('', 'Choose one'),] + \
                             [(x,x.title()) for x in project_processes.keys()]
 
-    context = {'specimen':specimen}
+    context = { 'project':project,
+                'specimen':specimen }
 
     #######
     # GET #
     #######
     if request.method == 'GET':
-        context['form_a'] = form_a = ProcessTypeForm(process_type_choices)
-        context['form_b'] = None
+        context['form_process_type'] = form_process_type = ProcessTypeForm(process_type_choices)
+        context['form_process_fields'] = None
 
     ########
     # POST #
@@ -102,32 +103,32 @@ def create(request):
         process_type = request.POST.get('process_type')
         process_fields = project_processes[process_type]['fields']
 
-        form_a = ProcessTypeForm(process_type_choices, request.POST)
-        form_a.fields['process_type'].widget.attrs['readonly'] = True
+        form_process_type = ProcessTypeForm(process_type_choices, request.POST)
+        form_process_type.fields['process_type'].widget.attrs['readonly'] = True
 
         # bug fix, if we disable this field, we won't get the value on the next post
-        # form_a.fields['process_type'].widget.attrs['disabled'] = True
+        # form_process_type.fields['process_type'].widget.attrs['disabled'] = True
 
         ######################################
-        # POST includes 'form_a' fields only #
+        # POST includes 'form_process_type' fields only #
         ######################################
         if not 'process_fields' in request.POST:
-            form_b = ProcessFieldsForm(process_fields)
-            context['form_a'] = form_a
-            context['form_b'] = form_b
+            form_process_fields = ProcessFieldsForm(process_fields)
+            context['form_process_type'] = form_process_type
+            context['form_process_fields'] = form_process_fields
 
         ########################################
-        # POST includes form_a & form_b fields #
+        # POST includes form_process_type & form_process_fields fields #
         ########################################
         else:
-            form_b = ProcessFieldsForm(process_fields, request.POST)
+            form_process_fields = ProcessFieldsForm(process_fields, request.POST)
 
-            if form_a.is_valid() and form_b.is_valid():
+            if form_process_type.is_valid() and form_process_fields.is_valid():
                 logger.debug('Process form is valid')
 
                 data = {'process_type':process_type}
-                data.update(form_a.cleaned_data.copy())
-                data.update(form_b.cleaned_data.copy())
+                data.update(form_process_type.cleaned_data.copy())
+                data.update(form_process_fields.cleaned_data.copy())
 
                 associationIds = specimen.associationIds
                 associationIds.append(specimen.uuid)
