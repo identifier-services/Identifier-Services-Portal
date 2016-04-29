@@ -80,7 +80,7 @@ def create(request):
         project_raw = a.meta.getMetadata(uuid=project_uuid)
         project = collapse_meta(project_raw)
 
-        context = {'form': SpecimenForm(),
+        context = {'form_specimen_create': SpecimenForm(),
                    'project': project,
                    'specimen': None}
 
@@ -172,7 +172,7 @@ def edit(request, specimen_uuid):
                 if result['name'] == 'idsvc.project':
                     project = result
 
-            context = {'form': SpecimenForm(initial=specimen),
+            context = {'form_specimen_edit': SpecimenForm(initial=specimen),
                        'specimen': specimen,
                        'project': project}
             return render(request, 'ids_projects/specimens/create.html', context)

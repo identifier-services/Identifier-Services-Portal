@@ -7,8 +7,13 @@
 {% block content %}
 <form method="post">
     {% csrf_token %}
-    {% bootstrap_form form %}
 
+    {% if form_specimen_create %}
+        {% bootstrap_form form_specimen_create %}
+    {% elif form_specimen_edit %}
+        {% bootstrap_form form_specimen_edit %}
+    {% endif %}
+    
     <input type="hidden" id="id_project_uuid" name="project_uuid" value="{{project.uuid}}">
 
     <div>
