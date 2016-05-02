@@ -182,7 +182,7 @@ def edit(request, process_uuid):
     # GET #
     #######
     if request.method == 'GET':
-        context = {'form': ProcessFieldsForm(process_fields, initial=process.body),
+        context = {'form_process_edit': ProcessFieldsForm(process_fields, initial=process.body),
                    'specimen': process.specimen,
                    'project': process.project,
                    'process': process}
@@ -206,112 +206,6 @@ def edit(request, process_uuid):
                 logger.error('Error editing process. {}'.format(e.message))
                 messages.error(request, 'Error editing process.')
                 return HttpResponseRedirect('/process/{}'.format(process_uuid))
-
-
-@login_required
-def _edit(request, process_uuid):
-    """ """
-    #######
-    # GET #
-    #######
-    if request.method == 'GET':
-
-        a = client(request)
-        try:
-            # get the process metadata object
-            process_raw = a.meta.getMetadata(uuid=process_uuid)
-            process = collapse_meta(process_raw)
-        except:
-            logger.error('Error editing process. {}'.format(e.message))
-            messages.error(request, 'Process not found.')
-
-            return HttpResponseRedirect('/projects/')
-        else:
-            project = None
-            specimen = None
-
-            # find the project and specimen that the process is associated with
-            associationIds = process['associationIds']
-            query = {'uuid': { '$in': associationIds }}
-            results_raw = a.meta.listMetadata(q=json.dumps(query))
-            results = map(collapse_meta, results_raw)
-            for result in results:
-                if result['name'] == 'idsvc.project':
-                    project = result
-                if result['name'] == 'idsvc.specimen':
-                    specimen = result
-
-            context = {'form': ProcessForm(initial=process),
-                       'specimen': specimen,
-                       'project': project,
-                       'process': process}
-
-            return render(request, 'ids_projects/processes/create.html', context)
-
-    ########
-    # POST #
-    ########
-    elif request.method == 'POST':
-
-        # get the association fields
-        a = client(request)
-        try:
-            # get the specimen metadata object
-            process_raw = a.meta.getMetadata(uuid=process_uuid)
-            process = collapse_meta(process_raw)
-        except:
-            logger.error('Error editing specimen. {}'.format(e.message))
-            messages.error(request, 'Process not found.')
-
-            return HttpResponseRedirect('/projects/')
-        else:
-            associationIds = process['associationIds']
-
-        form = ProcessForm(request.POST)
-
-        if form.is_valid():
-
-            logger.debug('Process form is valid')
-
-            process_type = form.cleaned_data['process_type']
-            sequence_method = form.cleaned_data['sequence_method']
-            sequence_hardware = form.cleaned_data['sequence_hardware']
-            assembly_method = form.cleaned_data['assembly_method']
-            reference_sequence = form.cleaned_data['reference_sequence']
-
-            new_process = {
-                "name" : 'idsvc.process',
-                "associationIds" : associationIds,
-                "value": {
-                    "process_type":process_type,
-                    "sequence_method":sequence_method,
-                    "sequence_hardware":sequence_hardware,
-                    "assembly_method":assembly_method,
-                    "reference_sequence":reference_sequence
-                }
-            }
-
-            try:
-                response = a.meta.updateMetadata(uuid=process_uuid, body=new_process)
-            except Exception as e:
-                logger.debug('Error while attempting to edit process metadata: %s' % e)
-                messages.error(request, 'Error while attempting to edit process.')
-            else:
-                messages.success(request, 'Successfully edited process.')
-                return HttpResponseRedirect('/process/{}'.format(response['uuid']))
-
-        else:
-
-            logger.debug('Process form is not valid')
-
-        messages.info(request, 'Did not edit process.')
-        return HttpResponseRedirect('/process/{}'.format(process_uuid))
-
-    #########
-    # OTHER #
-    #########
-    else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
 
 
 @login_required
