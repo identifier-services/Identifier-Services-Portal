@@ -6,6 +6,9 @@ class DynamicForm(forms.Form):
         super(DynamicForm, self).__init__(*args, **kwargs)
         for f in fields:
             self.fields[f['id']] = self._construct_form_field(f)
+        for key in self.initial['value'].iterkeys():
+            if key in self.fields:
+                self.fields[key].initial = self.initial['value'][key]
 
     class Meta:
         abstract = True
@@ -32,3 +35,12 @@ class DynamicForm(forms.Form):
         instance = self.metadata_model()
         instance.value = self.cleaned_data
         instance.save()
+
+def __init__(self, *args, **kwargs):
+    super(ProjectForm, self).__init__(*args, **kwargs)
+    try:
+        for key in self.initial['value'].iterkeys():
+            if key in self.fields:
+                self.fields[key].initial = self.initial['value'][key]
+    except Exception as e:
+        logger.debug('New project, no initial values.')
