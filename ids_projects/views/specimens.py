@@ -14,6 +14,7 @@ import json, logging
 from ..forms.specimens import SpecimenForm
 from ..models import Project, Specimen
 from helper import client, collapse_meta
+from requests import HTTPError
 
 
 logger = logging.getLogger(__name__)
@@ -64,21 +65,18 @@ def view(request, specimen_uuid):
 @login_required
 def create(request):
     """Create a new specimen related to a project"""
+    project_uuid = request.GET.get('project_uuid', False)
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        project_uuid = request.GET.get('project_uuid', False)
-
         if not project_uuid:
             messages.error(request, 'No project uuid')
             return HttpResponseRedirect(reverse('ids_projects:project-list'))
 
-        # get the project
-        a = client(request)
-        project_raw = a.meta.getMetadata(uuid=project_uuid)
-        project = collapse_meta(project_raw)
+        project = Project(uuid=project_uuid)
 
         context = {'form_specimen_create': SpecimenForm(),
                    'project': project,
@@ -91,51 +89,37 @@ def create(request):
     ########
     elif request.method == 'POST':
 
-        project_uuid = request.POST.get('project_uuid', False)
         form = SpecimenForm(request.POST)
 
         if form.is_valid():
 
-            taxon_name = form.cleaned_data['taxon_name']
-            specimen_id = form.cleaned_data['specimen_id']
-            organ_or_tissue = form.cleaned_data['organ_or_tissue']
-            developmental_stage = form.cleaned_data['developmental_stage']
-            haploid_chromosome_count = form.cleaned_data['haploid_chromosome_count']
-            ploidy = form.cleaned_data['ploidy']
-            propagation = form.cleaned_data['propagation']
-            estimated_genome_size = form.cleaned_data['estimated_genome_size']
+            # TODO: for some reason the project_uuid looks like it's actually the uuid for a specimen
+            body = { 'associationIds':[project_uuid],
+                     'value':form.cleaned_data }
 
-            associationIds = [project_uuid]
-
-            new_specimen = {
-                "name":"idsvc.specimen",
-                "associationIds": associationIds,
-                "value": {
-                    "taxon_name":taxon_name,
-                    "specimen_id":specimen_id,
-                    "organ_or_tissue":organ_or_tissue,
-                    "developmental_stage":developmental_stage,
-                    "haploid_chromosome_count":haploid_chromosome_count,
-                    "ploidy":ploidy,
-                    "propagation":propagation,
-                    "estimated_genome_size":estimated_genome_size,
-                }
-            }
-
-            a = client(request)
             try:
-                response = a.meta.addMetadata(body=new_specimen)
+                specimen = Specimen(initial_data = body)
+                result = specimen.save()
+                if not 'uuid' in result:
+                    raise Exception('Invalid API response: {}.'.format(result))
+                specimen_uuid = result['uuid']
+                success_msg = 'Successfully created specimen.'
+                logger.debug(success_msg)
+                messages.success(request, success_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:specimen-view',
+                                    kwargs={'specimen_uuid': specimen_uuid}))
+            except HTTPError as e:
+                logger.debug('Error while attempting to create specimen metadata: %s' % e)
             except Exception as e:
                 logger.debug('Error while attempting to create specimen metadata: %s' % e)
-            else:
-                messages.success(request, 'Successfully created specimen.')
-                return HttpResponseRedirect('/specimen/{}'.format(response['uuid']))
 
-        messages.info(request, 'Did not create new specimen.')
-        if project_uuid:
-            return HttpResponseRedirect('/project/{}'.format(project_uuid))
-        else:
-            return HttpResponseRedirect('/projects')
+        # execution falls through to here if an exception is caught, or the form is not valid
+        messages.error(request, 'Encountered error while creating new Specimen.')
+        return HttpResponseRedirect(
+                        reverse('ids_projects:project-view',
+                            kwargs={'project_uuid': project_uuid}))
+
     #########
     # OTHER #
     #########
