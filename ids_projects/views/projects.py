@@ -135,7 +135,7 @@ def edit(request, project_uuid):
             body = {}
             body['value'] = form.cleaned_data
             project = Project(uuid = project_uuid, initial_data = body)
-            result = oroject.save()
+            result = project.save()
 
             if 'uuid' in result:
                 project_uuid = result['uuid']

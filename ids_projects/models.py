@@ -133,7 +133,7 @@ class Specimen(BaseMetadata):
             associationIds = self.body['associationIds']
             query = {'uuid': { '$in': associationIds }, 'name': Project.name}
             results = self.ag.meta.listMetadata(q=json.dumps(query))
-            self._project = Project(initial_data = next(iter(results)))
+            self._project = Project(initial_data = next(iter(results), None))
 
         return self._project
 
