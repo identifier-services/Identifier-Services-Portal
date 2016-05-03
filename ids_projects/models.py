@@ -23,25 +23,25 @@ class BaseMetadata(object):
             self.load()
 
         if initial_data is not None:
-            self.set_values(initial_data)
+            self.set_initial(initial_data)
 
-    def set_values(self, metadata):
-        if 'uuid' in metadata:
-            self.uuid = metadata['uuid']
-        if 'associationIds' in metadata:
-            self.associationIds = metadata['associationIds']
-        if 'created' in metadata:
-            self.created = metadata['created']
-        if 'lastUpdated' in metadata:
-            self.lastUpdated = metadata['lastUpdated']
-        if '_links' in metadata:
-            self.links = metadata['_links']
-        if 'value' in metadata:
-            self.value = metadata['value']
+    def set_initial(self, initial_data):
+        if 'uuid' in initial_data:
+            self.uuid = initial_data['uuid']
+        if 'associationIds' in initial_data:
+            self.associationIds = initial_data['associationIds']
+        if 'created' in initial_data:
+            self.created = initial_data['created']
+        if 'lastUpdated' in initial_data:
+            self.lastUpdated = initial_data['lastUpdated']
+        if '_links' in initial_data:
+            self.links = initial_data['_links']
+        if 'value' in initial_data:
+            self.value = initial_data['value']
 
     def load(self):
         meta = self.ag.meta.getMetadata(uuid=self.uuid)
-        self.set_values(meta)
+        self.set_initial(meta)
 
     def save(self):
         if self.uuid is None:
@@ -233,3 +233,147 @@ class Data(BaseMetadata):
 
     def __init__(self, *args, **kwargs):
         super(Data, self).__init__(*args, **kwargs)
+
+class System(object):
+
+    def __init__(self, system_id=None, initial_data=None):
+        self.ag = Agave(api_server=settings.AGAVE_TENANT_BASEURL,
+                        token=settings.AGAVE_SUPER_TOKEN)
+        self.id = None
+        self.name = None
+        self.type = None
+        self.description = None
+        self.status = None
+        self.public = None
+        self.default = None
+        self._links = None
+
+        if system_id is not None:
+            self.id = system_id
+            self.load()
+
+        if initial_data is not None:
+            self.set_initial(initial_data)
+
+    def set_initial(self, initial_data):
+        if 'id' in initial_data:
+            self.id = initial_data['id']
+        if 'name' in initial_data:
+            self.name = initial_data['name']
+        if 'type' in initial_data:
+            self.type = initial_data['type']
+        if 'description' in initial_data:
+            self.description = initial_data['description']
+        if 'status' in initial_data:
+            self.status = initial_data['status']
+        if 'public' in initial_data:
+            self.public = initial_data['public']
+        if 'default' in initial_data:
+            self.default = initial_data['default']
+        if '_links' in initial_data:
+            self._links = initial_data['_links']
+
+    @classmethod
+    def list(cls, system_type="STORAGE"):
+        results = Project().ag.systems.list(type=system_type)
+        systems =  [cls(initial_data = r) for r in results]
+        return [system.body for system in systems]
+
+    def load(self):
+        meta = self.ag.systems.get(systemId=self.id)
+        self.set_initial(meta)
+
+    def save(self):
+        # {
+        # 	"id": "demo.execute.example.com",
+        # 	"name": "Demo SGE + GSISSH demo vm",
+        # 	"status": "UP",
+        # 	"type": "EXECUTION",
+        # 	"description": "My example system using gsissh and gridftp to submit jobs used for testing.",
+        # 	"site": "example.com",
+        # 	"executionType": "HPC",
+        # 	"queues": [
+        # 		{
+        # 			"name": "debug",
+        # 			"maxJobs": 100,
+        # 			"maxUserJobs": 10,
+        # 			"maxNodes": 128,
+        # 			"maxMemoryPerNode": "2GB",
+        # 			"maxProcessorsPerNode": 128,
+        # 			"maxRequestedTime": "24:00:00",
+        # 			"customDirectives": "",
+        # 			"default": true
+        # 		}
+        # 	],
+        # 	"login": {
+        # 		"host": "gsissh.example.com",
+        # 		"port": 2222,
+        # 		"protocol": "GSISSH",
+        # 		"scratchDir": "/scratch",
+        # 		"workDir": "/work",
+        # 		"auth": {
+        # 			"username": "demo",
+        # 			"password": "demo",
+        # 			"credential": "",
+        # 			"type": "X509",
+        # 			"server": {
+        # 				"id": "myproxy.teragrid.org",
+        # 				"name": "XSEDE MyProxy Server",
+        # 				"site": "ncsa.uiuc.edu",
+        # 				"endpoint": "myproxy.teragrid.org",
+        # 				"port": 7512,
+        # 				"protocol": "MYPROXY"
+        # 			}
+        # 		}
+        # 	},
+        # 	"storage": {
+        # 		"host": "gridftp.example.com",
+        # 		"port": 2811,
+        # 		"protocol": "GRIDFTP",
+        # 		"rootDir": "/home/demo",
+        # 		"homeDir": "/",
+        # 		"auth": {
+        # 			"username": "demo",
+        # 			"password": "demo",
+        # 			"credential": "",
+        # 			"type": "X509",
+        # 			"server": {
+        # 				"id": "myproxy.teragrid.org",
+        # 				"name": "XSEDE MyProxy Server",
+        # 				"site": "ncsa.uiuc.edu",
+        # 				"endpoint": "myproxy.teragrid.org",
+        # 				"port": 7512,
+        # 				"protocol": "MYPROXY"
+        # 			}
+        # 		}
+        # 	},
+        # 	"maxSystemJobs": 100,
+        # 	"maxSystemJobsPerUser": 10,
+        # 	"scheduler": "SGE",
+        # 	"environment": "",
+        # 	"startupScript": "./bashrc"
+        # }
+        #TODO: implement system save
+        raise(NotImplementedError)
+        if self.id is None:
+            return self.ag.systems.add(fileToUpload=None)
+        else:
+            return self.ag.systems.update(systemId=self.id, body=None)
+
+    def delete(self):
+        #TODO: see if this works
+        raise(NotImplemented)
+        return self.ag.systems.delete(systemId=self.id)
+
+    @property
+    def body(self):
+        return {
+            'id' : self.id,
+            'name' : self.name,
+            'type' : self.type,
+            'description' : self.description,
+            'status' : self.status,
+            'public' : self.public,
+            'default' : self.default,
+            '_links' : self._links,
+        }

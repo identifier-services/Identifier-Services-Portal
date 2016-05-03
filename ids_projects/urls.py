@@ -15,6 +15,24 @@ urlpatterns = patterns(
 )
 
 
+###########
+# Systems #
+###########
+urlpatterns += patterns(
+    'ids_projects.views.systems',
+    # list all systems available to user
+    url(r'^systems/?$', 'list', name='system-list'),
+    # register a system
+    url(r'^system/register/?$', 'create', name='system-create'),
+    # edit a system
+    url(r'^system/edit/(?P<system_id>.+?)$', 'edit', name='system-edit'),
+    # unregister a system
+    url(r'^system/delete/(?P<system_id>.+?)$', 'delete', name='system-delete'),
+    # view a system
+    url(r'^system/(?P<system_id>.+?)$', 'view', name='system-view'),
+)
+
+
 #############
 # Processes #
 #############
