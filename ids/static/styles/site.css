@@ -113,6 +113,10 @@ hr {
     box-shadow: 0px 0px 3px #edecf7;
 }
 
+.padding-right-30 {
+  padding-right: 30px;
+}
+
 /** footer **/
 
 /* sticky footer stuff */
