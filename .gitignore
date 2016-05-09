@@ -5,8 +5,10 @@
 docker/
 .idea/
 ids.env
+ids.env.j2
 *.env
 db.sqlite3
 *.0
 definitions/
 *.ignore
+*.retry

@@ -1,0 +1,38 @@
+---
+- name: Change ownership of application files
+  file: path=/opt/ids state=directory owner=ids group=ids
+
+- name: Change ownership of application files
+  file: path=/opt/ids/logs state=directory owner=ids group=ids
+
+- name: Change ownership of application files
+  file: path=/opt/ids/static state=directory owner=ids group=ids
+
+- name: Change ownership of application files
+  file: path=/opt/ids/media state=directory owner=ids group=ids
+
+- name: Clone 'IDS' repository
+  git: repo=https://github.com/identifier-services/Identifier-Services-Portal.git dest=/opt/ids/portal-public version=master
+  notify:
+    - restart uwsgi
+
+- name: Configure application virtualenv
+  command: virtualenv /opt/ids/venv
+
+- name: Install application requirements
+  pip: requirements=/opt/ids/portal-public/requirements.txt virtualenv=/opt/ids/venv
+  notify:
+    - restart uwsgi
+
+# ImproperlyConfigured: You're using the staticfiles app without having
+# set the STATIC_ROOT setting to a filesystem path.
+
+# - name: Django Collect Static
+#   command: /opt/ids/venv/bin/python /opt/ids/portal-public/manage.py collectstatic --noinput
+#   become: yes
+#   become_user: ids
+
+- name: Copy IDS ENV
+  template: src=ids.env.j2 dest=/opt/ids/ids.env
+  notify:
+    - restart uwsgi

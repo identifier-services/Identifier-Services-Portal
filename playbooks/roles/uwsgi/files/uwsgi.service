@@ -1,0 +1,15 @@
+[Unit]
+Description=uWSGI for ids
+After=syslog.target
+
+[Service]
+ExecStart=/bin/uwsgi --ini /etc/uwsgi/uwsgi.ini
+RuntimeDirectory=uwsgi
+Restart=always
+KillSignal=SIGQUIT
+Type=notify
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target
