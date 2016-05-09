@@ -27,13 +27,19 @@
   notify:
     - restart uwsgi
 
-# ImproperlyConfigured: You're using the staticfiles app without having
-# set the STATIC_ROOT setting to a filesystem path.
-
-- name: Django Collect Static
+- name: Run Django Collect Static
   command: /opt/ids/venv/bin/python /opt/ids/portal-public/manage.py collectstatic --noinput
   become: yes
   become_user: ids
+  notify:
+    - restart nginx
+
+- name: Run Django Migrations
+  command: /opt/ids/venv/bin/python /opt/ids/portal-public/manage.py migrate
+  become: yes
+  become_user: ids
+  notify:
+    - restart uwsgi
 
 - name: Copy IDS ENV
   template: src=ids.env.j2 dest=/opt/ids/ids.env
