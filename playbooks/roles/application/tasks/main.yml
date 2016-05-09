@@ -16,6 +16,9 @@
   notify:
     - restart uwsgi
 
+- name: Change ownership of application files
+  file: path=/opt/ids/portal-public state=directory owner=ids group=ids
+
 - name: Configure application virtualenv
   command: virtualenv /opt/ids/venv
 
@@ -27,10 +30,10 @@
 # ImproperlyConfigured: You're using the staticfiles app without having
 # set the STATIC_ROOT setting to a filesystem path.
 
-# - name: Django Collect Static
-#   command: /opt/ids/venv/bin/python /opt/ids/portal-public/manage.py collectstatic --noinput
-#   become: yes
-#   become_user: ids
+- name: Django Collect Static
+  command: /opt/ids/venv/bin/python /opt/ids/portal-public/manage.py collectstatic --noinput
+  become: yes
+  become_user: ids
 
 - name: Copy IDS ENV
   template: src=ids.env.j2 dest=/opt/ids/ids.env
