@@ -1,9 +1,8 @@
 from django.conf import settings
 from django.contrib.auth import logout
-from agavepy.agave import Agave
+from django.core.exceptions import ObjectDoesNotExist
+from requests.exceptions import RequestException, HTTPError
 import logging
-import time
-
 
 logger = logging.getLogger(__name__)
 
@@ -11,43 +10,23 @@ logger = logging.getLogger(__name__)
 class AgaveTokenRefreshMiddleware(object):
 
     def process_request(self, request):
-        if request.path != '/logout/':
-            token_key = getattr(settings, 'AGAVE_TOKEN_SESSION_ID')
-            if token_key in request.session:
-                current_time = time.time()
-                token = request.session[token_key]
-                valid_seconds = token['created'] + token['expires_in'] - current_time
-                if valid_seconds <= 0:
-                    masked_token = token['access_token'][:8].ljust(
-                        len(token['access_token']), '-')
-                    logger.debug('refreshing current token: %s' % masked_token)
-
+        if request.path != '/logout/' and request.user.is_authenticated():
+            session_key = getattr(settings, 'AGAVE_TOKEN_SESSION_ID')
+            try:
+                token = request.user.agave_oauth
+                if token and token.expired:
                     try:
-                        ag = Agave(
-                            api_server=getattr(settings, 'AGAVE_TENANT_BASEURL'),
-                            api_key=getattr(settings, 'AGAVE_CLIENT_KEY'),
-                            api_secret=getattr(settings, 'AGAVE_CLIENT_SECRET'),
-                            token=token['access_token'], refresh_token=token['refresh_token'])
-                        ag.token.refresh()
-
-                        ag.token.token_info['created'] = current_time
-                        request.session[token_key] = ag.token.token_info
-                        request.session.save()
-
-                        masked_token = ag.token.token_info['access_token'][:8].ljust(
-                            len(ag.token.token_info['access_token']), '-')
-                        logger.debug('refreshed token: %s' % masked_token)
-                    except:
-                        try:
-                            logger.exception('Failed to refresh token for user=%s. '
-                                             'Forcing logout.' % request.user.username)
-                        except:
-                            logger.exception('Failed to refresh token. Forcing logout.')
-                            
+                        token.refresh()
+                        request.session[session_key] = token.token
+                    except HTTPError:
+                        logger.exception('Agave Token refresh failed. Forcing logout',
+                                         extra={'user': request.user.username})
                         logout(request)
-
-                else:
-                    masked_token = token['access_token'][:8].ljust(
-                        len(token['access_token']), '-')
-                    logger.debug('session.%s valid for %s additional seconds: %s' %
-                                 (token_key, valid_seconds, masked_token))
+            except ObjectDoesNotExist:
+                logger.warn('Agave Token missing. Forcing logout.',
+                            extra={'user': request.user.username})
+                logout(request)
+            except RequestException:
+                logger.exception('Agave Token refresh failed. Forcing logout',
+                                 extra={'user': request.user.username})
+                logout(request)
