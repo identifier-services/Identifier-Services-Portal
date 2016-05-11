@@ -3,7 +3,10 @@ from __future__ import unicode_literals
 from django.db import models
 from django.conf import settings
 from agavepy.agave import Agave
-import json
+import json, logging
+
+logger = logging.getLogger(__name__)
+
 
 class BaseMetadata(object):
 
@@ -40,8 +43,12 @@ class BaseMetadata(object):
             self.value = initial_data['value']
 
     def load(self):
-        meta = self.ag.meta.getMetadata(uuid=self.uuid)
-        self.set_initial(meta)
+        try:
+            meta = self.ag.meta.getMetadata(uuid=self.uuid)
+            self.set_initial(meta)
+        except Exception as e:
+            self.uuid = None
+            logger.debug('Invalid UUID, Agave object not found.')
 
     def save(self):
         if self.uuid is None:
