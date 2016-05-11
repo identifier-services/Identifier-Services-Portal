@@ -4,9 +4,9 @@
 *config.py
 docker/
 .idea/
-ids.env
-ids.env.j2
+*:wq
 *.env
+*.env.j2
 db.sqlite3
 *.0
 definitions/
