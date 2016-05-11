@@ -5,12 +5,10 @@ from django.conf import settings
 from agavepy.agave import Agave
 import json
 
+
 class BaseMetadata(object):
 
-    def __init__(self, uuid=None, initial_data=None):
-        self.ag = Agave(api_server=settings.AGAVE_TENANT_BASEURL,
-                        token=settings.AGAVE_SUPER_TOKEN)
-
+    def __init__(self, uuid=None, initial_data=None, user=None):
         self.uuid = None
         self.associationIds = None
         self.created = None
@@ -18,12 +16,24 @@ class BaseMetadata(object):
         self.links = None
         self.value = None
 
+        self.user = user
+
         if uuid is not None:
             self.uuid = uuid
             self.load()
 
         if initial_data is not None:
             self.set_initial(initial_data)
+
+    def get_client(self, type='system'):
+        if type == 'system':
+            return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
+                         token=settings.AGAVE_SUPER_TOKEN)
+        else:
+            return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
+                         token=self.user.agave_oauth.access_token)
+
+
 
     def set_initial(self, initial_data):
         if 'uuid' in initial_data:
@@ -45,9 +55,16 @@ class BaseMetadata(object):
 
     def save(self):
         if self.uuid is None:
-            return self.ag.meta.addMetadata(body=self.body)
+            ag = self.get_client()
+            response = ag.meta.addMetadata(body=self.body)
+            # TODO set self.uuid from response
+            # self.set_initial(response['result'])
+            ag.meta.updateMetadataPermissions(uuid=response['uuid'], body={
+                'user': self.user.username,
+                'permission': 'READ_WRITE',
+            })
         else:
-            return self.ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
+            return self.get_client(type='user').meta.updateMetadata(uuid=self.uuid, body=self.body)
 
     def delete(self):
         if self.uuid:
@@ -78,7 +95,7 @@ class Project(BaseMetadata):
     def list(cls):
         query = {'name': cls.name}
         results = Project().ag.meta.listMetadata(q=json.dumps(query))
-        projects =  [cls(initial_data = r) for r in results]
+        projects = [cls(initial_data = r) for r in results]
         return [project.body for project in projects]
 
     @property
@@ -233,6 +250,12 @@ class Data(BaseMetadata):
 
     def __init__(self, *args, **kwargs):
         super(Data, self).__init__(*args, **kwargs)
+
+    def calculate_checksum(self):
+        # using AgavePy, submit job to run analysis
+        resp = self.ag.jobs.submit(body={'appId': '<app id>', 'inputs': [], 'parameters': []})
+
+        pass
 
 class System(object):
 
