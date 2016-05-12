@@ -104,22 +104,22 @@ def create(request):
         process_fields = project_processes[process_type]['fields']
 
         form_process_type = ProcessTypeForm(process_type_choices, request.POST)
+        form_process_type.fields['process_type'].widget.attrs['disabled'] = True
         form_process_type.fields['process_type'].widget.attrs['readonly'] = True
 
-        # bug fix, if we disable this field, we won't get the value on the next post
-        # form_process_type.fields['process_type'].widget.attrs['disabled'] = True
 
-        ######################################
+        #################################################
         # POST includes 'form_process_type' fields only #
-        ######################################
+        #################################################
         if not 'process_fields' in request.POST:
             form_process_fields = ProcessFieldsForm(process_fields)
             context['form_process_type'] = form_process_type
             context['form_process_fields'] = form_process_fields
+            context['process_type'] = process_type
 
-        ########################################
+        ################################################################
         # POST includes form_process_type & form_process_fields fields #
-        ########################################
+        ################################################################
         else:
             form_process_fields = ProcessFieldsForm(process_fields, request.POST)
 
