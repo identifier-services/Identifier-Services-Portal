@@ -1,6 +1,8 @@
 *.py[cod]
 *.DS_Store
 *__pycache__
+ids/static/admin/
+ids/static/ids_projects/
 *config.py
 docker/
 .idea/
