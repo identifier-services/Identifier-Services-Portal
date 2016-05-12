@@ -1,7 +1,7 @@
-import logging
 from django import forms
 from .base import DynamicForm
-import six
+import six, logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -72,14 +72,3 @@ class Process(IdsMetadata):
 class ProcessFieldsForm(DynamicForm):
 
     metadata_model = Process
-
-# p = Process(uuid='asdfasdfasdf')
-#
-# inputs = p.inputs
-#
-#
-# p.get_associated(name='idsvc.data', type='sra_data')
-# query = {
-#     'name': 'idsvc.data',
-#     'value.type': 'sra_data'
-# }
