@@ -21,8 +21,11 @@
     {% load django_bootstrap_breadcrumbs %}
     <div class="container">
         <div class="row">
-            <!-- TODO: make this work -->
-            {% if self.create_button %}
+            <!-- TODO: I'd like to detect if the block called create_button
+                       is present in the inherited page, if that is possible,
+                       maybe like this: http://stackoverflow.com/a/18721466/1344499
+                       right now i'm hacking it with a context field-->
+            {% if create_button %}
             <div class="col-xs-9">
                 {% render_breadcrumbs 'django_bootstrap_breadcrumbs/bootstrap3.html' %}
             </div>

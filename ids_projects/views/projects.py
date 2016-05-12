@@ -26,7 +26,12 @@ def list(request):
     # GET #
     #######
     if request.method == 'GET':
-        context = {'projects':Project().list()}
+        # TODO: I'd like to detect if the block called create_button is present
+        #       in the inherited page, (see base.html) if that is possible,
+        #       maybe like this: http://stackoverflow.com/a/18721466/1344499
+        #       right now i'm hacking it with a context field
+        context = {'projects':Project().list(),
+                   'create_button':True}
         return render(request, 'ids_projects/projects/index.html', context)
 
     #########
