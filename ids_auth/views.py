@@ -100,7 +100,6 @@ def agave_oauth_callback(request):
         messages.error(request, 'Authentication failed.  Did you forget your password?'
                         '<ahref="https://user.iplantcollaborative.org/reset/request"Click here</a>'
                         'to reset your password.')
-        # TODO: if failed, prompt to reset password, link to cyverse
         return HttpResponseRedirect(reverse('ids_auth:login'))
 
     if 'next' in request.session:
