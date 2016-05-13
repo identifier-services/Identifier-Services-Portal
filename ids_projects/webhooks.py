@@ -9,7 +9,6 @@ import datetime
 
 @csrf_exempt
 def handle_webhook(request, type, *args, **kwargs):
-    # do stuff
 
     if type == 'agave':
         print request.body
@@ -46,8 +45,16 @@ def handle_webhook(request, type, *args, **kwargs):
 					        	        
         return HttpResponse(uuid + ' ' + checksum + '\n')
 
-    return HttpResponse('OK')
+    # testing for calling job
+    elif type == 'job':
+        uuid = '4544798190901268966-242ac1111-0001-012'
+        meta = Data(uuid = uuid)
+        meta.calculate_checksum()
+        return HttpResponse('Job submitted for uuid = %s!' % uuid)
+    else:
+        return HttpResponse('OK')
 
+    
 # testing command
 # curl -k --data '{"UUID":"4544798190901268966-242ac1111-0001-012","checksum":"060a735c8f6240949ae7ac9fd8d22129"}' http://localhost:8000/webhook/agave/
 

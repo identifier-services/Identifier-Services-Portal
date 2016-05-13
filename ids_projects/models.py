@@ -266,10 +266,48 @@ class Data(BaseMetadata):
         super(Data, self).__init__(*args, **kwargs)
 
     def calculate_checksum(self):
-        # using AgavePy, submit job to run analysis
-        resp = self.ag.jobs.submit(body={'appId': '<app id>', 'inputs': [], 'parameters': []})
+        # using AgavePy, submit job to run analysis   
 
-        pass
+        # example 1: by internal agave url             
+        # inputs = {
+        #     "AGAVE_URL": "agave://data.iplantcollaborative.org/mingchen7/others/WGSOryza_CIAT_LSU_USDA_NCGR_SV.tar.gz"
+        # }
+
+        # parameters = {
+        #     "UUID": self.uuid         
+        # }
+
+        # example 2: by SRA number
+        # inputs = {}
+        # parameters = {
+        #     "UUID": self.uuid,
+        #     "SRA": "SRR292241"
+        # }
+
+        # example 3: by external URL
+        inputs = {}
+        parameters = {
+            "UUID": self.uuid,
+            "URL": "http://datadryad.org/bitstream/handle/10255/dryad.80422/WGSOryza_CIAT_LSU_USDA_NCGR_SV.tar.gz"
+        }        
+
+        body = {
+            "jobName": "ids-checksum-01",
+            "softwareName": "ming-ids-checksum-0.1",
+            "processorsPerNode": 16,
+            "requestedTime": "01:00:00",
+            "memoryPerNode": 2,
+            "nodeCount": 1,
+            "batchQueue": "debug",
+            "archive": False,
+            "archivePath": "",
+            "inputs": inputs,
+            "parameters": parameters
+        }
+
+        print json.dumps(body, indent = 2)
+        resp = self.ag.jobs.submit(body = body)        
+        print "Job ID: %s" % resp['id']
 
 class System(object):
 
