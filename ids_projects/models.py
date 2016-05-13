@@ -21,6 +21,13 @@ class BaseMetadata(object):
 
         self.user = user
 
+        ### temporary ###
+        # going to just do this for now while i figure out what changes need  #
+        # to be made throughout the app in order to create all objects as the #
+        # system user, share the objects with the logged in user, and query   #
+        # only the objects that the logged in user should see.                #
+        self.ag = self.get_client()
+
         if uuid is not None:
             self.uuid = uuid
             self.load()
