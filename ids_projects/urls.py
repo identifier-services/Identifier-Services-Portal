@@ -93,5 +93,5 @@ urlpatterns += patterns(
 ####
 urlpatterns += patterns(
     'ids_projects.webhooks',
-    url(r'webhook/(?P<type>\w+)/?$', 'handle_webhook', name='webhook'),
+    url(r'webhook/(?P<hook_type>\w+)/?$', 'handle_webhook', name='webhook'),
 )
