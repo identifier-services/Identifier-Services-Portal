@@ -48,6 +48,7 @@ def handle_webhook(request, hook_type, *args, **kwargs):
                 logger.exception('Checksum was not saved successfully. %s' % e)
                 return HttpResponse("Error")
         else:
+            try:
                 meta.value['checksum_conflict'] = checksum
             	meta.value['lastChecksumUpdated'] = updated_time.strftime("%Y-%m-%dT%H:%M:%S")
             	meta.save()
