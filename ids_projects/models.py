@@ -8,42 +8,47 @@ import json, logging
 logger = logging.getLogger(__name__)
 
 
-
 class BaseMetadata(object):
 
-    def __init__(self, uuid=None, initial_data=None, user=None):
-        self.uuid = None
+    def __init__(self, uuid=None, initial_data=None):
+        self.system_ag = None
+        self.user_ag = None
+
+        try:
+            self.system_ag = get_client(as_system=True)
+        except Exception as e:
+            # this is a fatal exception
+            exception_msg = 'Unable to connect to Agave as IDS system user.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        try:
+            self.user_ag = get_client(as_system=False)
+        except Exception as e:
+            # this is not a fatal exception
+            debug_msg = 'User is not logged in.'
+            logger.debug(debug_msg)
+
         self.associationIds = None
         self.created = None
         self.lastUpdated = None
         self.links = None
         self.value = None
-
-        self.user = user
-
-        ### temporary ###
-        # going to just do this for now while i figure out what changes need  #
-        # to be made throughout the app in order to create all objects as the #
-        # system user, share the objects with the logged in user, and query   #
-        # only the objects that the logged in user should see.                #
-        self.ag = self.get_client()
+        self.uuid = uuid
 
         if uuid is not None:
-            self.uuid = uuid
             self.load()
 
         if initial_data is not None:
             self.set_initial(initial_data)
 
-    def get_client(self, type='system'):
-        if type == 'system':
+    def get_client(self, as_system):
+        if as_system:
             return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
                          token=settings.AGAVE_SUPER_TOKEN)
         else:
             return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
                          token=self.user.agave_oauth.access_token)
-
-
 
     def set_initial(self, initial_data):
         if 'uuid' in initial_data:
@@ -60,25 +65,81 @@ class BaseMetadata(object):
             self.value = initial_data['value']
 
     def load(self):
+        if self.uuid is None:
+            exception_msg = 'No UUID provided, Agave meta object not found.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        meta = None
+
         try:
-            meta = self.ag.meta.getMetadata(uuid=self.uuid)
-            self.set_initial(meta)
+            # query public meta owned by system user
+            query = { 'uuid': self.uuid, 'value.public': 'True' }
+            metas = self.system_ag.meta.listMetadata(q=json.dumps(query))
+            meta = next(iter(metas), None))
+        except Exception as e:
+            # not a fatal exception
+            exception_msg = 'Agave meta object not owned by system user.'
+            logger.debug(exception_msg)
+
+        if meta is not None:
+            # return if meta found
+            return self.set_initial(meta)
+
+        if self.user_ag is None:
+            # if uuid not found in public meta, and no logged in user, we have a problem
+            exception_msg = 'No logged in user and meta object not owned by system user.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        try:
+            # query meta owned by logged in user
+            meta = self.user_ag.meta.getMetadata(uuid=self.uuid)
         except Exception as e:
             self.uuid = None
-            logger.debug('Invalid UUID, Agave object not found.')
+            exception_msg = 'Invalid UUID, Agave object not found.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        if meta is None:
+            exception_msg = 'Invalid UUID provided, Agave meta object not found.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        self.set_initial(meta)
 
     def save(self):
         if self.uuid is None:
-            ag = self.get_client()
-            response = ag.meta.addMetadata(body=self.body)
-            # TODO set self.uuid from response
-            # self.set_initial(response['result'])
-            ag.meta.updateMetadataPermissions(uuid=response['uuid'], body={
-                'user': self.user.username,
-                'permission': 'READ_WRITE',
-            })
+            try:
+                user_ag = Agave(api_server=settings.AGAVE_TENANT_BASEURL,
+                                token=self.user.agave_oauth.access_token)
+            except Exception as e:
+                exception_msg = 'User is not logged in, cannot save object.'
+                logger.exception(exception_msg)
+                raise Exception(exception_msg)
+
+            try:
+                system_ag = Agave(api_server=settings.AGAVE_TENANT_BASEURL,
+                                    token=settings.AGAVE_SUPER_TOKEN)
+                response = self.ag.meta.addMetadata(body=self.body)
+                self.ag.meta.updateMetadataPermissions(uuid=response['uuid'], body={
+                    'user': self.user.username,
+                    'permission': 'READ_WRITE',
+                })
+                self.set_initial(response['result'])
+            except Exception as e:
+                exception_msg = 'Unable to save object.'
+                logger.exception(exception_msg)
+                raise Exception(exception_msg)
         else:
-            return self.get_client(type='user').meta.updateMetadata(uuid=self.uuid, body=self.body)
+            try:
+                response = self.ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
+                self.set_initial(response['result'])
+            except Exception as e:
+                exception_msg = 'Unable to save object with UUID: %s.' % self.uuid
+                logger.exception(exception_msg)
+                raise Exception(exception_msg)
+        return response
 
     def delete(self):
         if self.uuid:
@@ -266,48 +327,10 @@ class Data(BaseMetadata):
         super(Data, self).__init__(*args, **kwargs)
 
     def calculate_checksum(self):
-        # using AgavePy, submit job to run analysis   
+        # using AgavePy, submit job to run analysis
+        resp = self.ag.jobs.submit(body={'appId': '<app id>', 'inputs': [], 'parameters': []})
 
-        # example 1: by internal agave url             
-        # inputs = {
-        #     "AGAVE_URL": "agave://data.iplantcollaborative.org/mingchen7/others/WGSOryza_CIAT_LSU_USDA_NCGR_SV.tar.gz"
-        # }
-
-        # parameters = {
-        #     "UUID": self.uuid         
-        # }
-
-        # example 2: by SRA number
-        # inputs = {}
-        # parameters = {
-        #     "UUID": self.uuid,
-        #     "SRA": "SRR292241"
-        # }
-
-        # example 3: by external URL
-        inputs = {}
-        parameters = {
-            "UUID": self.uuid,
-            "URL": "http://datadryad.org/bitstream/handle/10255/dryad.80422/WGSOryza_CIAT_LSU_USDA_NCGR_SV.tar.gz"
-        }        
-
-        body = {
-            "jobName": "ids-checksum-01",
-            "softwareName": "ming-ids-checksum-0.1",
-            "processorsPerNode": 16,
-            "requestedTime": "01:00:00",
-            "memoryPerNode": 2,
-            "nodeCount": 1,
-            "batchQueue": "debug",
-            "archive": False,
-            "archivePath": "",
-            "inputs": inputs,
-            "parameters": parameters
-        }
-
-        print json.dumps(body, indent = 2)
-        resp = self.ag.jobs.submit(body = body)        
-        print "Job ID: %s" % resp['id']
+        pass
 
 class System(object):
 
