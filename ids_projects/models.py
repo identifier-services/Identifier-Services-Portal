@@ -98,42 +98,64 @@ class BaseMetadata(object):
         self.set_initial(meta)
 
     def save(self):
+        if self.user_ag is None:
+            exception_msg = 'User is not logged in, cannot save object.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        # if no uuid, we are creating a new object (as the system user)
         if self.uuid is None:
             try:
-                user_ag = Agave(api_server=settings.AGAVE_TENANT_BASEURL,
-                                token=self.user.agave_oauth.access_token)
-            except Exception as e:
-                exception_msg = 'User is not logged in, cannot save object.'
-                logger.exception(exception_msg)
-                raise Exception(exception_msg)
-
-            try:
-                system_ag = Agave(api_server=settings.AGAVE_TENANT_BASEURL,
-                                    token=settings.AGAVE_SUPER_TOKEN)
-                response = self.ag.meta.addMetadata(body=self.body)
-                self.ag.meta.updateMetadataPermissions(uuid=response['uuid'], body={
+                response = self.system_ag.meta.addMetadata(body=self.body)
+                # update permissions to include the logged in user
+                self.system_ag.meta.updateMetadataPermissions(uuid=response['uuid'], body={
                     'user': self.user.username,
-                    'permission': 'READ_WRITE',
+                    # 'permission': 'READ_WRITE',
+                    'permission': 'ALL',
+                    # I'm going to set permissions for the logged in user to
+                    # 'ALL', because I want to the use the logged in user
+                    # (not the system user) to delete the meta objects. If we
+                    # use the system user to delete meta objects, we'll have
+                    # to check to make sure the logged in user isn't deleting
+                    # public data that they shouldn't, and that's too complicated.
                 })
                 self.set_initial(response['result'])
             except Exception as e:
-                exception_msg = 'Unable to save object.'
+                exception_msg = 'Unable to save object. %s' e
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
+
+        # if we have a uuid, we are probably editing an existing object
         else:
             try:
-                response = self.ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
+                response = self.user_ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
                 self.set_initial(response['result'])
             except Exception as e:
-                exception_msg = 'Unable to save object with UUID: %s.' % self.uuid
+                exception_msg = 'Unable update object. %s' e
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
+
         return response
 
     def delete(self):
-        if self.uuid:
-            self.ag.meta.deleteMetadata(uuid=self.uuid)
+        if self.uuid is None:
+            exception_msg = 'No UUID provided, no meta to delete.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        if self.user_ag is None:
+            exception_msg = 'User must be logged in to delete meta objects.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        try:
+            # we use the logged in user to delete the meta object
+            self.user_ag.meta.deleteMetadata(uuid=self.uuid)
             self.uuid = None
+        except Exception as e:
+            exception_msg = 'Unable to delete meta object. %s' % e
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
 
     @property
     def body(self):
