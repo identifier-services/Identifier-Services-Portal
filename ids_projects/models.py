@@ -85,7 +85,7 @@ class BaseMetadata(object):
             try:
                 query = { 'uuid': self.uuid, 'value.public': 'True' }
                 metas = self.system_ag.meta.listMetadata(q=json.dumps(query))
-                meta = next(iter(metas), None))
+                meta = next(iter(metas), None)
             except Exception as e:
                 exception_msg = 'Agave meta object not owned by system user.'
                 logger.debug(exception_msg)
@@ -121,7 +121,7 @@ class BaseMetadata(object):
                 })
                 self.set_initial(response['result'])
             except Exception as e:
-                exception_msg = 'Unable to save object. %s' e
+                exception_msg = 'Unable to save object. %s' % e
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
 
@@ -131,7 +131,7 @@ class BaseMetadata(object):
                 response = self.user_ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
                 self.set_initial(response['result'])
             except Exception as e:
-                exception_msg = 'Unable update object. %s' e
+                exception_msg = 'Unable update object. %s' % e
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
 
@@ -180,7 +180,8 @@ class Project(BaseMetadata):
     @classmethod
     def list(cls):
         query = {'name': cls.name}
-        results = Project().ag.meta.listMetadata(q=json.dumps(query))
+        # TODO: return public and private results
+        results = Project().user_ag.meta.listMetadata(q=json.dumps(query))
         projects = [cls(initial_data = r) for r in results]
         return [project.body for project in projects]
 
@@ -188,7 +189,8 @@ class Project(BaseMetadata):
     def specimens(self, reset=False):
         if self._specimens is None or reset:
             query = {'associationIds': [self.uuid], 'name': Specimen.name}
-            meta_results = self.ag.meta.listMetadata(q=json.dumps(query))
+            # TODO: return public and private results
+            meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
             self._specimens = [Specimen(initial_data=r) for r in meta_results]
 
         return self._specimens
@@ -197,7 +199,8 @@ class Project(BaseMetadata):
     def processes(self, reset=False):
         if self._processes is None or reset:
             query = {'associationIds': [self.uuid], 'name': Process.name}
-            meta_results = self.ag.meta.listMetadata(q=json.dumps(query))
+            # TODO: return public and private results
+            meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
             self._processes = [Process(initial_data=r) for r in meta_results]
 
         return self._processes
@@ -206,7 +209,8 @@ class Project(BaseMetadata):
     def data(self, reset=False):
         if self._data is None or reset:
             query = {'associationIds': self.uuid, 'name': Data.name}
-            meta_results = self.ag.meta.listMetadata(q=json.dumps(query))
+            # TODO: return public and private results
+            meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
             self._data = [Data(initial_data=r) for r in meta_results]
 
         return self._data
@@ -235,7 +239,8 @@ class Specimen(BaseMetadata):
         if self._project is None or reset:
             associationIds = self.body['associationIds']
             query = {'uuid': { '$in': associationIds }, 'name': Project.name}
-            results = self.ag.meta.listMetadata(q=json.dumps(query))
+            # TODO: return public and private results
+            results = self.user_ag.meta.listMetadata(q=json.dumps(query))
             self._project = Project(initial_data = next(iter(results), None))
 
         return self._project
@@ -244,7 +249,8 @@ class Specimen(BaseMetadata):
     def processes(self, reset=False):
         if self._processes is None or reset:
             query = {'associationIds': self.uuid, 'name': Process.name}
-            meta_results = self.ag.meta.listMetadata(q=json.dumps(query))
+            # TODO: return public and private results
+            meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
             self._processes = [Process(initial_data=r) for r in meta_results]
 
         return self._processes
@@ -253,7 +259,8 @@ class Specimen(BaseMetadata):
     def data(self, reset=False):
         if self._data is None or reset:
             query = {'associationIds': self.uuid, 'name': Data.name}
-            meta_results = self.ag.meta.listMetadata(q=json.dumps(query))
+            # TODO: return public and private results
+            meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
             self._data = [Data(initial_data=r) for r in meta_results]
 
         return self._data
@@ -339,7 +346,7 @@ class Data(BaseMetadata):
 
     def calculate_checksum(self):
         # using AgavePy, submit job to run analysis
-        resp = self.ag.jobs.submit(body={'appId': '<app id>', 'inputs': [], 'parameters': []})
+        resp = self.user_ag.jobs.submit(body={'appId': '<app id>', 'inputs': [], 'parameters': []})
 
         pass
 
@@ -384,12 +391,12 @@ class System(object):
 
     @classmethod
     def list(cls, system_type="STORAGE"):
-        results = Project().ag.systems.list(type=system_type)
+        results = Project().user_ag.systems.list(type=system_type)
         systems =  [cls(initial_data = r) for r in results]
         return [system.body for system in systems]
 
     def load(self):
-        meta = self.ag.systems.get(systemId=self.id)
+        meta = self.user_ag.systems.get(systemId=self.id)
         self.set_initial(meta)
 
     def save(self):
@@ -465,14 +472,14 @@ class System(object):
         #TODO: implement system save
         raise(NotImplementedError)
         if self.id is None:
-            return self.ag.systems.add(fileToUpload=None)
+            return self.user_ag.systems.add(fileToUpload=None)
         else:
-            return self.ag.systems.update(systemId=self.id, body=None)
+            return self.user_ag.systems.update(systemId=self.id, body=None)
 
     def delete(self):
         #TODO: see if this works
         raise(NotImplemented)
-        return self.ag.systems.delete(systemId=self.id)
+        return self.user_ag.systems.delete(systemId=self.id)
 
     @property
     def body(self):
