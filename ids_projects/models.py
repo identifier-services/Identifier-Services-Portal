@@ -178,12 +178,13 @@ class Project(BaseMetadata):
         self._data = None
 
     @classmethod
-    def list(cls):
+    def list(cls, public=False):
         query = {'name': cls.name}
-        # TODO: return public and private results
-        results = Project().user_ag.meta.listMetadata(q=json.dumps(query))
-        projects = [cls(initial_data = r) for r in results]
-        return [project.body for project in projects]
+        if public is True:
+            results = Project().system_ag.meta.listMetadata(q=json.dumps(query))
+        else:
+            results = Project().user_ag.meta.listMetadata(q=json.dumps(query))
+        return [cls(initial_data = r) for r in results]
 
     @property
     def specimens(self, reset=False):
@@ -392,8 +393,7 @@ class System(object):
     @classmethod
     def list(cls, system_type="STORAGE"):
         results = Project().user_ag.systems.list(type=system_type)
-        systems =  [cls(initial_data = r) for r in results]
-        return [system.body for system in systems]
+        return [cls(initial_data = r) for r in results]
 
     def load(self):
         meta = self.user_ag.systems.get(systemId=self.id)

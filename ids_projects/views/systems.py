@@ -26,7 +26,7 @@ def list(request):
         systems = System().list(system_type=system_type)
     else:
         systems = System().list()
-    return JsonResponse(systems, safe=False)
+    return JsonResponse([system.body for system in systems], safe=False)
 
 @login_required
 def view(request, system_id):
