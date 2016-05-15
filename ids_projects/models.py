@@ -72,34 +72,23 @@ class BaseMetadata(object):
 
         meta = None
 
-        try:
-            # query public meta owned by system user
-            query = { 'uuid': self.uuid, 'value.public': 'True' }
-            metas = self.system_ag.meta.listMetadata(q=json.dumps(query))
-            meta = next(iter(metas), None))
-        except Exception as e:
-            # not a fatal exception
-            exception_msg = 'Agave meta object not owned by system user.'
-            logger.debug(exception_msg)
-
-        if meta is not None:
-            # return if meta found
-            return self.set_initial(meta)
-
-        if self.user_ag is None:
-            # if uuid not found in public meta, and no logged in user, we have a problem
-            exception_msg = 'No logged in user and meta object not owned by system user.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
-
-        try:
+        if self.user_ag is not None:
             # query meta owned by logged in user
-            meta = self.user_ag.meta.getMetadata(uuid=self.uuid)
-        except Exception as e:
-            self.uuid = None
-            exception_msg = 'Invalid UUID, Agave object not found.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
+            try:
+                meta = self.user_ag.meta.getMetadata(uuid=self.uuid)
+            except Exception as e:
+                self.uuid = None
+                exception_msg = 'Agave meta object not owned by logged in user.'
+                logger.debug(exception_msg)
+        else:
+            # query public meta owned by system user
+            try:
+                query = { 'uuid': self.uuid, 'value.public': 'True' }
+                metas = self.system_ag.meta.listMetadata(q=json.dumps(query))
+                meta = next(iter(metas), None))
+            except Exception as e:
+                exception_msg = 'Agave meta object not owned by system user.'
+                logger.debug(exception_msg)
 
         if meta is None:
             exception_msg = 'Invalid UUID provided, Agave meta object not found.'
