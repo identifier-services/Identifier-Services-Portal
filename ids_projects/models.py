@@ -127,14 +127,7 @@ class BaseMetadata(object):
                     uuid=self.uuid,
                     body={
                         'username': self.user.username,
-                        'permission': 'READ_WRITE',
-                        #'permission': 'ALL',
-                        # I'm going to set permissions for the logged in user to
-                        # 'ALL', because I want to the use the logged in user
-                        # (not the system user) to delete the meta objects. If we
-                        # use the system user to delete meta objects, we'll have
-                        # to check to make sure the logged in user isn't deleting
-                        # public data that they shouldn't, and that's too complicated.
+                        'permission': 'READ_WRITE'
                     })
 
                 self.set_initial(response)
@@ -148,25 +141,12 @@ class BaseMetadata(object):
         # if we have a uuid, we are probably editing an existing object
         else:
             try:
-                response = self.user_ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
+                response = self.system_ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
                 self.set_initial(response)
             except Exception as e:
                 exception_msg = 'Unable update object. %s' % e
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
-
-            try:
-                self.user_ag.meta.updateMetadataPermissions(
-                    uuid=self.uuid,
-                    body={
-                        'username': 'idsvc_user',
-                        'permission': 'ALL',
-                    })
-
-                self.set_initial(response)
-            except Exception as e:
-                warning_msg = 'Unable to update permissions, project may not be visible publicly. %s' % e
-                logger.warning(warning_msg)
 
         return response
 
