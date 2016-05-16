@@ -18,6 +18,10 @@ import json, logging
 
 logger = logging.getLogger(__name__)
 
+class User(object):
+    def __init__(self, username, agave_oauth):
+        self.username = username
+        self.agave_oauth = agave_oauth
 
 @login_required
 def list(request):
@@ -26,11 +30,21 @@ def list(request):
     # GET #
     #######
     if request.method == 'GET':
-        # TODO: I'd like to detect if the block called create_button is present
-        #       in the inherited page, (see base.html) if that is possible,
-        #       maybe like this: http://stackoverflow.com/a/18721466/1344499
-        #       right now i'm hacking it with a context field
-        context = {'projects':Project().list(),
+
+        # user = User(request.user.username, request.user.agave_oauth)
+        #
+        # print user.username
+
+        if request.user.is_authenticated():
+            project_list = Project(user=request.user).list()
+        else:
+            project_list = Project().list()
+
+        if project_list is not None:
+            projects = [project.body for project in project_list]
+        else:
+            projects = None
+        context = {'projects':projects,
                    'create_button':True}
         return render(request, 'ids_projects/projects/index.html', context)
 
@@ -48,7 +62,7 @@ def view(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        project = Project(uuid = project_uuid)
+        project = Project(uuid = project_uuid, user=request.user)
 
         context = {'project' : project,
                    'specimen_count' : len(project.specimens),
@@ -88,7 +102,7 @@ def create(request):
             body['value'] = form.cleaned_data
             user_full = request.user.get_full_name()
             body['value']['creator'] = user_full
-            project = Project(initial_data = body)
+            project = Project(initial_data = body, user=request.user)
 
             result = project.save()
 
@@ -118,7 +132,7 @@ def edit(request, project_uuid):
     if request.method == 'GET':
 
         try:
-            project = Project(uuid = project_uuid)
+            project = Project(uuid = project_uuid, user=request.user)
         except:
             logger.error('Error while attempting to edit project, not found.')
             messages.error(request, 'Project not found.')
@@ -139,7 +153,7 @@ def edit(request, project_uuid):
 
             body = {}
             body['value'] = form.cleaned_data
-            project = Project(uuid = project_uuid, initial_data = body)
+            project = Project(uuid = project_uuid, initial_data = body, user=request.user)
             result = project.save()
 
             if 'uuid' in result:
@@ -167,7 +181,7 @@ def delete(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        project = Project(uuid = project_uuid)
+        project = Project(uuid = project_uuid, user=request.user)
 
         for uuid in project.associationIds:
             item = BaseMetadata(uuid = uuid)

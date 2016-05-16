@@ -29,7 +29,7 @@ def list(request):
     if request.method == 'GET':
 
         project_uuid = request.GET.get('project_uuid', None)
-        project = Project(uuid = project_uuid)
+        project = Project(uuid = project_uuid, user=request.user)
         context = {'project': project, 'specimens' : project.specimens}
         return render(request, 'ids_projects/specimens/index.html', context)
 
@@ -76,7 +76,7 @@ def create(request):
             messages.error(request, 'No project uuid')
             return HttpResponseRedirect(reverse('ids_projects:project-list'))
 
-        project = Project(uuid=project_uuid)
+        project = Project(uuid=project_uuid, user=request.user)
 
         context = {'form_specimen_create': SpecimenForm(),
                    'project': project,

@@ -10,24 +10,26 @@ logger = logging.getLogger(__name__)
 
 class BaseMetadata(object):
 
-    def __init__(self, uuid=None, initial_data=None):
+    def __init__(self, uuid=None, initial_data=None, user=None):
         self.system_ag = None
         self.user_ag = None
+        self.user = None
+
+        if user is not None:
+            # if type(user) is not django.utils.functional.SimpleLazyObject:
+            #     exception_msg = 'User parameter type is incorrect.'
+            #     logging.exception(exception_msg)
+            #     raise TypeError(exception_msg)
+
+            self.user = user
+            self.user_ag = self.get_client(user=user)
 
         try:
-            self.system_ag = get_client(as_system=True)
+            self.system_ag = self.get_client()
         except Exception as e:
-            # this is a fatal exception
-            exception_msg = 'Unable to connect to Agave as IDS system user.'
+            exception_msg = 'Unable to connect to Agave as IDS system user. %s' % e
             logger.exception(exception_msg)
             raise Exception(exception_msg)
-
-        try:
-            self.user_ag = get_client(as_system=False)
-        except Exception as e:
-            # this is not a fatal exception
-            debug_msg = 'User is not logged in.'
-            logger.debug(debug_msg)
 
         self.associationIds = None
         self.created = None
@@ -42,13 +44,20 @@ class BaseMetadata(object):
         if initial_data is not None:
             self.set_initial(initial_data)
 
-    def get_client(self, as_system):
-        if as_system:
-            return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
-                         token=settings.AGAVE_SUPER_TOKEN)
-        else:
+    def get_client(self, user=None):
+        if user is not None:
+            # if type(user) is not django.utils.functional.SimpleLazyObject:
+            #     exception_msg = 'User parameter type is incorrect.'
+            #     logging.exception(exception_msg)
+            #     raise TypeError(exception_msg)
+
+            # user client
             return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
                          token=self.user.agave_oauth.access_token)
+        else:
+            # system client
+            return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
+                         token=settings.AGAVE_SUPER_TOKEN)
 
     def set_initial(self, initial_data):
         if 'uuid' in initial_data:
@@ -78,8 +87,8 @@ class BaseMetadata(object):
                 meta = self.user_ag.meta.getMetadata(uuid=self.uuid)
             except Exception as e:
                 self.uuid = None
-                exception_msg = 'Agave meta object not owned by logged in user.'
-                logger.debug(exception_msg)
+                debug_msg = 'Agave meta object not owned by logged in user. %s' % e
+                logger.debug(debug_msg)
         else:
             # query public meta owned by system user
             try:
@@ -87,19 +96,19 @@ class BaseMetadata(object):
                 metas = self.system_ag.meta.listMetadata(q=json.dumps(query))
                 meta = next(iter(metas), None)
             except Exception as e:
-                exception_msg = 'Agave meta object not owned by system user.'
+                exception_msg = 'Agave meta object not owned by system user. %s' % e
                 logger.debug(exception_msg)
 
         if meta is None:
-            exception_msg = 'Invalid UUID provided, Agave meta object not found.'
+            exception_msg = 'Agave meta object not found.'
             logger.exception(exception_msg)
             raise Exception(exception_msg)
 
         self.set_initial(meta)
 
     def save(self):
-        if self.user_ag is None:
-            exception_msg = 'User is not logged in, cannot save object.'
+        if self.user is None:
+            exception_msg = 'Missing user information, cannot save object.'
             logger.exception(exception_msg)
             raise Exception(exception_msg)
 
@@ -107,21 +116,32 @@ class BaseMetadata(object):
         if self.uuid is None:
             try:
                 response = self.system_ag.meta.addMetadata(body=self.body)
-                # update permissions to include the logged in user
-                self.system_ag.meta.updateMetadataPermissions(uuid=response['uuid'], body={
-                    'user': self.user.username,
-                    # 'permission': 'READ_WRITE',
-                    'permission': 'ALL',
-                    # I'm going to set permissions for the logged in user to
-                    # 'ALL', because I want to the use the logged in user
-                    # (not the system user) to delete the meta objects. If we
-                    # use the system user to delete meta objects, we'll have
-                    # to check to make sure the logged in user isn't deleting
-                    # public data that they shouldn't, and that's too complicated.
-                })
-                self.set_initial(response['result'])
+                self.set_initial(response)
             except Exception as e:
                 exception_msg = 'Unable to save object. %s' % e
+                logger.exception(exception_msg)
+                raise Exception(exception_msg)
+
+            try:
+                self.system_ag.meta.updateMetadataPermissions(
+                    uuid=self.uuid,
+                    body={
+                        'username': self.user.username,
+                        # 'permission': 'READ_WRITE',
+                        'permission': 'ALL',
+                        # I'm going to set permissions for the logged in user to
+                        # 'ALL', because I want to the use the logged in user
+                        # (not the system user) to delete the meta objects. If we
+                        # use the system user to delete meta objects, we'll have
+                        # to check to make sure the logged in user isn't deleting
+                        # public data that they shouldn't, and that's too complicated.
+                    })
+
+                self.set_initial(response)
+            except Exception as e:
+                # rollback
+                self.system_ag.meta.deleteMetadata(uuid=self.uuid)
+                exception_msg = 'Unable to update permissions, rolling back. %s' % e
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
 
@@ -129,7 +149,7 @@ class BaseMetadata(object):
         else:
             try:
                 response = self.user_ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
-                self.set_initial(response['result'])
+                self.set_initial(response)
             except Exception as e:
                 exception_msg = 'Unable update object. %s' % e
                 logger.exception(exception_msg)
@@ -172,19 +192,33 @@ class Project(BaseMetadata):
     name = 'idsvc.project'
 
     def __init__(self, *args, **kwargs):
+
         super(Project, self).__init__(*args, **kwargs)
         self._specimens = None
         self._processes = None
         self._data = None
 
-    @classmethod
-    def list(cls, public=False):
-        query = {'name': cls.name}
+    def list(self, public=False):
+        query = {'name': Project.name}
+        results = None
+
         if public is True:
-            results = Project().system_ag.meta.listMetadata(q=json.dumps(query))
+            try:
+                results = self.system_ag.meta.listMetadata(q=json.dumps(query))
+            except Exception as e:
+                exception_msg = 'Fatal exception: %s' % e
+                logger.exception(e)
+                raise e
         else:
-            results = Project().user_ag.meta.listMetadata(q=json.dumps(query))
-        return [cls(initial_data = r) for r in results]
+            try:
+                results = self.user_ag.meta.listMetadata(q=json.dumps(query))
+            except Exception as e:
+                exception_msg = 'Unable to list metadata, user may not be logged in: %s' % e
+                logger.debug(e)
+        if results is not None:
+            return [Project(initial_data = r, user=self.user) for r in results]
+        else:
+            return None
 
     @property
     def specimens(self, reset=False):
