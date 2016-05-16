@@ -127,8 +127,8 @@ class BaseMetadata(object):
                     uuid=self.uuid,
                     body={
                         'username': self.user.username,
-                        # 'permission': 'READ_WRITE',
-                        'permission': 'ALL',
+                        'permission': 'READ_WRITE',
+                        #'permission': 'ALL',
                         # I'm going to set permissions for the logged in user to
                         # 'ALL', because I want to the use the logged in user
                         # (not the system user) to delete the meta objects. If we
@@ -154,6 +154,19 @@ class BaseMetadata(object):
                 exception_msg = 'Unable update object. %s' % e
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
+
+            try:
+                self.user_ag.meta.updateMetadataPermissions(
+                    uuid=self.uuid,
+                    body={
+                        'username': 'idsvc_user',
+                        'permission': 'ALL',
+                    })
+
+                self.set_initial(response)
+            except Exception as e:
+                warning_msg = 'Unable to update permissions, project may not be visible publicly. %s' % e
+                logger.warning(warning_msg)
 
         return response
 
@@ -199,11 +212,11 @@ class Project(BaseMetadata):
         self._data = None
 
     def list(self, public=False):
-        query = {'name': Project.name}
         results = None
 
         if public is True:
             try:
+                query = {'name': Project.name, 'value.public': 'True'}
                 results = self.system_ag.meta.listMetadata(q=json.dumps(query))
             except Exception as e:
                 exception_msg = 'Fatal exception: %s' % e
@@ -211,10 +224,11 @@ class Project(BaseMetadata):
                 raise e
         else:
             try:
+                query = {'name': Project.name}
                 results = self.user_ag.meta.listMetadata(q=json.dumps(query))
             except Exception as e:
                 exception_msg = 'Unable to list metadata, user may not be logged in: %s' % e
-                logger.debug(e)
+                logger.debug(exception_msg)
         if results is not None:
             return [Project(initial_data = r, user=self.user) for r in results]
         else:
@@ -257,6 +271,43 @@ class Project(BaseMetadata):
     @title.setter
     def title(self, new_title):
         self.value['title'] = new_title
+
+    def _modify_access(self, public=True):
+        if self.user_ag is None:
+            exception_msg = 'Missing user client, cannot update object.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        if self.uuid is None:
+            exception_msg = 'Missing UUID, cannot update object.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        try:
+            self.value['public'] = 'True' if public else 'False'
+            self.save()
+        except Exception as e:
+            exception_msg = 'Unable update project. %s' % e
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        for uuid in self.associationIds:
+            try:
+                name = 'object'
+                item = BaseMetadata(uuid=uuid, user=self.user)
+                name = item.name
+                item.value['public'] = 'True' if public else 'False'
+                item.save()
+            except Exception as e:
+                exception_msg = 'Unable update %s. %s' % (name, e)
+                logger.exception(exception_msg)
+                raise Exception(exception_msg)
+
+    def make_public(self):
+        self._modify_access(public=True)
+
+    def make_private(self):
+        self._modify_access(public=False)
 
 
 class Specimen(BaseMetadata):

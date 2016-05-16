@@ -31,21 +31,23 @@ def list(request):
     #######
     if request.method == 'GET':
 
-        # user = User(request.user.username, request.user.agave_oauth)
-        #
-        # print user.username
+        project = Project(user=request.user)
+        public_projects = project.list(public=True)
+        private_projects = project.list(public=False)
 
-        if request.user.is_authenticated():
-            project_list = Project(user=request.user).list()
-        else:
-            project_list = Project().list()
+        public_projects_meta = None
+        private_projects_meta = None
 
-        if project_list is not None:
-            projects = [project.body for project in project_list]
-        else:
-            projects = None
-        context = {'projects':projects,
+        if public_projects is not None:
+            public_projects_meta = [project.body for project in public_projects]
+
+        if private_projects is not None:
+            private_projects_meta = [project.body for project in private_projects]
+
+        context = {'public_projects':public_projects_meta,
+                   'private_projects':private_projects_meta,
                    'create_button':True}
+
         return render(request, 'ids_projects/projects/index.html', context)
 
     #########
@@ -181,15 +183,14 @@ def make_public(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        project = Project(uuid = project_uuid, user=request.user)
-
-        # for uuid in project.associationIds:
-        #     item = BaseMetadata(uuid = uuid, user=request.user)
-        #     item.value['public'] == True
-        #     item.save()
-        #
-        # project.save()
-        project.make_public()
+        try:
+            project = Project(uuid = project_uuid, user=request.user)
+            project.make_public()
+        except Exception as e:
+            exception_msg = 'Unable to make project and associated objects public.'
+            logger.exception(exception_msg)
+            messages.error(request, exception_msg)
+            return HttpResponseRedirect('/project/%s' % project_uuid)
 
         messages.success(request, 'Successfully made project public.')
         return HttpResponseRedirect('/project/%s' % project_uuid)
@@ -209,17 +210,16 @@ def make_private(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        project = Project(uuid = project_uuid, user=request.user)
+        try:
+            project = Project(uuid = project_uuid, user=request.user)
+            project.make_private()
+        except Exception as e:
+            exception_msg = 'Unable to make project and associated objects public.'
+            logger.exception(exception_msg)
+            messages.error(request, exception_msg)
+            return HttpResponseRedirect('/project/%s' % project_uuid)
 
-        # for uuid in project.associationIds:
-        #     item = BaseMetadata(uuid = uuid, user=request.user)
-        #     item.value['private'] == True
-        #     item.save()
-        #
-        # project.save()
-        project.make_private()
-
-        messages.success(request, 'Successfully made project private.')
+        messages.success(request, 'Successfully made project public.')
         return HttpResponseRedirect('/project/%s' % project_uuid)
 
     #########
