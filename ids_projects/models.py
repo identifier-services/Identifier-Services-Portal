@@ -92,7 +92,11 @@ class BaseMetadata(object):
         else:
             # query public meta owned by system user
             try:
-                query = { 'uuid': self.uuid, 'value.public': 'True' }
+                # if public:
+                #     query = { 'uuid': self.uuid, 'value.public': 'True' }
+                # else:
+                #     query = { 'uuid': self.uuid }
+                query = { 'uuid': self.uuid }
                 metas = self.system_ag.meta.listMetadata(q=json.dumps(query))
                 meta = next(iter(metas), None)
             except Exception as e:
@@ -140,6 +144,7 @@ class BaseMetadata(object):
 
         # if we have a uuid, we are probably editing an existing object
         else:
+
             try:
                 response = self.system_ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
                 self.set_initial(response)

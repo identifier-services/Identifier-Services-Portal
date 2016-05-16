@@ -27,9 +27,9 @@ def handle_webhook(request, hook_type, *args, **kwargs):
             return HttpResponse("Error")
 
         updated_time = datetime.datetime.now()
-        previous_checksum = meta.value.get('checksum')
+        previous_checksum = meta.value.get('checksum', None)
 
-        if not previous_checksum is None:
+        if previous_checksum is None:
             try:
             	meta.value['checksum'] = checksum
             	meta.value['lastChecksumUpdated'] = updated_time.strftime("%Y-%m-%dT%H:%M:%S")
