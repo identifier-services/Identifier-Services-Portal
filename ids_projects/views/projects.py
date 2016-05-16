@@ -174,6 +174,62 @@ def edit(request, project_uuid):
 
 
 @login_required
+def make_public(request, project_uuid):
+    """Make a project public"""
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+
+        project = Project(uuid = project_uuid, user=request.user)
+
+        # for uuid in project.associationIds:
+        #     item = BaseMetadata(uuid = uuid, user=request.user)
+        #     item.value['public'] == True
+        #     item.save()
+        #
+        # project.save()
+        project.make_public()
+
+        messages.success(request, 'Successfully made project public.')
+        return HttpResponseRedirect('/project/%s' % project_uuid)
+
+    #########
+    # OTHER #
+    #########
+    else:
+        django.http.HttpResponseNotAllowed("Method not allowed")
+
+
+@login_required
+def make_private(request, project_uuid):
+    """Make a project private"""
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+
+        project = Project(uuid = project_uuid, user=request.user)
+
+        # for uuid in project.associationIds:
+        #     item = BaseMetadata(uuid = uuid, user=request.user)
+        #     item.value['private'] == True
+        #     item.save()
+        #
+        # project.save()
+        project.make_private()
+
+        messages.success(request, 'Successfully made project private.')
+        return HttpResponseRedirect('/project/%s' % project_uuid)
+
+    #########
+    # OTHER #
+    #########
+    else:
+        django.http.HttpResponseNotAllowed("Method not allowed")
+
+
+@login_required
 def delete(request, project_uuid):
     """Delete a project """
     #######

@@ -17,12 +17,30 @@
                 <p><b>Project Name: </b> {{ project.value.title }}</p>
                 <p><b>Investigation Type: </b> {{ project.value.investigation_type }}</p>
                 <p><b>Description: </b> {{ project.value.description }}</p>
-                <div class="row">
-                    <div class="col-xs-3">
-                        <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit Project</a>
+                <div class="visible-xs">
+                    <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
+                    {% if project.value.public == 'True'%}
+                    <a href="{% url 'ids_projects:project-make-private' project_uuid=project.uuid %}" class="btn btn-primary">Make Private</a>
+                    {% else %}
+                    <a href="{% url 'ids_projects:project-make-public' project_uuid=project.uuid %}" class="btn btn-primary">Make Public</a>
+                    {% endif %}
+                    <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
+                </div>
+                <div class="row hidden-xs">
+                    <div class="col-sm-3">
+                        <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
                     </div>
-                    <div class="col-xs-3 col-xs-offset-4 col-sm-offset-3 col-md-offset-4">
-                        <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete Project</a>
+                    {% if project.value.public == 'True'%}
+                    <div class="col-sm-5 col-md-offset-1">
+                        <a href="{% url 'ids_projects:project-make-private' project_uuid=project.uuid %}" class="btn btn-primary">Make Private</a>
+                    </div>
+                    {% else %}
+                    <div class="col-sm-5 col-md-offset-1">
+                        <a href="{% url 'ids_projects:project-make-public' project_uuid=project.uuid %}" class="btn btn-primary">Make Public</a>
+                    </div>
+                    {% endif %}
+                    <div class="col-sm-1">
+                        <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
                     </div>
                 </div>
             </div>
