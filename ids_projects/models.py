@@ -107,13 +107,13 @@ class BaseMetadata(object):
         self.set_initial(meta)
 
     def save(self):
-        if self.user is None:
-            exception_msg = 'Missing user information, cannot save object.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
-
         # if no uuid, we are creating a new object (as the system user)
         if self.uuid is None:
+            if self.user is None:
+                exception_msg = 'Missing user information, cannot create object.'
+                logger.exception(exception_msg)
+                raise Exception(exception_msg)
+
             try:
                 response = self.system_ag.meta.addMetadata(body=self.body)
                 self.set_initial(response)
