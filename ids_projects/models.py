@@ -71,7 +71,12 @@ class BaseMetadata(object):
         if '_links' in initial_data:
             self.links = initial_data['_links']
         if 'value' in initial_data:
-            self.value = initial_data['value']
+            if self.value is None:
+                self.value = initial_data['value']
+            else:
+                # i don't want to clear values that might not be contained in a form (like 'public':'True')
+                for key, value in initial_data['value'].items():
+                    self.value[key] = value
 
     def load(self):
         if self.uuid is None:
