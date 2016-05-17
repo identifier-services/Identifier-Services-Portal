@@ -15,13 +15,8 @@ from ..models import Project
 from helper import client, collapse_meta
 import json, logging
 
-
 logger = logging.getLogger(__name__)
 
-class User(object):
-    def __init__(self, username, agave_oauth):
-        self.username = username
-        self.agave_oauth = agave_oauth
 
 @login_required
 def list(request):
@@ -31,21 +26,18 @@ def list(request):
     #######
     if request.method == 'GET':
 
-        project = Project(user=request.user)
-        public_projects = project.list(public=True)
-        private_projects = project.list(public=False)
+        try:
+            project = Project(user=request.user)
+            public_projects = project.list(public=True)
+            private_projects = project.list(public=False)
+        except Exception as e:
+            exception_msg = 'Unable to load projects. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect('/')
 
-        public_projects_meta = None
-        private_projects_meta = None
-
-        if public_projects is not None:
-            public_projects_meta = [project.body for project in public_projects]
-
-        if private_projects is not None:
-            private_projects_meta = [project.body for project in private_projects]
-
-        context = {'public_projects':public_projects_meta,
-                   'private_projects':private_projects_meta,
+        context = {'public_projects':public_projects,
+                   'private_projects':private_projects,
                    'create_button':True}
 
         return render(request, 'ids_projects/projects/index.html', context)
@@ -64,7 +56,13 @@ def view(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        project = Project(uuid = project_uuid, user=request.user)
+        try:
+            project = Project(uuid=project_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load project. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect('/projects/')
 
         context = {'project' : project,
                    'specimen_count' : len(project.specimens),
@@ -100,22 +98,28 @@ def create(request):
 
         if form.is_valid():
 
-            body = {}
-            body['value'] = form.cleaned_data
+            body = { 'value': form.cleaned_data }
             user_full = request.user.get_full_name()
             body['value']['creator'] = user_full
-            project = Project(initial_data = body, user=request.user)
 
-            result = project.save()
+            try:
+                project = Project(initial_data=body, user=request.user)
+                result = project.save()
+            except Exception as e:
+                exception_msg = 'Unable to create new project. %s' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+                return HttpResponseRedirect('/projects/')
 
             if 'uuid' in result:
-                project_uuid = result['uuid']
                 messages.info(request, 'New project created.')
                 return HttpResponseRedirect(
                             reverse('ids_projects:project-view',
-                                    kwargs={'project_uuid': project_uuid}))
+                                    kwargs={'project_uuid': project.uuid}))
 
-        messages.info(request, 'Did not create new project.')
+        warning_msg = 'Invalid API response. %s' % result
+        logger.warning(warning_msg)
+        messages.warning(request, warning_msg)
         return HttpResponseRedirect('/projects/')
 
     #########
@@ -128,21 +132,22 @@ def create(request):
 @login_required
 def edit(request, project_uuid):
     """ """
+    try:
+        project = Project(uuid=project_uuid, user=request.user)
+    except Exception as e:
+        exception_msg = 'Unable to load project. %s' % e
+        logger.exception(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect('/projects/')
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        try:
-            project = Project(uuid = project_uuid, user=request.user)
-        except:
-            logger.error('Error while attempting to edit project, not found.')
-            messages.error(request, 'Project not found.')
-            return HttpResponseRedirect('/projects/')
-        else:
-            context = {'form_project_edit': ProjectForm(initial=project.body),
-                       'project': project}
-            return render(request, 'ids_projects/projects/create.html', context)
+        context = { 'form_project_edit': ProjectForm(initial=project_meta),
+                    'project': project }
+        return render(request, 'ids_projects/projects/create.html', context)
 
     ########
     # POST #
@@ -153,20 +158,30 @@ def edit(request, project_uuid):
 
         if form.is_valid():
 
-            body = {}
-            body['value'] = form.cleaned_data
-            project = Project(uuid = project_uuid, initial_data = body, user=request.user)
-            result = project.save()
-
-            if 'uuid' in result:
-                project_uuid = result['uuid']
-                messages.info(request, 'Project Successfully edited.')
+            try:
+                body = { 'value': form.cleaned_data }
+                project.set_initial(body)
+                result = project.save()
+            except Exception as e:
+                exception_msg = 'Unable to create new project. %s' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
                 return HttpResponseRedirect(
                             reverse('ids_projects:project-view',
-                                    kwargs={'project_uuid': project_uuid}))
+                                    kwargs={ 'project_uuid': project.uuid }))
 
-        messages.success(request, 'Did not edit project.')
-        return HttpResponseRedirect('/project/{}'.format(project_uuid))
+            if 'uuid' in result:
+                messages.info(request, 'Project successfully edited.')
+                return HttpResponseRedirect(
+                            reverse('ids_projects:project-view',
+                                    kwargs={ 'project_uuid': project.uuid }))
+
+        warning_msg = 'Invalid API response. %s' % result
+        logger.warning(warning_msg)
+        messages.warning(request, warning_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:project-view',
+                            kwargs={ 'project_uuid': project.uuid }))
 
     #########
     # OTHER #
@@ -184,12 +199,12 @@ def make_public(request, project_uuid):
     if request.method == 'GET':
 
         try:
-            project = Project(uuid = project_uuid, user=request.user)
+            project = Project(uuid=project_uuid, user=request.user)
             project.make_public()
         except Exception as e:
             exception_msg = 'Unable to make project and associated objects public.'
             logger.exception(exception_msg)
-            messages.error(request, exception_msg)
+            messages.warning(request, exception_msg)
             return HttpResponseRedirect('/project/%s' % project_uuid)
 
         messages.success(request, 'Successfully made project public.')
@@ -211,12 +226,12 @@ def make_private(request, project_uuid):
     if request.method == 'GET':
 
         try:
-            project = Project(uuid = project_uuid, user=request.user)
+            project = Project(uuid=project_uuid, user=request.user)
             project.make_private()
         except Exception as e:
             exception_msg = 'Unable to make project and associated objects public.'
             logger.exception(exception_msg)
-            messages.error(request, exception_msg)
+            messages.warning(request, exception_msg)
             return HttpResponseRedirect('/project/%s' % project_uuid)
 
         messages.success(request, 'Successfully made project public.')
@@ -237,13 +252,40 @@ def delete(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        project = Project(uuid = project_uuid, user=request.user)
+        try:
+            project = Project(uuid=project_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load project. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:project-view',
+                                kwargs={ 'project_uuid': project.uuid }))
 
         for uuid in project.associationIds:
-            item = BaseMetadata(uuid = uuid)
-            item.delete()
+            try:
+                item = BaseMetadata(uuid=uuid)
+            except Exception as e:
+                exception_msg = 'Unable to load meta. %s' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+                # skip the rest of the loop iteration if the item is not found
+                continue
 
-        project.delete()
+            try:
+                item.delete()
+            except Exception as e:
+                exception_msg = 'Unable to delete meta. %s' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+
+        try:
+            project.delete()
+        except Exception as e:
+            exception_msg = 'Unable to delete project. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect('/projects/'')
 
         messages.success(request, 'Successfully deleted project.')
         return HttpResponseRedirect('/projects/')

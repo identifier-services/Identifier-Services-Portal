@@ -29,8 +29,19 @@ def list(request):
     if request.method == 'GET':
 
         project_uuid = request.GET.get('project_uuid', None)
-        project = Project(uuid = project_uuid, user=request.user)
-        context = {'project': project, 'specimens' : project.specimens}
+        if not project_uuid:
+            messages.warning(request, 'Missing project UUID, cannot find specimens.')
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
+        try:
+            project = Project(uuid=project_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load project. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect('/projects/')
+
+        context = {'project': project, 'specimens': project.specimens}
         return render(request, 'ids_projects/specimens/index.html', context)
 
     #########
@@ -48,10 +59,15 @@ def view(request, specimen_uuid):
     #######
     if request.method == 'GET':
 
-        specimen = Specimen(uuid = specimen_uuid)
-        project = specimen.project
+        try:
+            specimen = Specimen(uuid = specimen_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load specimen. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect('/projects/')
 
-        context = {'project' : project, 'specimen' : specimen}
+        context = { 'specimen': specimen, 'project': specimen.project }
 
         return render(request, 'ids_projects/specimens/detail.html', context)
 
@@ -67,16 +83,22 @@ def create(request):
     """Create a new specimen related to a project"""
     project_uuid = request.GET.get('project_uuid', False)
 
+    if not project_uuid:
+        messages.warning(request, 'Missing project UUID, cannot create specimen.')
+        return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        if not project_uuid:
-            messages.error(request, 'No project uuid')
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
-
-        project = Project(uuid=project_uuid, user=request.user)
+        try:
+            project = Project(uuid=project_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load project. %s' % e
+            logger.exception(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect('/projects/')
 
         context = {'form_specimen_create': SpecimenForm(),
                    'project': project,
@@ -93,29 +115,31 @@ def create(request):
 
         if form.is_valid():
 
-            # TODO: for some reason the project_uuid looks like it's actually the uuid for a specimen
             body = { 'associationIds':[project_uuid],
                      'value':form.cleaned_data }
 
             try:
-                specimen = Specimen(initial_data = body)
+                specimen = Specimen(initial_data=body, user=request.user)
                 result = specimen.save()
-                if not 'uuid' in result:
-                    raise Exception('Invalid API response: {}.'.format(result))
-                specimen_uuid = result['uuid']
+            except Exception as e:
+                exception_msg = 'Unable to create new specimen. %s' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:project-view',
+                                    kwargs={'project_uuid': project_uuid}))
+
+            if 'uuid' in result:
                 success_msg = 'Successfully created specimen.'
-                logger.debug(success_msg)
+                logger.info(success_msg)
                 messages.success(request, success_msg)
                 return HttpResponseRedirect(
                             reverse('ids_projects:specimen-view',
-                                    kwargs={'specimen_uuid': specimen_uuid}))
-            except HTTPError as e:
-                logger.debug('Error while attempting to create specimen metadata: %s' % e)
-            except Exception as e:
-                logger.debug('Error while attempting to create specimen metadata: %s' % e)
+                                    kwargs={'specimen_uuid': specimen.uuid}))
 
-        # execution falls through to here if an exception is caught, or the form is not valid
-        messages.error(request, 'Encountered error while creating new Specimen.')
+        warning_msg = 'Invalid API response. %s' % result
+        logger.warning(warning_msg)
+        messages.warning(request, warning_msg)
         return HttpResponseRedirect(
                         reverse('ids_projects:project-view',
                             kwargs={'project_uuid': project_uuid}))
@@ -130,96 +154,59 @@ def create(request):
 @login_required
 def edit(request, specimen_uuid):
     """ """
+    try:
+        specimen = Specimen(uuid=specimen_uuid, user=request.user)
+    except Exception as e:
+        exception_msg = 'Unable to edit specimen. %s' % e
+        logger.exception(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect('/projects/')
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        a = client(request)
-        try:
-            # get the specimen metadata object
-            specimens_raw= a.meta.getMetadata(uuid=specimen_uuid)
-            specimen = collapse_meta(specimens_raw)
-        except Exception as e:
-            logger.error('Error editing specimen. {}'.format(e.message))
-            messages.error(request, 'Specimen not found.')
+        context = {'form_specimen_edit': SpecimenForm(initial=specimen_meta),
+                   'specimen': specimen,
+                   'project': specimen.project}
 
-            return HttpResponseRedirect('/projects/')
-        else:
-            # find the project that the specimen is associated with
-            project = None
-            associationIds = specimen['associationIds']
-            query = {'uuid': { '$in': associationIds }}
-            results_raw = a.meta.listMetadata(q=json.dumps(query))
-            results = map(collapse_meta, results_raw)
-            for result in results:
-                if result['name'] == 'idsvc.project':
-                    project = result
-
-            context = {'form_specimen_edit': SpecimenForm(initial=specimen),
-                       'specimen': specimen,
-                       'project': project}
-            return render(request, 'ids_projects/specimens/create.html', context)
+        return render(request, 'ids_projects/specimens/create.html', context)
 
     ########
     # POST #
     ########
     elif request.method == 'POST':
 
-        form = SpecimenForm(request.POST)
-
-        # get the association fields
-        a = client(request)
-        try:
-            # get the specimen metadata object
-            specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
-            specimen = collapse_meta(specimen_raw)
-        except Exception as e:
-            logger.error('Error editing specimen. {}'.format(e.message))
-            messages.error(request, 'Specimen not found.')
-
-            return HttpResponseRedirect('/projects/')
-        else:
-            associationIds = specimen['associationIds']
+        form = ProjectForm(request.POST)
 
         if form.is_valid():
 
-            taxon_name = form.cleaned_data['taxon_name']
-            specimen_id = form.cleaned_data['specimen_id']
-            organ_or_tissue = form.cleaned_data['organ_or_tissue']
-            developmental_stage = form.cleaned_data['developmental_stage']
-            haploid_chromosome_count = form.cleaned_data['haploid_chromosome_count']
-            ploidy = form.cleaned_data['ploidy']
-            propagation = form.cleaned_data['propagation']
-            estimated_genome_size = form.cleaned_data['estimated_genome_size']
-
-            new_specimen = {
-                "name" : 'idsvc.specimen',
-                "associationIds" : associationIds,
-                "value": {
-                    "taxon_name":taxon_name,
-                    "specimen_id":specimen_id,
-                    "organ_or_tissue":organ_or_tissue,
-                    "developmental_stage":developmental_stage,
-                    "haploid_chromosome_count":haploid_chromosome_count,
-                    "ploidy":ploidy,
-                    "propagation":propagation,
-                    "estimated_genome_size":estimated_genome_size,
-                }
-            }
-
-            a = client(request)
             try:
-                response = a.meta.updateMetadata(uuid=specimen_uuid, body=new_specimen)
+                # will not overwrite association ids
+                body = { 'value': form.cleaned_data }
+                specimen.set_initial(body)
+                result = specimen.save()
             except Exception as e:
-                logger.debug('Error while attempting to edit specimen metadata: %s' % e)
-                messages.error(request, 'Error while attempting to edit specimen.')
-            else:
-                messages.success(request, 'Successfully edited specimen.')
-                return HttpResponseRedirect('/specimen/{}'.format(specimen_uuid))
+                exception_msg = 'Unable to edit specimen. %s' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:specimen-view',
+                                    kwargs={'specimen_uuid': specimen.uuid}))
 
-        messages.info(request, 'Did not edit specimen.')
-        return HttpResponseRedirect('/specimen/{}'.format(specimen_uuid))
+            if 'uuid' in result:
+                messages.info(request, 'Specimen successfully edited.')
+                return HttpResponseRedirect(
+                            reverse('ids_projects:specimen-view',
+                                    kwargs={'specimen_uuid': specimen.uuid}))
+
+        warning_msg = 'Invalid API response. %s' % result
+        logger.warning(warning_msg)
+        messages.warning(request, warning_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:project-view',
+                            kwargs={ 'project_uuid': project.uuid }))
 
     #########
     # OTHER #
@@ -238,39 +225,40 @@ def delete(request, specimen_uuid):
 
         # TODO: Ask user if process and file data should be deleted
 
-        # get the specimen
-        a = client(request)
-        specimen_raw = a.meta.getMetadata(uuid=specimen_uuid)
-        specimen = collapse_meta(specimen_raw)
+        try:
+            specimen = Specimen(uuid=specimen_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load specimen. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect('/projects/')
 
-        project = None
+        for process in specimen.processes:
+            try:
+                process.delete()
+            except Exception as e:
+                exception_msg = 'Unable to delete process. %s' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
 
-        # find the project that the specimen is associated with
-        associationIds = specimen['associationIds']
-        query = {'uuid': { '$in': associationIds }}
-        results_raw = a.meta.listMetadata(q=json.dumps(query))
-        results = map(collapse_meta, results_raw)
-        for result in results:
-            if result['name'] == 'idsvc.project':
-                project = result
+        for data in specimen.data:
+            try:
+                data.delete()
+            except Exception as e:
+                exception_msg = 'Unable to delete data. %s' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
 
         try:
-            a.meta.deleteMetadata(uuid=specimen_uuid)
-        except:
-            logger.error('Error deleting specimen. {}'.format(e.message) )
-            messages.error(request, 'Specimen deletion unsuccessful.')
+            specimen.delete()
+        except Exception as e:
+            exception_msg = 'Unable to delete specimen. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect('/projects/')
 
-            if project:
-                return HttpResponseRedirect('/project/{}'.format(project['uuid']))
-            else:
-                return HttpResponseRedirect('/projects/')
-        else:
-            messages.success(request, 'Successfully deleted specimen.')
-
-            if project:
-                return HttpResponseRedirect('/project/{}'.format(project['uuid']))
-            else:
-                return HttpResponseRedirect('/projects/')
+        messages.success(request, 'Successfully deleted project.')
+        return HttpResponseRedirect('/projects/')
 
     #########
     # OTHER #
