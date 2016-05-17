@@ -167,7 +167,7 @@ def edit(request, specimen_uuid):
     #######
     if request.method == 'GET':
 
-        context = {'form_specimen_edit': SpecimenForm(initial=specimen_meta),
+        context = {'form_specimen_edit': SpecimenForm(initial=specimen.body),
                    'specimen': specimen,
                    'project': specimen.project}
 
@@ -178,7 +178,7 @@ def edit(request, specimen_uuid):
     ########
     elif request.method == 'POST':
 
-        form = ProjectForm(request.POST)
+        form = SpecimenForm(request.POST)
 
         if form.is_valid():
 

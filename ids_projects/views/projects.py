@@ -145,7 +145,7 @@ def edit(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        context = { 'form_project_edit': ProjectForm(initial=project_meta),
+        context = { 'form_project_edit': ProjectForm(initial=project.body),
                     'project': project }
         return render(request, 'ids_projects/projects/create.html', context)
 
@@ -285,7 +285,7 @@ def delete(request, project_uuid):
             exception_msg = 'Unable to delete project. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect('/projects/'')
+            return HttpResponseRedirect('/projects/')
 
         messages.success(request, 'Successfully deleted project.')
         return HttpResponseRedirect('/projects/')
