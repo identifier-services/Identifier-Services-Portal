@@ -18,7 +18,7 @@ class BaseMetadata(object):
         if user is not None:
             # if type(user) is not django.utils.functional.SimpleLazyObject:
             #     exception_msg = 'User parameter type is incorrect.'
-            #     logging.exception(exception_msg)
+            #     logging.error(exception_msg)
             #     raise TypeError(exception_msg)
 
             self.user = user
@@ -48,7 +48,7 @@ class BaseMetadata(object):
         if user is not None:
             # if type(user) is not django.utils.functional.SimpleLazyObject:
             #     exception_msg = 'User parameter type is incorrect.'
-            #     logging.exception(exception_msg)
+            #     logging.error(exception_msg)
             #     raise TypeError(exception_msg)
 
             # user client
