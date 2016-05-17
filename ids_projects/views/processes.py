@@ -145,7 +145,7 @@ def create(request):
                     return HttpResponseRedirect('/process/{}'.format(process_uuid))
                 except HTTPError as e:
                     logger.debug('Error while attempting to create process metadata: %s' % e)
-                    messages.error(request, 'Encountered error, process not created.')
+                    messages.warning(request, 'Encountered error, process not created.')
                     return HttpResponseRedirect('/specimen/{}'.format(specimen_uuid))
 
     if request.is_ajax():
@@ -161,11 +161,11 @@ def edit(request, process_uuid):
         process = Process(uuid=process_uuid)
     except HTTPError as e:
         logger.error('Error editing process. {}'.format(e.message))
-        messages.error(request, 'Error editing process.')
+        messages.warning(request, 'Error editing process.')
         return HttpResponseRedirect('/process/{}'.format(process_uuid))
     except Exception as e:
         logger.error('Error editing process. {}'.format(e.message))
-        messages.error(request, 'Process not found.')
+        messages.warning(request, 'Process not found.')
         return HttpResponseRedirect('/projects/')
 
     # TODO: find better way of getting process fields.
@@ -200,11 +200,11 @@ def edit(request, process_uuid):
                 process.value = form.cleaned_data.copy()
                 process.save()
                 logger.error('Successfully edited process.')
-                messages.error(request, 'Successfully edited process.')
+                messages.warning(request, 'Successfully edited process.')
                 return HttpResponseRedirect('/process/{}'.format(process_uuid))
             except HTTPError as e:
                 logger.error('Error editing process. {}'.format(e.message))
-                messages.error(request, 'Error editing process.')
+                messages.warning(request, 'Error editing process.')
                 return HttpResponseRedirect('/process/{}'.format(process_uuid))
 
 

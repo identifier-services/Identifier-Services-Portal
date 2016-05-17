@@ -86,7 +86,7 @@ def agave_oauth_callback(request):
             messages.success(request, 'Login successful. Welcome back, %s %s!' %
                 (user.first_name, user.last_name))
         else:
-            messages.error(
+            messages.warning(
                 request,
                 'Authentication failed. Please try again. If this problem '
                 'persists please submit a support ticket.'
@@ -97,7 +97,7 @@ def agave_oauth_callback(request):
             error = request.GET['error']
             logger.error('Authorization failed: %s' % error)
 
-        messages.error(request, 'Authentication failed.  Did you forget your password?'
+        messages.warning(request, 'Authentication failed.  Did you forget your password?'
                         '<ahref="https://user.iplantcollaborative.org/reset/request"Click here</a>'
                         'to reset your password.')
         return HttpResponseRedirect(reverse('ids_auth:login'))
