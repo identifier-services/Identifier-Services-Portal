@@ -2,6 +2,7 @@ from agavepy.agave import Agave, AgaveException
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.http import (HttpResponse,
                          HttpResponseRedirect,
                          HttpResponseBadRequest,
@@ -28,7 +29,18 @@ def list(request):
     if request.method == 'GET':
 
         specimen_uuid = request.GET.get('specimen_uuid', None)
-        specimen = Specimen(uuid = specimen_uuid)
+        if not specimen_uuid:
+            messages.warning(request, 'Missing specimen UUID, cannot find processes.')
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
+        try:
+            specimen = Specimen(uuid=specimen_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load specimen, processes. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
         context = { 'project': specimen.project,
                     'specimen' : specimen,
                     'processes': specimen.processes
@@ -51,7 +63,13 @@ def view(request, process_uuid):
     #######
     if request.method == 'GET':
 
-        process = Process(uuid = process_uuid)
+        try:
+            process = Process(uuid=process_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load process. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
 
         context = {'process' : process,
                    'project' : process.project,
@@ -71,19 +89,37 @@ def view(request, process_uuid):
 def create(request):
     """Create a new process related to a specimen"""
     specimen_uuid = request.GET.get('specimen_uuid', None)
-    specimen = Specimen(uuid=specimen_uuid)
+    if not specimen_uuid:
+        messages.warning(request, 'Missing specimen UUID, cannot create processes.')
+        return HttpResponseRedirect(reverse('ids_projects:project-list'))
 
-    project = specimen.project
-    investigation_type = project.value['investigation_type'].lower()
+    try:
+        specimen = Specimen(uuid=specimen_uuid, user=request.user)
+    except Exception as e:
+        exception_msg = 'Unable to load specimen, cannot create process. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list'))
 
-    object_descriptions = getattr(settings, 'OBJ_DESCR')
-    investigation_types = object_descriptions['investigation_types']
+    try:
+        project = specimen.project
+        investigation_type = project.value['investigation_type'].lower()
 
-    project_description = investigation_types[investigation_type]
-    project_processes = project_description['processes']
+        object_descriptions = getattr(settings, 'OBJ_DESCR')
+        investigation_types = object_descriptions['investigation_types']
 
-    process_type_choices = [('', 'Choose one'),] + \
-                            [(x,x.title()) for x in project_processes.keys()]
+        project_description = investigation_types[investigation_type]
+        project_processes = project_description['processes']
+
+        process_type_choices = [('', 'Choose one'),] + \
+                                [(x,x.title()) for x in project_processes.keys()]
+    except Exception as e:
+        exception_msg = 'Missing project type information, cannot create process. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:specimen-view',
+                            kwargs={'specimen_uuid': specimen.uuid}))
 
     context = { 'project':project,
                 'specimen':specimen }
@@ -133,20 +169,33 @@ def create(request):
                 associationIds = specimen.associationIds
                 associationIds.append(specimen.uuid)
 
-                new_process = Process()
-                new_process.associationIds = associationIds
-                new_process.value = data
+                body = { 'associationIds': associationIds, 'value': data }
 
                 try:
-                    response = new_process.save()
-                    process_uuid = response['uuid']
-                    logger.debug('Successfully created process: {}'.format(process_uuid))
-                    messages.success(request, 'Successfully created process.')
-                    return HttpResponseRedirect('/process/{}'.format(process_uuid))
+                    process = Process(initial_data=body, user=request.user)
+                    result = process.save()
                 except HTTPError as e:
-                    logger.debug('Error while attempting to create process metadata: %s' % e)
-                    messages.warning(request, 'Encountered error, process not created.')
-                    return HttpResponseRedirect('/specimen/{}'.format(specimen_uuid))
+                    exception_msg = 'Unable to create new process. %s' % e
+                    logger.error(exception_msg)
+                    messages.warning(request, exception_msg)
+                    return HttpResponseRedirect(
+                                reverse('ids_projects:specimen-view',
+                                        kwargs={'specimen_uuid': specimen.uuid}))
+
+                if 'uuid' in result:
+                    success_msg = 'Successfully created process.'
+                    logger.info(success_msg)
+                    messages.success(request, success_msg)
+                    return HttpResponseRedirect(
+                                reverse('ids_projects:process-view',
+                                        kwargs={'process_uuid': process.uuid}))
+
+            warning_msg = 'Invalid API response. %s' % result
+            logger.warning(warning_msg)
+            messages.warning(request, warning_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:specimen-view',
+                                kwargs={'specimen_uuid': specimen.uuid}))
 
     if request.is_ajax():
         return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
@@ -158,7 +207,7 @@ def create(request):
 def edit(request, process_uuid):
     """Edit existing process metadata"""
     try:
-        process = Process(uuid=process_uuid)
+        process = Process(uuid=process_uuid, user=request.user)
     except HTTPError as e:
         logger.error('Error editing process. {}'.format(e.message))
         messages.warning(request, 'Error editing process.')
@@ -168,7 +217,6 @@ def edit(request, process_uuid):
         messages.warning(request, 'Process not found.')
         return HttpResponseRedirect('/projects/')
 
-    # TODO: find better way of getting process fields.
     object_descriptions = getattr(settings, 'OBJ_DESCR')
     investigation_types = object_descriptions['investigation_types']
     investigation_type = process.project.value['investigation_type'].lower()
@@ -196,22 +244,37 @@ def edit(request, process_uuid):
         form = ProcessFieldsForm(process_fields, request.POST)
 
         if form.is_valid():
-            try:
-                process.value = form.cleaned_data.copy()
-                process.save()
-                logger.error('Successfully edited process.')
-                messages.warning(request, 'Successfully edited process.')
-                return HttpResponseRedirect('/process/{}'.format(process_uuid))
-            except HTTPError as e:
-                logger.error('Error editing process. {}'.format(e.message))
-                messages.warning(request, 'Error editing process.')
-                return HttpResponseRedirect('/process/{}'.format(process_uuid))
 
+            try:
+                # will not overwrite association ids
+                body = { 'value': form.cleaned_data }
+                process.set_initial(body)
+                result = process.save()
+            except Exception as e:
+                exception_msg = 'Unable to edit process. %s' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:process-view',
+                                    kwargs={'process_uuid': process.uuid}))
+
+            if 'uuid' in result:
+                messages.info(request, 'Process successfully edited.')
+                return HttpResponseRedirect(
+                            reverse('ids_projects:process-view',
+                                    kwargs={'process_uuid': process.uuid}))
+
+            warning_msg = 'Invalid API response. %s' % result
+            logger.warning(warning_msg)
+            messages.warning(request, warning_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:process-view',
+                                kwargs={'process_uuid': process.uuid}))
 
 @login_required
 def delete(request, process_uuid):
     """Delete a process"""
-    process = Process(uuid=process_uuid)
+    process = Process(uuid=process_uuid, user=request.user)
 
     # TODO: delete data, or just associate data with project?
     for data in process.data:
