@@ -22,4 +22,4 @@ class SpecimenForm(forms.Form):
                 if key in self.fields:
                     self.fields[key].initial = self.initial['value'][key]
         except Exception as e:
-            logger.debug('New project, no initial values.')
+            logger.debug('New specimen, no initial values.')
