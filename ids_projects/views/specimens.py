@@ -201,12 +201,12 @@ def edit(request, specimen_uuid):
                             reverse('ids_projects:specimen-view',
                                     kwargs={'specimen_uuid': specimen.uuid}))
 
-        warning_msg = 'Invalid API response. %s' % result
-        logger.warning(warning_msg)
-        messages.warning(request, warning_msg)
-        return HttpResponseRedirect(
-                    reverse('ids_projects:project-view',
-                            kwargs={ 'project_uuid': project.uuid }))
+            warning_msg = 'Invalid API response. %s' % result
+            logger.warning(warning_msg)
+            messages.warning(request, warning_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:specimen-view',
+                                kwargs={ 'specimen_uuid': specimen.uuid }))
 
     #########
     # OTHER #
