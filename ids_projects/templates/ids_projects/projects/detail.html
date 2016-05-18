@@ -17,6 +17,7 @@
                 <p><b>Project Name: </b> {{ project.value.title }}</p>
                 <p><b>Investigation Type: </b> {{ project.value.investigation_type }}</p>
                 <p><b>Description: </b> {{ project.value.description }}</p>
+                <p><b>Creator: </b>{{ project.value.creator }}</p>
                 <p><b>Access: </b> {% if project.value.public == 'True' %}Public{% else %}Private{% endif %}</p>
                 <div class="visible-xs">
                     <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>

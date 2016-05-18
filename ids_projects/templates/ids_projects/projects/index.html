@@ -24,6 +24,7 @@
                 <p><h4>{{ project.value.title }}</h4>
                 <b>Type: </b>{{ project.value.investigation_type }}</p>
                 <p><b>Description: </b>{{ project.value.description }}</p>
+                <p><b>Creator: </b>{{ project.value.creator }}</p>
                 <div class="row">
                     <div class="col-xs-3">
                         <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-primary">View</a>
@@ -53,6 +54,7 @@
                 <p><h4>{{ project.value.title }}</h4>
                 <b>Type: </b>{{ project.value.investigation_type }}</p>
                 <p><b>Description: </b>{{ project.value.description }}</p>
+                <p><b>Access: </b> {% if project.value.public == 'True' %}Public{% else %}Private{% endif %}</p>
                 <div class="row">
                     <div class="col-xs-3">
                         <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-primary">View</a>
