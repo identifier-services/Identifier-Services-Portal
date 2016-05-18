@@ -15,6 +15,7 @@ class BaseMetadata(object):
         self.system_ag = None
         self.user_ag = None
         self.user = None
+        self.contributors = None
         # this is a workaround until i figure out how to authenticate user through webhook
         self.public = kwargs.get('public', True)
 
@@ -80,6 +81,7 @@ class BaseMetadata(object):
                 # i don't want to clear values that might not be contained in a form (like 'public':'True')
                 for key, value in initial_data['value'].items():
                     self.value[key] = value
+        self.load_contributors()
 
     def load(self):
         if self.uuid is None:
@@ -126,13 +128,16 @@ class BaseMetadata(object):
     def _list_associated_meta(self, name, relationship):
 
         if relationship == 'parent':
-            query = { 'uuid': { '$in': self.associationIds }, 'name': name }
+            query = { 'uuid': { '$in': self.associationIds } }
         elif relationship == 'child':
-            query = { 'associationIds': self.uuid, 'name': name }
+            query = { 'associationIds': self.uuid }
         else:
             warning_msg = 'Cannot list associated meta, missing relationship type. Must be either parent or child.'
             logger.warning(warning_msg)
             return None
+
+        if name is not None:
+            query['name'] = name
 
         meta_results = None
 
@@ -144,7 +149,7 @@ class BaseMetadata(object):
                 debug_msg = 'Unable to list meta objects as logged in user. %s' % e
                 logger.debug(debug_msg)
 
-        if meta_results is None:
+        if not meta_results:
             try:
                 query['value.public'] = 'True'
                 # query public meta owned by system user
@@ -164,6 +169,7 @@ class BaseMetadata(object):
                 raise Exception(exception_msg)
 
             try:
+                # always create objects with the system user
                 response = self.system_ag.meta.addMetadata(body=self.body)
                 self.set_initial(response)
             except Exception as e:
@@ -172,6 +178,7 @@ class BaseMetadata(object):
                 raise Exception(exception_msg)
 
             try:
+                # then grant permissions to the logged in user
                 self.system_ag.meta.updateMetadataPermissions(
                     uuid=self.uuid,
                     body={
@@ -189,6 +196,28 @@ class BaseMetadata(object):
 
         # if we have a uuid, we are probably editing an existing object
         else:
+
+            # in most cases we want to do this as the logged in user,
+            # but a bug (#?) in the agave api prevents us from doing that
+            # for now. so we'll use the system user, but we want to make
+            # sure that the logged in user has privs
+
+            # try:
+            #     permissions_response = \
+            #         self.system_ag.meta.listMetadataPermissionsForUser(
+            #                 uuid=self.uuid,
+            #                 username=self.user.username
+            #             )
+            #     if permissions_response['permission']['write'] is not True:
+            #         raise Exception('Client does not have access.')
+            # except Exception as e:
+            #     exception_msg = 'Unable update object. %s' % e
+            #     logger.exception(exception_msg)
+            #     raise Exception(exception_msg)
+            if self.user not in self.contributors:
+                exception_msg = 'Unable update object.'
+                logger.exception(exception_msg)
+                raise Exception(exception_msg)
 
             try:
                 response = self.system_ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
@@ -219,6 +248,23 @@ class BaseMetadata(object):
             exception_msg = 'Unable to delete meta object. %s' % e
             logger.exception(exception_msg)
             raise Exception(exception_msg)
+
+    def load_contributors(self):
+        try:
+            contributor_list = []
+            permissions_list = self.system_ag.meta.listMetadataPermissions(uuid=self.uuid)
+            for entry in permissions_list:
+                if entry['permission']['write'] is True:
+                    contributor_list.append(entry['username'])
+            self.contributors = contributor_list
+        except Exception as e:
+            self.contributors = None
+            exception_msg = 'Unable to list permissions on object. %s' % e
+            logger.exception(exception_msg)
+
+    @property
+    def user_is_contributor(self):
+        return self.user.username in self.contributors
 
     @property
     def body(self):
@@ -269,7 +315,7 @@ class Project(BaseMetadata):
         if self._specimens is None or reset:
 
             meta_results = self._list_associated_meta(name=Specimen.name, relationship='child')
-            self._specimens = [Specimen(initial_data=r) for r in meta_results]
+            self._specimens = [Specimen(initial_data=r, user=self.user) for r in meta_results]
 
         return self._specimens
 
@@ -278,7 +324,7 @@ class Project(BaseMetadata):
         if self._processes is None or reset:
 
             meta_results = self._list_associated_meta(name=Process.name, relationship='child')
-            self._processes = [Process(initial_data=r) for r in meta_results]
+            self._processes = [Process(initial_data=r, user=self.user) for r in meta_results]
 
         return self._processes
 
@@ -287,7 +333,7 @@ class Project(BaseMetadata):
         if self._data is None or reset:
 
             meta_results = self._list_associated_meta(name=Data.name, relationship='child')
-            self._data = [Data(initial_data=r) for r in meta_results]
+            self._data = [Data(initial_data=r, user=self.user) for r in meta_results]
 
         return self._data
 
@@ -318,15 +364,12 @@ class Project(BaseMetadata):
             logger.exception(exception_msg)
             raise Exception(exception_msg)
 
-        for uuid in self.associationIds:
+        for item in self.specimens + self.processes + self.data:
             try:
-                name = 'object'
-                item = BaseMetadata(uuid=uuid, user=self.user)
-                name = item.name
                 item.value['public'] = 'True' if public else 'False'
                 item.save()
             except Exception as e:
-                exception_msg = 'Unable update %s. %s' % (name, e)
+                exception_msg = 'Unable update %s. %s' % (item.name, e)
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
 
@@ -352,7 +395,7 @@ class Specimen(BaseMetadata):
         if self._project is None or reset:
 
             meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
-            self._project = Project(initial_data = next(iter(meta_results), None))
+            self._project = Project(initial_data = next(iter(meta_results), None), user=self.user)
 
         return self._project
 
@@ -361,7 +404,7 @@ class Specimen(BaseMetadata):
         if self._processes is None or reset:
 
             meta_results = self._list_associated_meta(name=Process.name, relationship='child')
-            self._processes = [Process(initial_data=r) for r in meta_results]
+            self._processes = [Process(initial_data=r, user=self.user) for r in meta_results]
 
         return self._processes
 
@@ -370,7 +413,7 @@ class Specimen(BaseMetadata):
         if self._data is None or reset:
 
             meta_results = self._list_associated_meta(name=Data.name, relationship='child')
-            self._data = [Data(initial_data=r) for r in meta_results]
+            self._data = [Data(initial_data=r, user=self.user) for r in meta_results]
 
         return self._data
 
@@ -407,7 +450,7 @@ class Process(BaseMetadata):
         if self._project is None or reset:
 
             meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
-            self._project = Project(initial_data = next(iter(meta_results), None))
+            self._project = Project(initial_data = next(iter(meta_results), None), user=self.user)
 
         return self._project
 
@@ -416,7 +459,7 @@ class Process(BaseMetadata):
         if self._specimen is None or reset:
 
             meta_results = self._list_associated_meta(name=Specimen.name, relationship='parent')
-            self._specimen = Specimen(initial_data = next(iter(meta_results)))
+            self._specimen = Specimen(initial_data = next(iter(meta_results), None), user=self.user)
 
         return self._specimen
 
@@ -425,7 +468,7 @@ class Process(BaseMetadata):
         if self._data is None or reset:
 
             meta_results = self._list_associated_meta(Data.name, relationship='child')
-            self._data = [Data(initial_data=r) for r in meta_results]
+            self._data = [Data(initial_data=r, user=self.user) for r in meta_results]
 
         return self._data
 
@@ -456,6 +499,7 @@ class Data(BaseMetadata):
         resp = self.user_ag.jobs.submit(body={'appId': '<app id>', 'inputs': [], 'parameters': []})
 
         pass
+
 
 class System(object):
 
