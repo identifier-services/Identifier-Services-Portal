@@ -29,16 +29,36 @@ class AgaveOAuthBackend(ModelBackend):
 
                 try:
                     user = UserModel.objects.get(username=username)
-                    user.first_name = agave_user['first_name']
-                    user.last_name = agave_user['last_name']
+
+                    if 'first_name' in agave_user:
+                        user.first_name = agave_user['first_name']
+                    elif 'firstName' in agave_user:
+                        user.first_name = agave_user['firstName']
+
+                    if 'last_name' in agave_user:
+                        user.last_name = agave_user['last_name']
+                    elif 'lastName' in agave_user:
+                        user.last_name = agave_user['lastName']
+
                     user.email = agave_user['email']
                     user.save()
                 except UserModel.DoesNotExist:
                     self.logger.info('Creating local user record for "%s" from Agave Profile' % username)
+
+                    if 'first_name' in agave_user:
+                        first_name = agave_user['first_name']
+                    elif 'firstName' in agave_user:
+                        first_name = agave_user['firstName']
+
+                    if 'last_name' in agave_user:
+                        last_name = agave_user['last_name']
+                    elif 'lastName' in agave_user:
+                        last_name = agave_user['lastName']
+
                     user = UserModel.objects.create_user(
                         username=username,
-                        first_name=agave_user['first_name'],
-                        last_name=agave_user['last_name'],
+                        first_name=first_name,
+                        last_name=last_name,
                         email=agave_user['email']
                         )
 
