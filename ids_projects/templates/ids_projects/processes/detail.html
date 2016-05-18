@@ -25,10 +25,18 @@
                 {% endfor %}
                 <div class="row">
                     <div class="col-xs-1">
-                        <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
+                        {% else %}
+                            <a href="#" class="btn btn-primary" disabled>Edit</a>
+                        {% endif %}
                     </div>
                     <div class="col-xs-2 pull-right col-xs-pull-2 col-sm-pull-2 col-md-pull-1">
-                        <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
+                        {% else %}
+                            <a href="#" class="btn btn-danger" disabled>Delete</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -40,14 +48,22 @@
         <div class="object-header dark">
             <div>
                 No data associated with {{ process.value.process_type }}
-                <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                {% if project.user_is_contributor %}
+                    <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                {% else %}
+                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
+                {% endif %}
             </div>
         </div>
         {% else %}
         <div class="object-header dark">
             <div>
                 Data associated with {{ process.value.process_type }}
-                <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                {% if project.user_is_contributor %}
+                    <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                {% else %}
+                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
+                {% endif %}
             </div>
         </div>
 
@@ -56,9 +72,13 @@
                 {% for data in datas %}
 
                 <div class="object-header">
-                    <!-- TODO: view file -->
+                    <!-- TODO: link to file detail view -->
                     <a href="#" class="header-link">{{ data.value.name }}</a>
-                    <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger btn-sm pull-right fix-me">Delete</a>
+                    {% if project.user_is_contributor %}
+                        <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger btn-sm pull-right fix-me">Delete</a>
+                    {% else %}
+                        <a href="#" class="btn btn-danger btn-sm pull-right fix-me" disabled>Delete</a>
+                    {% endif %}
                 </div>
 
                 {% endfor %}

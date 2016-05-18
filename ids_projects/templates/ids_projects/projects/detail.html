@@ -18,31 +18,65 @@
                 <p><b>Investigation Type: </b> {{ project.value.investigation_type }}</p>
                 <p><b>Description: </b> {{ project.value.description }}</p>
                 <p><b>Creator: </b>{{ project.value.creator }}</p>
+                <!-- <p><b>Contributors: </b> {{ project.contributors|join:", " }} </p> -->
                 <p><b>Access: </b> {% if project.value.public == 'True' %}Public{% else %}Private{% endif %}</p>
                 <div class="visible-xs">
-                    <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
-                    {% if project.value.public == 'True'%}
-                    <a href="{% url 'ids_projects:project-make-private' project_uuid=project.uuid %}" class="btn btn-primary">Make Private</a>
+                    {% if project.user_is_contributor %}
+                        <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
                     {% else %}
-                    <a href="{% url 'ids_projects:project-make-public' project_uuid=project.uuid %}" class="btn btn-primary">Make Public</a>
+                        <a href="#" class="btn btn-primary" disabled>Edit</a>
                     {% endif %}
-                    <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
+
+                    {% if project.value.public == 'True'%}
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:project-make-private' project_uuid=project.uuid %}" class="btn btn-primary">Make Private</a>
+                        {% else %}
+                            <a href="#" class="btn btn-primary" disabled>Make Private</a>
+                        {% endif %}
+                    {% else %}
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:project-make-public' project_uuid=project.uuid %}" class="btn btn-primary">Make Public</a>
+                        {% else %}
+                            <a href="#" class="btn btn-primary" disabled>Make Public</a>
+                        {% endif %}
+                    {% endif %}
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
+                        {% else %}
+                            <a href="#" class="btn btn-danger" disabled>Delete</a>
+                        {% endif %}
                 </div>
                 <div class="row hidden-xs">
                     <div class="col-sm-3">
-                        <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
+                        {% else %}
+                            <a href="#" class="btn btn-primary" disabled>Edit</a>
+                        {% endif %}
                     </div>
                     {% if project.value.public == 'True'%}
                     <div class="col-sm-5 col-md-offset-1">
-                        <a href="{% url 'ids_projects:project-make-private' project_uuid=project.uuid %}" class="btn btn-primary">Make Private</a>
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:project-make-private' project_uuid=project.uuid %}" class="btn btn-primary">Make Private</a>
+                        {% else %}
+                            <a href="#" class="btn btn-primary" disabled>Make Private</a>
+                        {% endif %}
                     </div>
                     {% else %}
                     <div class="col-sm-5 col-md-offset-1">
-                        <a href="{% url 'ids_projects:project-make-public' project_uuid=project.uuid %}" class="btn btn-primary">Make Public</a>
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:project-make-public' project_uuid=project.uuid %}" class="btn btn-primary">Make Public</a>
+                        {% else %}
+                            <a href="#" class="btn btn-primary" disabled>Make Public</a>
+                        {% endif %}
                     </div>
                     {% endif %}
                     <div class="col-sm-1">
-                        <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
+                        {% else %}
+                            <a href="#" class="btn btn-danger" disabled>Delete</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -53,7 +87,11 @@
                 <h4>Specimens: {{ specimen_count }}</h4>
             </div>
             <div class="col-xs-3 col-xs-offset-2">
-                <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a>
+                {% if project.user_is_contributor %}
+                    <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a>
+                {% else %}
+                    <a href="#" class="btn btn-primary" disabled>Add </a>
+                {% endif %}
             </div>
         </div><hr>
         <div class="row">
@@ -61,7 +99,11 @@
                 <h4>Processes: {{ process_count }}</h4>
             </div>
             <div class="col-xs-3 col-xs-offset-2">
-                <a href="{% url 'ids_projects:process-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a>
+                {% if project.user_is_contributor %}
+                    <a href="{% url 'ids_projects:process-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a>
+                {% else %}
+                    <a href="#" class="btn btn-primary"disabled>Add </a>
+                {% endif %}
             </div>
         </div><hr>
         <div class="row">
@@ -69,8 +111,11 @@
                 <h4>Files: {{ file_count }}</h4>
             </div>
             <div class="col-xs-3 col-xs-offset-2">
-                <!-- TODO: adding data to project, not process -->
-                {# <a href="{% url 'ids_projects:file-select' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add</a> #}
+                {% if project.user_is_contributor %}
+                    <a href="{% url 'ids_projects:file-select' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add</a>
+                {% else %}
+                    <a href="#" class="btn btn-primary" disabled>Add</a>
+                {% endif %}
             </div>
         </div><hr>
 
@@ -83,14 +128,22 @@
         <div class="object-header dark">
             <div>
                 No Specimens yet.
-                <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                {% if project.user_is_contributor %}
+                    <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                {% else %}
+                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
+                {% endif %}
             </div>
         </div>
         {% else %}
         <div class="object-header dark">
             <div>
                 Specimens
-                <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                {% if project.user_is_contributor %}
+                    <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                {% else %}
+                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
+                {% endif %}
             </div>
         </div>
 
@@ -168,7 +221,7 @@
                         </div>
                     </div>
 
-                        {% if not specimen.value.processes %}
+                        {% if not specimen.processes %}
                         <div class="object-header dark">
                             <div>
                                 {% if specimen.short %}
@@ -176,7 +229,12 @@
                                 {% else %}
                                     No processes for {{ specimen.value.taxon_name }} {{ specimen.value.specimen_id }}
                                 {% endif %}
-                                <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+
+                                {% if project.user_is_contributor %}
+                                    <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                                {% else %}
+                                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
+                                {% endif %}
                             </div>
                         </div>
                         {% else %}
@@ -187,7 +245,12 @@
                                 {% else %}
                                     Processes for {{ specimen.value.taxon_name }} {{ specimen.value.specimen_id }}
                                 {% endif %}
-                                <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+
+                                {% if project.user_is_contributor %}
+                                    <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                                {% else %}
+                                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -197,57 +260,21 @@
                             {% for process in specimen.processes %}
 
                             <div class="object-header">
-                                <a href="{% url 'ids_projects:process-view' process_uuid=process.uuid %}" class="header-link">{{ process.process_type }}</a>
+                                <a href="{% url 'ids_projects:process-view' process_uuid=process.uuid %}" class="header-link">{{ process.value.process_type }}</a>
                             </div>
 
-                            <div class="row info-item">
-                                <div class="col-xs-6">
-                                    <b>Process Type</b>
-                                </div>
-                                <div class="col-xs-6">
-                                    {{ process.value.process_type }}
-                                </div>
-                            </div>
-                            {% if process.value.sequence_method %}
-                            <div class="row info-item">
-                                <div class="col-xs-6">
-                                    <b>Sequence Method</b>
-                                </div>
-                                <div class="col-xs-6">
-                                    {{ process.value.sequence_method }}
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% if process.value.sequence_hardware %}
-                            <div class="row info-item">
-                                <div class="col-xs-6">
-                                    <b>Sequence Hardware</b>
-                                </div>
-                                <div class="col-xs-6">
-                                    {{ process.value.sequence_hardware }}
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% if process.value.assembly_method %}
-                            <div class="row info-item">
-                                <div class="col-xs-6">
-                                    <b>Assembly Method</b>
-                                </div>
-                                <div class="col-xs-6">
-                                    {{ process.value.assembly_method }}
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% if process.value.reference_sequence %}
-                            <div class="row info-item">
-                                <div class="col-xs-6">
-                                    <b>Reference Sequence</b>
-                                </div>
-                                <div class="col-xs-6">
-                                    {{ process.value.reference_sequence }}
-                                </div>
-                            </div>
-                            {% endif %}
+                                {% for key, value in process.value.items %}
+                                    {% if key != "process_type" and key != "public" %}
+                                    <div class="row info-item">
+                                        <div class="col-xs-6">
+                                            <b>{{ key.title }}</b>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            {{ value }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
 
                             {% endfor %} <!-- processes -->
                         {% endif %} <!-- specimen.processes -->

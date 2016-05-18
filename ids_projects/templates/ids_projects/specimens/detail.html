@@ -24,10 +24,18 @@
 
                 <div class="row">
                     <div class="col-xs-1">
-                        <a href="{% url 'ids_projects:specimen-edit' specimen_uuid=specimen.uuid %}" class="btn btn-primary">Edit</a>
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:specimen-edit' specimen_uuid=specimen.uuid %}" class="btn btn-primary">Edit</a>
+                        {% else %}
+                            <a href="#" class="btn btn-primary" disabled>Edit</a>
+                        {% endif %}
                     </div>
                     <div class="col-xs-2 pull-right col-xs-pull-2 col-sm-pull-2 col-md-pull-1">
-                        <a href="{% url 'ids_projects:specimen-delete' specimen_uuid=specimen.uuid %}" class="btn btn-danger">Delete</a>
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:specimen-delete' specimen_uuid=specimen.uuid %}" class="btn btn-danger">Delete</a>
+                        {% else %}
+                            <a href="#" class="btn btn-danger" disabled>Delete</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -43,14 +51,24 @@
                 {% else %}
                     No processes for {{ specimen.value.taxon_name }} {{ specimen.value.specimen_id }}
                 {% endif %}
-                <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+
+                {% if project.user_is_contributor %}
+                    <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                {% else %}
+                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
+                {% endif %}
             </div>
         </div>
         {% else %}
         <div class="object-header dark">
             <div>
                 Processes for {{ specimen.value.taxon_name }} {{ specimen.value.specimen_id }}
-                <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+
+                {% if project.user_is_contributor %}
+                    <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                {% else %}
+                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
+                {% endif %}
             </div>
         </div>
 
