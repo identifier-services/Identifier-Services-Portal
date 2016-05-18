@@ -202,19 +202,7 @@ class BaseMetadata(object):
             # for now. so we'll use the system user, but we want to make
             # sure that the logged in user has privs
 
-            # try:
-            #     permissions_response = \
-            #         self.system_ag.meta.listMetadataPermissionsForUser(
-            #                 uuid=self.uuid,
-            #                 username=self.user.username
-            #             )
-            #     if permissions_response['permission']['write'] is not True:
-            #         raise Exception('Client does not have access.')
-            # except Exception as e:
-            #     exception_msg = 'Unable update object. %s' % e
-            #     logger.exception(exception_msg)
-            #     raise Exception(exception_msg)
-            if self.user not in self.contributors:
+            if not self.user_is_contributor:
                 exception_msg = 'Unable update object.'
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
