@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.conf import settings
+from django.utils.functional import SimpleLazyObject
 from agavepy.agave import Agave
 import json, logging
 
@@ -10,16 +11,18 @@ logger = logging.getLogger(__name__)
 
 class BaseMetadata(object):
 
-    def __init__(self, uuid=None, initial_data=None, user=None):
+    def __init__(self, uuid=None, initial_data=None, user=None, *args, **kwargs):
         self.system_ag = None
         self.user_ag = None
         self.user = None
+        # this is a workaround until i figure out how to authenticate user through webhook
+        self.public = kwargs.get('public', True)
 
         if user is not None:
-            # if type(user) is not django.utils.functional.SimpleLazyObject:
-            #     exception_msg = 'User parameter type is incorrect.'
-            #     logging.error(exception_msg)
-            #     raise TypeError(exception_msg)
+            if type(user) is not SimpleLazyObject:
+                exception_msg = 'User parameter type is incorrect.'
+                logging.error(exception_msg)
+                raise TypeError(exception_msg)
 
             self.user = user
             self.user_ag = self.get_client(user=user)
@@ -46,10 +49,10 @@ class BaseMetadata(object):
 
     def get_client(self, user=None):
         if user is not None:
-            # if type(user) is not django.utils.functional.SimpleLazyObject:
-            #     exception_msg = 'User parameter type is incorrect.'
-            #     logging.error(exception_msg)
-            #     raise TypeError(exception_msg)
+            if type(user) is not SimpleLazyObject:
+                exception_msg = 'User parameter type is incorrect.'
+                logging.error(exception_msg)
+                raise TypeError(exception_msg)
 
             # user client
             return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
@@ -84,36 +87,73 @@ class BaseMetadata(object):
             logger.exception(exception_msg)
             raise Exception(exception_msg)
 
-        meta = None
+        meta_result = None
 
         if self.user_ag is not None:
             # query meta owned by logged in user
             try:
-                meta = self.user_ag.meta.getMetadata(uuid=self.uuid)
+                meta_result = self.user_ag.meta.getMetadata(uuid=self.uuid)
             except Exception as e:
-                self.uuid = None
-                debug_msg = 'Agave meta object not owned by logged in user. %s' % e
+                debug_msg = 'Agave meta object not owned by logged in user.'
                 logger.debug(debug_msg)
-        else:
+
+        if meta_result is None:
             # query public meta owned by system user
             try:
-                # if public:
-                #     query = { 'uuid': self.uuid, 'value.public': 'True' }
-                # else:
-                #     query = { 'uuid': self.uuid }
-                query = { 'uuid': self.uuid }
-                metas = self.system_ag.meta.listMetadata(q=json.dumps(query))
-                meta = next(iter(metas), None)
+                # this is a workaround until i figure out how to authenticate user through webhook
+                if self.public:
+                    query = { 'uuid': self.uuid, 'value.public': 'True' }
+                    meta_results = self.system_ag.meta.listMetadata(q=json.dumps(query))
+                    meta_result = next(iter(meta_results), None)
+                else:
+                    meta_result = self.system_ag.meta.getMetadata(uuid=self.uuid)
+
             except Exception as e:
                 exception_msg = 'Agave meta object not owned by system user. %s' % e
                 logger.debug(exception_msg)
 
-        if meta is None:
+        if meta_result is None:
+            # i want to remove the uuid if the meta doesn't load, to avoid
+            # potentially editing and losing data. this is probably an unlikely
+            # scenario, so i might chage my mind on this.
+            self.uuid = None
             exception_msg = 'Agave meta object not found.'
             logger.exception(exception_msg)
             raise Exception(exception_msg)
 
-        self.set_initial(meta)
+        self.set_initial(meta_result)
+
+    def _list_associated_meta(self, name, relationship):
+
+        if relationship == 'parent':
+            query = { 'uuid': { '$in': self.associationIds }, 'name': name }
+        elif relationship == 'child':
+            query = { 'associationIds': self.uuid, 'name': name }
+        else:
+            warning_msg = 'Cannot list associated meta, missing relationship type. Must be either parent or child.'
+            logger.warning(warning_msg)
+            return None
+
+        meta_results = None
+
+        if self.user_ag is not None:
+            try:
+                # query meta owned by logged in user
+                meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
+            except Exception as e:
+                debug_msg = 'Unable to list meta objects as logged in user. %s' % e
+                logger.debug(debug_msg)
+
+        if meta_results is None:
+            try:
+                query['value.public'] = 'True'
+                # query public meta owned by system user
+                meta_results = self.system_ag.meta.listMetadata(q=json.dumps(query))
+            except Exception as e:
+                debug_msg = 'Unable to list meta objects as system user. %s' % e
+                logger.debug(debug_msg)
+
+        return meta_results
 
     def save(self):
         # if no uuid, we are creating a new object (as the system user)
@@ -227,9 +267,8 @@ class Project(BaseMetadata):
     @property
     def specimens(self, reset=False):
         if self._specimens is None or reset:
-            query = {'associationIds': [self.uuid], 'name': Specimen.name}
-            # TODO: return public and private results
-            meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
+
+            meta_results = self._list_associated_meta(name=Specimen.name, relationship='child')
             self._specimens = [Specimen(initial_data=r) for r in meta_results]
 
         return self._specimens
@@ -237,9 +276,8 @@ class Project(BaseMetadata):
     @property
     def processes(self, reset=False):
         if self._processes is None or reset:
-            query = {'associationIds': [self.uuid], 'name': Process.name}
-            # TODO: return public and private results
-            meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
+
+            meta_results = self._list_associated_meta(name=Process.name, relationship='child')
             self._processes = [Process(initial_data=r) for r in meta_results]
 
         return self._processes
@@ -247,9 +285,8 @@ class Project(BaseMetadata):
     @property
     def data(self, reset=False):
         if self._data is None or reset:
-            query = {'associationIds': self.uuid, 'name': Data.name}
-            # TODO: return public and private results
-            meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
+
+            meta_results = self._list_associated_meta(name=Data.name, relationship='child')
             self._data = [Data(initial_data=r) for r in meta_results]
 
         return self._data
@@ -313,20 +350,17 @@ class Specimen(BaseMetadata):
     @property
     def project(self, reset=False):
         if self._project is None or reset:
-            associationIds = self.body['associationIds']
-            query = {'uuid': { '$in': associationIds }, 'name': Project.name}
-            # TODO: return public and private results
-            results = self.user_ag.meta.listMetadata(q=json.dumps(query))
-            self._project = Project(initial_data = next(iter(results), None))
+
+            meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
+            self._project = Project(initial_data = next(iter(meta_results), None))
 
         return self._project
 
     @property
     def processes(self, reset=False):
         if self._processes is None or reset:
-            query = {'associationIds': self.uuid, 'name': Process.name}
-            # TODO: return public and private results
-            meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
+
+            meta_results = self._list_associated_meta(name=Process.name, relationship='child')
             self._processes = [Process(initial_data=r) for r in meta_results]
 
         return self._processes
@@ -334,9 +368,8 @@ class Specimen(BaseMetadata):
     @property
     def data(self, reset=False):
         if self._data is None or reset:
-            query = {'associationIds': self.uuid, 'name': Data.name}
-            # TODO: return public and private results
-            meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
+
+            meta_results = self._list_associated_meta(name=Data.name, relationship='child')
             self._data = [Data(initial_data=r) for r in meta_results]
 
         return self._data
@@ -372,28 +405,26 @@ class Process(BaseMetadata):
     @property
     def project(self, reset=False):
         if self._project is None or reset:
-            associationIds = self.body['associationIds']
-            query = {'uuid': { '$in': associationIds }, 'name': Project.name}
-            results = self.ag.meta.listMetadata(q=json.dumps(query))
-            self._project = Project(initial_data = next(iter(results)))
+
+            meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
+            self._project = Project(initial_data = next(iter(meta_results), None))
 
         return self._project
 
     @property
     def specimen(self, reset=False):
         if self._specimen is None or reset:
-            associationIds = self.body['associationIds']
-            query = {'uuid': { '$in': associationIds }, 'name': Specimen.name}
-            results = self.ag.meta.listMetadata(q=json.dumps(query))
-            self._specimen = Specimen(initial_data = next(iter(results)))
+
+            meta_results = self._list_associated_meta(name=Specimen.name, relationship='parent')
+            self._specimen = Specimen(initial_data = next(iter(meta_results)))
 
         return self._specimen
 
     @property
     def data(self, reset=False):
         if self._data is None or reset:
-            query = {'associationIds': self.uuid, 'name': Data.name}
-            meta_results = self.ag.meta.listMetadata(q=json.dumps(query))
+
+            meta_results = self._list_associated_meta(Data.name, relationship='child')
             self._data = [Data(initial_data=r) for r in meta_results]
 
         return self._data
