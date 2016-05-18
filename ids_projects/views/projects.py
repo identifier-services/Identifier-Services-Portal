@@ -234,7 +234,7 @@ def make_private(request, project_uuid):
             messages.warning(request, exception_msg)
             return HttpResponseRedirect('/project/%s' % project_uuid)
 
-        messages.success(request, 'Successfully made project public.')
+        messages.success(request, 'Successfully made project private.')
         return HttpResponseRedirect('/project/%s' % project_uuid)
 
     #########
