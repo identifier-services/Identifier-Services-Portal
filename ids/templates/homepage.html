@@ -48,13 +48,13 @@
     <div class="row">
       <div class="col-sm-6 col-md-5">
         <div class="homepage-feature">
-          <h3>Browse Published Projects</h3>
+          <h3>Browse {% if user.is_anonymous %}Published {% endif %}Projects</h3>
           <div class="homepage-feature-content">
             <p>View, search, and download metadata, raw and derived data,
                 and find publications related to datasets that Identifier
                 Services users have uploaded and published.</p>
           </div>
-          <a href="/projects/" class="homepage-feature-action btn btn-primary btn-block">Browse Published Projects</a>
+            <a href="/projects/" class="homepage-feature-action btn btn-primary btn-block">Browse {% if user.is_anonymous %}Published {% endif %}Projects</a>
         </div>
       </div>
 

@@ -5,7 +5,11 @@
 {% block title %}Projects{% endblock %}
 
 {% block create_button %}
-    <a href="{% url 'ids_projects:project-create' %}" class="btn btn-primary pull-right">Create Project</a>
+    {% if user.is_anonymous %}
+        <a href="{% url 'login' %}" class="btn btn-success pull-right">Login</a>
+    {% else %}
+        <a href="{% url 'ids_projects:project-create' %}" class="btn btn-primary pull-right">Create Project</a>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -45,10 +49,16 @@
 </div>
 <div class="row">
     <div class="container">
-      <h3>{{ user.first_name }}'s Projects</h3>
-      {% if not private_projects %}
-      <h4>You don't have any private projects.</h4>
-      <a href="{% url 'ids_projects:project-create' %}" class="btn btn-primary">Create Project</a>
+      {% if user.is_anonymous %}
+          <h3>Private Projects</h3>
+          <h4>You must log in to create projects projects.</h4>
+          <a href="{% url 'login' %}" class="btn btn-success">Login</a>
+      {% else %}
+          <h3>{{ user.first_name }}'s Projects</h3>
+          {% if not private_projects %}
+          <h4>You don't have any private projects.</h4>
+          <a href="{% url 'ids_projects:project-create' %}" class="btn btn-primary">Create Project</a>
+          {% endif %}
       {% endif %}
     </div>
 {% for project in private_projects %}

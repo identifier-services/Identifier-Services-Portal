@@ -26,7 +26,8 @@ class BaseMetadata(object):
                 raise TypeError(exception_msg)
 
             self.user = user
-            self.user_ag = self.get_client(user=user)
+            if not user.is_anonymous():
+                self.user_ag = self.get_client(user=user)
 
         try:
             self.system_ag = self.get_client()

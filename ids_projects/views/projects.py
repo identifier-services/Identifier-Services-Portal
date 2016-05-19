@@ -18,7 +18,6 @@ import json, logging
 logger = logging.getLogger(__name__)
 
 
-@login_required
 def list(request):
     """List all projects"""
     #######
@@ -29,7 +28,10 @@ def list(request):
         try:
             project = Project(user=request.user)
             public_projects = project.list(public=True)
-            private_projects = project.list(public=False)
+            if request.user.is_anonymous():
+                private_projects = None
+            else:
+                private_projects = project.list(public=False)
         except Exception as e:
             exception_msg = 'Unable to load projects. %s' % e
             logger.error(exception_msg)

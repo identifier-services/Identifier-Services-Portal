@@ -20,7 +20,6 @@ from requests import HTTPError
 logger = logging.getLogger(__name__)
 
 
-@login_required
 def list(request):
     """List all specimens related to a project"""
     #######
@@ -51,7 +50,6 @@ def list(request):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
-@login_required
 def view(request, specimen_uuid):
     """ """
     #######
