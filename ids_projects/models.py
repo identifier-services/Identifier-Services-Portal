@@ -147,7 +147,7 @@ class BaseMetadata(BaseClient):
                 results = self.system_ag.meta.listMetadata(q=json.dumps(query))
             except Exception as e:
                 exception_msg = 'Fatal exception: %s' % e
-                logger.exception(e)
+                logger.exception(exception_msg)
                 raise e
         else:
             try:
@@ -502,11 +502,11 @@ class Data(BaseMetadata):
         pass
 
 
-class System(object):
+class System(BaseClient):
 
     def __init__(self, system_id=None, initial_data=None, *args, **kwargs):
-        self.ag = Agave(api_server=settings.AGAVE_TENANT_BASEURL,
-                        token=settings.AGAVE_SUPER_TOKEN)
+
+        super(System, self).__init__(*args, **kwargs)
         self.id = None
         self.name = None
         self.type = None
@@ -541,10 +541,20 @@ class System(object):
         if '_links' in initial_data:
             self._links = initial_data['_links']
 
-    @classmethod
-    def list(cls, system_type="STORAGE"):
-        results = Project().user_ag.systems.list(type=system_type)
-        return [cls(initial_data = r) for r in results]
+    def list(self, system_type="STORAGE"):
+        if self.user_ag is None:
+            exception_msg = 'Missing user client, cannot list systems.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        try:
+            results = self.user_ag.systems.list(type=system_type)
+        except Exception as e:
+            exception_msg = 'Unable to list systems. %s' % e
+            logger.debug(exception_msg)
+            raise e
+
+        return [System(initial_data = r) for r in results]
 
     def load(self):
         meta = self.user_ag.systems.get(systemId=self.id)

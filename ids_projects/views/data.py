@@ -2,6 +2,7 @@ from agavepy.agave import Agave, AgaveException
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.http import (JsonResponse,
                          HttpResponse,
                          HttpResponseRedirect,
@@ -11,8 +12,8 @@ from django.http import (JsonResponse,
                          HttpResponseServerError)
 from django.shortcuts import render
 import json, logging, urllib
+from ..models import Project, Specimen, Process, System, Data
 from helper import client, collapse_meta
-
 
 logger = logging.getLogger(__name__)
 
@@ -66,13 +67,29 @@ def file_select(request):
     # GET #
     #######
     if request.method == 'GET':
-        a = client(request)
 
         process_uuid = request.GET.get('process_uuid', None)
 
+        try:
+            process = Process(uuid=process_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load process. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
+        try:
+            system = System(user=request.user)
+            systems = system.list()
+        except Exception as e:
+            exception_msg = 'Unable to load systems. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
         context = {
-            'process': a.meta.getMetadata(uuid=process_uuid),
-            'systems': a.systems.list(type='STORAGE'),
+            'process': process,
+            'systems': systems,
         }
 
         return render(request, 'ids_projects/data/select_files.html', context)
