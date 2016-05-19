@@ -9,17 +9,11 @@ import json, logging
 logger = logging.getLogger(__name__)
 
 
-class BaseMetadata(object):
-
-    name = 'idsvc.object'
-
-    def __init__(self, uuid=None, initial_data=None, user=None, *args, **kwargs):
+class BaseClient(object):
+    def __init__(self, user=None):
         self.system_ag = None
         self.user_ag = None
         self.user = None
-        self.contributors = None
-        # this is a workaround until i figure out how to authenticate user through webhook
-        self.public = kwargs.get('public', True)
 
         if user is not None:
             if type(user) is not SimpleLazyObject:
@@ -38,19 +32,6 @@ class BaseMetadata(object):
             logger.exception(exception_msg)
             raise Exception(exception_msg)
 
-        self.associationIds = None
-        self.created = None
-        self.lastUpdated = None
-        self.links = None
-        self.value = None
-        self.uuid = uuid
-
-        if uuid is not None:
-            self.load()
-
-        if initial_data is not None:
-            self.set_initial(initial_data)
-
     def get_client(self, user=None):
         if user is not None:
             if type(user) is not SimpleLazyObject:
@@ -65,6 +46,31 @@ class BaseMetadata(object):
             # system client
             return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
                          token=settings.AGAVE_SUPER_TOKEN)
+
+
+class BaseMetadata(BaseClient):
+
+    name = 'idsvc.object'
+
+    def __init__(self, uuid=None, initial_data=None, *args, **kwargs):
+
+        super(BaseMetadata, self).__init__(*args, **kwargs)
+        self.contributors = None
+        # this is a workaround until i figure out how to authenticate user through webhook
+        self.public = kwargs.get('public', True)
+
+        self.associationIds = None
+        self.created = None
+        self.lastUpdated = None
+        self.links = None
+        self.value = None
+        self.uuid = uuid
+
+        if uuid is not None:
+            self.load()
+
+        if initial_data is not None:
+            self.set_initial(initial_data)
 
     def set_initial(self, initial_data):
         if 'uuid' in initial_data:
@@ -293,10 +299,6 @@ class BaseMetadata(object):
             'value': self.value
         }
 
-    @property
-    def nom(self):
-        import pdb; pdb.set_trace()
-        return self.name
 
 class Project(BaseMetadata):
 
@@ -502,7 +504,7 @@ class Data(BaseMetadata):
 
 class System(object):
 
-    def __init__(self, system_id=None, initial_data=None):
+    def __init__(self, system_id=None, initial_data=None, *args, **kwargs):
         self.ag = Agave(api_server=settings.AGAVE_TENANT_BASEURL,
                         token=settings.AGAVE_SUPER_TOKEN)
         self.id = None
