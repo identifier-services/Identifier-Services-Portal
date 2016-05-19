@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 class BaseMetadata(object):
 
+    name = 'idsvc.object'
+
     def __init__(self, uuid=None, initial_data=None, user=None, *args, **kwargs):
         self.system_ag = None
         self.user_ag = None
@@ -125,6 +127,33 @@ class BaseMetadata(object):
             raise Exception(exception_msg)
 
         self.set_initial(meta_result)
+
+    @classmethod
+    def make(cls, uuid=None, initial_data=None, user=None, *args, **kwargs):
+        return cls(uuid, initial_data, user, *args, **kwargs)
+
+    def list(self, public=False):
+        results = None
+
+        if public is True:
+            try:
+                query = {'name': self.name, 'value.public': 'True'}
+                results = self.system_ag.meta.listMetadata(q=json.dumps(query))
+            except Exception as e:
+                exception_msg = 'Fatal exception: %s' % e
+                logger.exception(e)
+                raise e
+        else:
+            try:
+                query = {'name': self.name}
+                results = self.user_ag.meta.listMetadata(q=json.dumps(query))
+            except Exception as e:
+                exception_msg = 'Unable to list metadata, user may not be logged in: %s' % e
+                logger.debug(exception_msg)
+        if results is not None:
+            return [self.make(initial_data = r, user=self.user) for r in results]
+        else:
+            return None
 
     def _list_associated_meta(self, name, relationship):
 
@@ -264,6 +293,10 @@ class BaseMetadata(object):
             'value': self.value
         }
 
+    @property
+    def nom(self):
+        import pdb; pdb.set_trace()
+        return self.name
 
 class Project(BaseMetadata):
 
@@ -275,29 +308,6 @@ class Project(BaseMetadata):
         self._specimens = None
         self._processes = None
         self._data = None
-
-    def list(self, public=False):
-        results = None
-
-        if public is True:
-            try:
-                query = {'name': Project.name, 'value.public': 'True'}
-                results = self.system_ag.meta.listMetadata(q=json.dumps(query))
-            except Exception as e:
-                exception_msg = 'Fatal exception: %s' % e
-                logger.exception(e)
-                raise e
-        else:
-            try:
-                query = {'name': Project.name}
-                results = self.user_ag.meta.listMetadata(q=json.dumps(query))
-            except Exception as e:
-                exception_msg = 'Unable to list metadata, user may not be logged in: %s' % e
-                logger.debug(exception_msg)
-        if results is not None:
-            return [Project(initial_data = r, user=self.user) for r in results]
-        else:
-            return None
 
     @property
     def specimens(self, reset=False):
