@@ -95,7 +95,7 @@
 
             // $.getJSON('/data/listing/' + system_id + '/' + file_path)
             // $.getJSON('/system/' + system_id + '/listing/' + file_path)
-            $.getJSON('/listing/' + system_id + '/' + file_path)
+            $.getJSON('/dir/list/' + system_id + '/' + file_path)
 
 
             .then(function(listing) {
