@@ -89,7 +89,10 @@ class BaseMetadata(BaseClient):
             else:
                 # i don't want to clear values that might not be contained in a form (like 'public':'True')
                 for key, value in initial_data['value'].items():
-                    self.value[key] = value
+                    if key == 'lastModified':
+                        self.value[key] = value.strftime('%b %-d %I:%M')
+                    else:
+                        self.value[key] = value
         self.load_contributors()
 
     def load(self):
@@ -480,6 +483,13 @@ class Process(BaseMetadata):
 
         return self._inputs
 
+    def add_input_data(self, uuid):
+        if '_inputs' in self.value:
+            self.value['_inputs'].append(uuid)
+        else:
+
+    def add_output_data(self, uuid):
+
     @property
     def outputs(self):
         if self._outputs is None:
@@ -492,8 +502,47 @@ class Data(BaseMetadata):
 
     name = 'idsvc.data'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, system_id=None, path=None, *args, **kwargs):
         super(Data, self).__init__(*args, **kwargs)
+        self.system = None
+        self.system_id = system_id
+        self.path = path
+
+    def load_file_info(self):
+        if self.user_ag is None:
+            exception_msg = 'Missing user client, cannot load file info.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        if self.system_id is None:
+            exception_msg = 'Missing system id, cannot load file info.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        if self.path is None:
+            exception_msg = 'Missing file path, cannot load file info.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        if self.system is None:
+            try:
+                self.system = System(system_id=system_id, user=request.user)
+            except Exception as e:
+                exception_msg = 'Unable to access system with system_id=%s.' % system_id
+                logger.error(exception_msg)
+                raise Exception(exception_msg)
+
+        try:
+            listing = system.listing(file_path)
+        except:
+            exception_msg = 'The path=%s could not be listed on system=%s. ' \
+                            'Please choose another path or system.' \
+                            % (file_path, system_id)
+            logger.error(exception_msg)
+            raise Exception(exception_msg)
+
+        self.set_initial(listing)
+
 
     def calculate_checksum(self):
         # using AgavePy, submit job to run analysis
@@ -568,7 +617,7 @@ class System(BaseClient):
             raise Exception(exception_msg)
 
         try:
-            results = self.user_ag.files.list(systemId=self.uuid, filePath=path)
+            results = self.user_ag.files.list(systemId=self.id, filePath=path)
             return results
         except Exception as e:
             exception_msg = 'Unable to list files. %s' % e

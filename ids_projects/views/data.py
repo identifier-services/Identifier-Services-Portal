@@ -18,30 +18,6 @@ from helper import client, collapse_meta
 logger = logging.getLogger(__name__)
 
 
-def _pack_contents(raw):
-    contents = []
-    for item in raw:
-        lm = item.lastModified
-
-        data = {
-            'name': item.name,
-            'last_modified': lm.strftime('%b %-d %I:%M'),#lm.isoformat(" "),
-            'length':item.length,
-            'link': item._links['self']['href'],
-            'system': item.system,
-            'path': item.path,
-            'type': item.type,
-            'permissions': item.permissions
-        }
-        choice_tuple = (
-            json.dumps(data),
-            item.name
-        )
-
-        contents.append(choice_tuple)
-    return contents
-
-
 @login_required
 def dir_list(request, system_id, file_path=None):
     ########
@@ -51,33 +27,49 @@ def dir_list(request, system_id, file_path=None):
 
         if file_path is None:
             file_path = '/'
-        a = client(request)
+
         try:
-            listing = a.files.list(systemId=system_id, filePath=file_path)
-            return JsonResponse(listing, safe=False)
+            system = System(system_id=system_id, user=request.user)
+        except:
+            exception_msg = 'Unable to access system with system_id=%s.' % system_id
+            logger.error(exception_msg)
+            return JsonResponse({'message': exception_msg}, status=404)
+
+        try:
+            dir_contents = system.listing(file_path)
+            return JsonResponse(dir_contents, safe=False)
         except:
             error_msg = 'The path=%s could not be listed on system=%s. ' \
-                        'Please choose another path or system.' % (file_path, system_id)
+                        'Please choose another path or system.' \
+                        % (file_path, system_id)
             return JsonResponse({'message': error_msg}, status=404)
 
 
 @login_required
-def file_select(request):
+def file_select(request, relationship):
 
     process_uuid = request.GET.get('process_uuid', None)
+
+    if relationship not in ('input','output'):
+        exception_msg = "Invalid relationship type, must be 'input', or 'output'."
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:process-view',
+                            kwargs={'process_uuid': process.uuid}))
+
+    try:
+        process = Process(uuid=process_uuid, user=request.user)
+    except Exception as e:
+        exception_msg = 'Unable to load process. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list'))
 
     #######
     # GET #
     #######
     if request.method == 'GET':
-
-        try:
-            process = Process(uuid=process_uuid, user=request.user)
-        except Exception as e:
-            exception_msg = 'Unable to load process. %s' % e
-            logger.error(exception_msg)
-            messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
 
         try:
             system = System(user=request.user)
@@ -86,7 +78,9 @@ def file_select(request):
             exception_msg = 'Unable to load systems. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+            return HttpResponseRedirect(
+                        reverse('ids_projects:process-view',
+                                kwargs={'process_uuid': process.uuid}))
 
         context = {
             'process': process,
@@ -106,44 +100,68 @@ def file_select(request):
         for key, value in response_tuples:
             response[key] = value
 
-        a = client(request)
-
-        system_id = response['system_id']
-        file_path = response['file_path']
+        try:
+            system_id = response['system_id']
+            file_path = response['file_path']
+        except Exception as e:
+            exception_msg = 'The post data does not contain sufficient ' \
+                            'information to list directory contents.'
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:process-view',
+                                kwargs={'process_uuid': process_uuid}))
 
         try:
-            listing = a.files.list(systemId=system_id, filePath=file_path)
-        except:
-            error_msg = 'The path=%s could not be listed on system=%s. ' \
-                        'Please choose another path or system.' % (file_path, system_id)
-            logger.deubg(error_msg)
+            data = Data(system_id=system_id, path=file_path, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to access system with system_id=%s. %s'\
+                            % (system_id, e)
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:process-view',
+                                kwargs={'process_uuid': process_uuid}))
 
-        process = a.meta.getMetadata(uuid=process_uuid)
-        associationIds = process['associationIds']
-        associationIds.append(process_uuid)
+        try:
+            result = data.save()
+        except Exception as e:
+            exception_msg = 'Unable to save file info as metadata. %s.' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:process-view',
+                                kwargs={'process_uuid': process_uuid}))
 
-        for file_info in listing:
-            lm = file_info['lastModified']
-            data = {
-                'name': file_info.name,
-                'last_modified': lm.strftime('%b %-d %I:%M'),
-                'length':file_info.length,
-                'link': file_info._links['self']['href'],
-                'system': file_info.system,
-                'path': file_info.path,
-                'type': file_info.type,
-                'permissions': file_info.permissions
-            }
+        if not 'uuid' in result:
+            warning_msg = 'Invalid API response. %s' % result
+            logger.warning(warning_msg)
+            messages.warning(request, warning_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:process-view',
+                                kwargs={'process_uuid': process_uuid}))
 
-            body = {
-                "name":"idsvc.data",
-                "associationIds": associationIds,
-                "value": data
-            }
+        if relationship == 'input':
+            process.value._inputs.append(result['uuid'])
+        else: # relationsip is 'output'
+            process.value._outpus.append(result['uuid'])
 
-            response = a.meta.addMetadata(body=body)
+        try:
+            result = process.save()
+        except Exception as e:
+            exception_msg = 'Unable to add file to process. %s.' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:process-view',
+                                kwargs={'process_uuid': process_uuid}))
 
-        return HttpResponseRedirect('/process/{}'.format(process_uuid))
+        success_msg = 'Successfully added file to process.'
+        logger.error(success_msg)
+        messages.success(request, success_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:process-view',
+                            kwargs={'process_uuid': process_uuid}))
 
     #########
     # OTHER #
