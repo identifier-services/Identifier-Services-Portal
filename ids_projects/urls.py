@@ -92,9 +92,9 @@ urlpatterns += patterns(
     url(r'^project/(?P<project_uuid>.+?)$', 'view', name='project-view'),
 )
 
-####
-# Webhooks
-####
+############
+# Webhooks #
+############
 urlpatterns += patterns(
     'ids_projects.webhooks',
     url(r'webhook/(?P<hook_type>\w+)/?$', 'handle_webhook', name='webhook'),

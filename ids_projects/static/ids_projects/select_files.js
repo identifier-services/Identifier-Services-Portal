@@ -67,20 +67,37 @@
     };
 
     var select_file = function select_file(file_path) {
+        var url = window.location.href;
 
         var postdata={
             system_id : $('#id_system_id').val(),
             file_path : file_path
         }
 
-        console.log(postdata);
-
-        var url = window.location.pathname;
-        var new_url = url.replace('file','')
+        var redirect_url = url.replace('file/select?process_uuid=','process/')
 
         if (postdata.system_id && postdata.file_path) {
             $.post(url, postdata)
-            window.location.replace(new_url);
+            window.location.replace(redirect_url);
+        }
+    }
+
+    var get_fields = function get_fields() {
+        var url = window.location.href;
+
+        var postdata={
+            process_type : $('#id_process_type').val(),
+            specimen_uuid : $('#id_specimen_uuid').val(),
+            project_uuid : $('#id_project_uuid').val()
+        }
+
+        if (postdata.process_type) {
+            $.post(url, postdata)
+            .then(function(response) {
+                $('#id_form_process_fields').html(response);
+                $('#id_process_type').attr('disabled', true);
+                $('#id_process_type').attr('readonly', true);
+            });
         }
     }
 

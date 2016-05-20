@@ -63,12 +63,13 @@ def dir_list(request, system_id, file_path=None):
 
 @login_required
 def file_select(request):
+
+    process_uuid = request.GET.get('process_uuid', None)
+
     #######
     # GET #
     #######
     if request.method == 'GET':
-
-        process_uuid = request.GET.get('process_uuid', None)
 
         try:
             process = Process(uuid=process_uuid, user=request.user)
@@ -98,8 +99,6 @@ def file_select(request):
     # POST #
     ########
     elif request.method == 'POST':
-
-        process_uuid = request.POST.get('process_uuid', None)
 
         body = urllib.unquote(request.body)
         response_tuples = map(lambda x: (x.split('=')[0],x.split('=')[1]), body.split('&'))
