@@ -7,7 +7,7 @@ from django.conf.urls import patterns, include, url
 urlpatterns = patterns(
     'ids_projects.views.data',
     # create a file metadata object associated with a process
-    url(r'^file/select/?$', 'file_select', name='file-select'),
+    url(r'^file/select/(?P<relationship>.+?)$', 'file_select', name='file-select'),
     # list content at given path on system
     url(r'^dir/list/(?P<system_id>[^/]+)/(?P<file_path>.+)?', 'dir_list', name='dir-list'),
     # delete a data metadata object associated with a process
