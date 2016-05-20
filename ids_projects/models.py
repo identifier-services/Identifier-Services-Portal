@@ -556,6 +556,25 @@ class System(BaseClient):
 
         return [System(initial_data = r) for r in results]
 
+    def listing(self, path):
+        if not self.id:
+            exception_msg = 'Missing system id, cannot list files.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        if not self.user_ag:
+            exception_msg = 'Missing user client, cannot list files.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        try:
+            results = self.user_ag.files.list(systemId=self.uuid, filePath=path)
+            return results
+        except Exception as e:
+            exception_msg = 'Unable to list files. %s' % e
+            logger.debug(exception_msg)
+            raise e
+
     def load(self):
         meta = self.user_ag.systems.get(systemId=self.id)
         self.set_initial(meta)
