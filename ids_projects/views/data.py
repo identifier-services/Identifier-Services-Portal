@@ -142,9 +142,13 @@ def file_select(request, relationship):
                                 kwargs={'process_uuid': process_uuid}))
 
         if relationship == 'input':
+            logger.debug('Adding intput: %s' % result['uuid'])
             process.value['_inputs'].append(result['uuid'])
-        else:
+            logger.debug('Intput: %s' % process.value['_inputs'])
+        elif relationship == 'output':
+            logger.debug('Adding output: %s' % result['uuid'])
             process.value['_outputs'].append(result['uuid'])
+            logger.debug('Outputs: %s' % process.value['_outputs'])
 
         try:
             result = process.save()
@@ -165,7 +169,7 @@ def file_select(request, relationship):
                                 kwargs={'process_uuid': process_uuid}))
 
         success_msg = 'Successfully added file to process.'
-        logger.error(success_msg)
+        logger.info(success_msg)
         messages.success(request, success_msg)
         return HttpResponseRedirect(
                     reverse('ids_projects:process-view',

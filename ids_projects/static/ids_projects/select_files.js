@@ -84,7 +84,9 @@
 
         if (postdata.system_id && postdata.file_path) {
             $.post(url, postdata)
-            window.location.replace(redirect_url);
+            .then(function(response) {
+                window.location.replace(redirect_url);
+            });
         }
     }
 

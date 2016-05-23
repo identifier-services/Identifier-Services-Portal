@@ -89,6 +89,7 @@
         {% endif %}
         <hr>
         <h4>Outputs</h4>
+
         {% if not process.outputs %}
         <div class="object-header dark">
             <div>
@@ -103,7 +104,7 @@
         {% else %}
         <div class="object-header dark">
             <div>
-                Input data for {{ process.value.process_type }}
+                Output data for {{ process.value.process_type }}
                 {% if project.user_is_contributor %}
                     <a href="{% url 'ids_projects:file-select' relationship='output'%}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 {% else %}
@@ -114,7 +115,7 @@
 
             <div class="info-panel">
 
-                {% for data in process.output %}
+                {% for data in process.outputs %}
 
                 <div class="object-header">
                     <!-- TODO: link to file detail view -->

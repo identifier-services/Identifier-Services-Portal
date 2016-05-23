@@ -85,16 +85,13 @@ class BaseMetadata(BaseClient):
         if '_links' in initial_data:
             self.links = initial_data['_links']
         if 'value' in initial_data:
+
             if self.value is None:
                 self.value = initial_data['value']
             else:
                 # i don't want to clear values that might not be contained in a form (like 'public':'True')
                 for key, value in initial_data['value'].items():
                     self.value[key] = value
-                    # if key == 'lastModified':
-                    #     self.value[key] = value.strftime('%b %-d %I:%M')
-                    # else:
-                    #     self.value[key] = value
 
     def load(self):
         if self.uuid is None:
@@ -451,10 +448,10 @@ class Process(BaseMetadata):
         self._project = None
         self._specimen = None
         self._data = None
-        self._inputs = None
-        self._outputs = None
-        self.value['_inputs'] = []
-        self.value['_outputs'] = []
+        if not '_inputs' in self.value:
+            self.value['_inputs'] = []
+        if not '_outputs' in self.value:
+            self.value['_outputs'] = []
 
     @property
     def project(self, reset=False):
@@ -485,37 +482,13 @@ class Process(BaseMetadata):
 
     @property
     def inputs(self):
-        if self._inputs is None:
-            self._inputs = [d for d in self.data if d.uuid in self.value['_inputs']]
-
-        return self._inputs
-
-    # def add_input(self, uuid):
-    #     if '_inputs' in self.value:
-    #         self.value['_inputs'].append(uuid)
-    #     else:
-    #         self.value['_inputs'] = [uuid]
-    #     self.save()
-    #
-    # def remove_input(self, uuid):
-    #     pass
-    #
-    # def add_output(self, uuid):
-    #     if '_outputs' in self.value:
-    #         self.value['_outputs'].append(uuid)
-    #     else:
-    #         self.value['_outputs'] = [uuid]
-    #     self.save()
-    #
-    # def remove_output(self, uuid):
-    #     pass
+        x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_inputs']]
+        return x
 
     @property
     def outputs(self):
-        if self._outputs is None:
-            self._outputs = [d for d in self.data if d.uuid in self.value['_outputs']]
-
-        return self._outputs
+        x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_outputs']]
+        return x
 
 
 class Data(BaseMetadata):
