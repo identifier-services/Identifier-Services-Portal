@@ -581,11 +581,21 @@ class Data(BaseMetadata):
         return self._process
 
     def calculate_checksum(self):
+        name = "checksum for %s%s" % (self.system_id, self.path)
+        app_id = "ming-ids-checksum-0.1"
+        archive = False
+        agave_url = "agave://%s%s" % (self.system_id, self.path)
+        inputs = { 'AGAVE_URL': agave_url }
+        parameters = { 'UUID': self.uuid }
+        body={'appId': app_id, 'inputs': inputs, 'parameters': parameters}
         # using AgavePy, submit job to run analysis
-        resp = self.user_ag.jobs.submit(body={'appId': '<app id>', 'inputs': [], 'parameters': []})
-
-        pass
-
+        try:
+            logger.debug("Job submission body: %s" % body)
+            resp = self.user_ag.jobs.submit(body=body)
+        except Exception as e:
+            exception_msg = 'Unable to initiate job. %s' % e
+            logger.error(exception_msg)
+            raise Exception(exception_msg)
 
 class System(BaseClient):
 
