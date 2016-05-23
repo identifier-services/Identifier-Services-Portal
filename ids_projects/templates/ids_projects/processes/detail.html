@@ -5,7 +5,8 @@
 {% block title %}Process{% endblock %}
 
 {% block create_button %}
-    <a href="{% url 'ids_projects:file-select' %}?process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Data</a>
+    <a href="{% url 'ids_projects:file-select' relationship='input'%}?process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Input</a>
+    <a href="{% url 'ids_projects:file-select' relationship='output'%}?process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Output</a>
 {% endblock %}
 
 {% block content %}
@@ -47,7 +48,7 @@
         {% if not process.inputs %}
         <div class="object-header dark">
             <div>
-                No input data associated with {{ process.value.process_type }}
+                No input data for {{ process.value.process_type }}
                 {% if project.user_is_contributor %}
                     <a href="{% url 'ids_projects:file-select' relationship='input'%}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 {% else %}
@@ -58,7 +59,7 @@
         {% else %}
         <div class="object-header dark">
             <div>
-                Input data associated with {{ process.value.process_type }}
+                Input data for {{ process.value.process_type }}
                 {% if project.user_is_contributor %}
                     <a href="{% url 'ids_projects:file-select' relationship='input'%}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 {% else %}
@@ -88,7 +89,7 @@
         {% if not process.outputs %}
         <div class="object-header dark">
             <div>
-                No output data associated with {{ process.value.process_type }}
+                No output data for {{ process.value.process_type }}
                 {% if project.user_is_contributor %}
                     <a href="{% url 'ids_projects:file-select' relationship='output'%}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 {% else %}
@@ -99,7 +100,7 @@
         {% else %}
         <div class="object-header dark">
             <div>
-                Input data associated with {{ process.value.process_type }}
+                Input data for {{ process.value.process_type }}
                 {% if project.user_is_contributor %}
                     <a href="{% url 'ids_projects:file-select' relationship='output'%}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 {% else %}

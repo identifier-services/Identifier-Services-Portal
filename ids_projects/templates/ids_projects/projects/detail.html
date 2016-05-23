@@ -106,18 +106,6 @@
                 {% endif %}
             </div>
         </div><hr>
-        <div class="row">
-            <div class="col-xs-6">
-                <h4>Files: {{ file_count }}</h4>
-            </div>
-            <div class="col-xs-3 col-xs-offset-2">
-                {% if project.user_is_contributor %}
-                    <a href="{% url 'ids_projects:file-select' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add</a>
-                {% else %}
-                    <a href="#" class="btn btn-primary" disabled>Add</a>
-                {% endif %}
-            </div>
-        </div><hr>
 
     </div>
     <!-- Middle/Right Column - Project Basic Info -->

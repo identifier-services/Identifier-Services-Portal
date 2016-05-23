@@ -77,8 +77,9 @@
         var redirect_url = url.replace('file/select?process_uuid=','process/')
 
         if (postdata.system_id && postdata.file_path) {
-            $.post(url, postdata)
-            window.location.replace(redirect_url);
+            $.post(url, postdata).then(function(response) {
+                window.location.replace(redirect_url);
+            });
         }
     }
 

@@ -36,7 +36,9 @@
 
         if (postdata.process_type) {
             $.post(url, postdata);
-            // window.location.replace(url);
+            .then(function(response) {
+                window.location.replace(url);
+            });
         }
 
     }

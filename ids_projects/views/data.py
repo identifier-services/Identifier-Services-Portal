@@ -142,9 +142,9 @@ def file_select(request, relationship):
                                 kwargs={'process_uuid': process_uuid}))
 
         if relationship == 'input':
-            process.value._inputs.append(result['uuid'])
-        else: # relationsip is 'output'
-            process.value._outpus.append(result['uuid'])
+            process.value['_inputs'].append(result['uuid'])
+        else:
+            process.value['_outputs'].append(result['uuid'])
 
         try:
             result = process.save()
@@ -152,6 +152,14 @@ def file_select(request, relationship):
             exception_msg = 'Unable to add file to process. %s.' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:process-view',
+                                kwargs={'process_uuid': process_uuid}))
+
+        if not 'uuid' in result:
+            warning_msg = 'Invalid API response. %s' % result
+            logger.warning(warning_msg)
+            messages.warning(request, warning_msg)
             return HttpResponseRedirect(
                         reverse('ids_projects:process-view',
                                 kwargs={'process_uuid': process_uuid}))

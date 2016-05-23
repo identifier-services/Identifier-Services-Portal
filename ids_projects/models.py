@@ -75,6 +75,7 @@ class BaseMetadata(BaseClient):
     def set_initial(self, initial_data):
         if 'uuid' in initial_data:
             self.uuid = initial_data['uuid']
+            self.load_contributors()
         if 'associationIds' in initial_data:
             self.associationIds = initial_data['associationIds']
         if 'created' in initial_data:
@@ -89,11 +90,11 @@ class BaseMetadata(BaseClient):
             else:
                 # i don't want to clear values that might not be contained in a form (like 'public':'True')
                 for key, value in initial_data['value'].items():
-                    if key == 'lastModified':
-                        self.value[key] = value.strftime('%b %-d %I:%M')
-                    else:
-                        self.value[key] = value
-        self.load_contributors()
+                    self.value[key] = value
+                    # if key == 'lastModified':
+                    #     self.value[key] = value.strftime('%b %-d %I:%M')
+                    # else:
+                    #     self.value[key] = value
 
     def load(self):
         if self.uuid is None:
@@ -136,6 +137,7 @@ class BaseMetadata(BaseClient):
             raise Exception(exception_msg)
 
         self.set_initial(meta_result)
+        self.load_contributors()
 
     @classmethod
     def make(cls, uuid=None, initial_data=None, user=None, *args, **kwargs):
@@ -218,12 +220,15 @@ class BaseMetadata(BaseClient):
 
             try:
                 # then grant permissions to the logged in user
-                self.system_ag.meta.updateMetadataPermissions(
+                perm_result = self.system_ag.meta.updateMetadataPermissions(
                     uuid=self.uuid,
                     body={
                         'username': self.user.username,
                         'permission': 'READ_WRITE'
                     })
+
+                self.contributors = [self.user.username]
+                # TODO: should we add idsvc_user? not sure
 
                 self.set_initial(response)
             except Exception as e:
@@ -448,6 +453,8 @@ class Process(BaseMetadata):
         self._data = None
         self._inputs = None
         self._outputs = None
+        self.value['_inputs'] = []
+        self.value['_outputs'] = []
 
     @property
     def project(self, reset=False):
@@ -483,12 +490,25 @@ class Process(BaseMetadata):
 
         return self._inputs
 
-    def add_input_data(self, uuid):
-        if '_inputs' in self.value:
-            self.value['_inputs'].append(uuid)
-        else:
-
-    def add_output_data(self, uuid):
+    # def add_input(self, uuid):
+    #     if '_inputs' in self.value:
+    #         self.value['_inputs'].append(uuid)
+    #     else:
+    #         self.value['_inputs'] = [uuid]
+    #     self.save()
+    #
+    # def remove_input(self, uuid):
+    #     pass
+    #
+    # def add_output(self, uuid):
+    #     if '_outputs' in self.value:
+    #         self.value['_outputs'].append(uuid)
+    #     else:
+    #         self.value['_outputs'] = [uuid]
+    #     self.save()
+    #
+    # def remove_output(self, uuid):
+    #     pass
 
     @property
     def outputs(self):
@@ -508,6 +528,9 @@ class Data(BaseMetadata):
         self.system_id = system_id
         self.path = path
 
+        if self.system_id is not None and self.path is not None:
+            self.load_file_info()
+
     def load_file_info(self):
         if self.user_ag is None:
             exception_msg = 'Missing user client, cannot load file info.'
@@ -526,22 +549,29 @@ class Data(BaseMetadata):
 
         if self.system is None:
             try:
-                self.system = System(system_id=system_id, user=request.user)
+                self.system = System(system_id=self.system_id, user=self.user)
             except Exception as e:
                 exception_msg = 'Unable to access system with system_id=%s.' % system_id
                 logger.error(exception_msg)
                 raise Exception(exception_msg)
 
         try:
-            listing = system.listing(file_path)
-        except:
-            exception_msg = 'The path=%s could not be listed on system=%s. ' \
-                            'Please choose another path or system.' \
-                            % (file_path, system_id)
+            listing = self.system.listing(self.path)
+            file_info = next(iter(listing), None)
+        except Exception as e:
+            exception_msg = 'The path=%s could not be listed on system=%s. %s' \
+                            % (self.path, self.system_id, e)
             logger.error(exception_msg)
             raise Exception(exception_msg)
 
-        self.set_initial(listing)
+        try:
+            last_mod = file_info['lastModified']
+            file_info['lastModified'] = last_mod.strftime('%b %-d %I:%M')
+        except:
+            warning_msg = 'Listing response does not contain lastModified.'
+            logger.warning(warning_msg)
+
+        self.set_initial({ 'value': file_info })
 
 
     def calculate_checksum(self):
@@ -606,6 +636,7 @@ class System(BaseClient):
         return [System(initial_data = r) for r in results]
 
     def listing(self, path):
+
         if not self.id:
             exception_msg = 'Missing system id, cannot list files.'
             logger.exception(exception_msg)
