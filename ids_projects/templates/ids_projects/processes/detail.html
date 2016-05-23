@@ -20,7 +20,7 @@
             <div class="panel-body">
                 <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
                 {% for key, value in process.value.items %}
-                    {% if key != "process_type" %}
+                    {% if "_" not in key and key != "process_type" %}
                     <p><b>{{ key }}</b> {{ value }}</p>
                     {% endif %}
                 {% endfor %}
