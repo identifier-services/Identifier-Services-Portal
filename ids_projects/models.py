@@ -498,7 +498,9 @@ class Data(BaseMetadata):
     name = 'idsvc.data'
 
     def __init__(self, system_id=None, path=None, *args, **kwargs):
+        # import pdb; pdb.set_trace()
         super(Data, self).__init__(*args, **kwargs)
+
         self._project = None
         self._specimen = None
         self._process = None

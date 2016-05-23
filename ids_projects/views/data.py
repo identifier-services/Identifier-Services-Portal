@@ -44,7 +44,6 @@ def dir_list(request, system_id, file_path=None):
                         % (file_path, system_id)
             return JsonResponse({'message': error_msg}, status=404)
 
-
 @login_required
 def view(request, data_uuid):
     """ """
@@ -215,30 +214,42 @@ def file_select(request, relationship):
 
 @login_required
 def do_checksum(request, data_uuid):
-    try:
-        data = Data(uuid=data_uuid, user=request.user)
-    except Exception as e:
-        exception_msg = 'Unable to load data. %s' % e
-        logger.error(exception_msg)
-        messages.warning(request, exception_msg)
-        return HttpResponseRedirect(reverse('ids_projects:project-list'))
+    """ """
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
 
-    try:
-        data.calculate_checksum()
-    except Exception as e:
-        exception_msg = 'Unable to initiate checksum. %s' % e
-        logger.error(exception_msg)
-        messages.warning(request, exception_msg)
+        try:
+            data = Data(uuid=data_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load data. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
+        try:
+            data.calculate_checksum()
+        except Exception as e:
+            exception_msg = 'Unable to initiate checksum. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(
+                        reverse('ids_projects:data-view',
+                                kwargs={'data_uuid': data.uuid}))
+
+        sucess_msg = 'Initiated checksum job.'
+        logger.info(sucess_msg)
+        messages.success(request, sucess_msg)
         return HttpResponseRedirect(
                     reverse('ids_projects:data-view',
                             kwargs={'data_uuid': data.uuid}))
 
-    sucess_msg = 'Initiated checksum job.'
-    logger.info(sucess_msg)
-    messages.success(request, sucess_msg)
-    return HttpResponseRedirect(
-                reverse('ids_projects:data-view',
-                        kwargs={'data_uuid': data.uuid}))
+    #########
+    # OTHER #
+    #########
+    else:
+        django.http.HttpResponseNotAllowed("Method not allowed")
 
 @login_required
 def request_id(request, data_uuid, id_type):
