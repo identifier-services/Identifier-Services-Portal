@@ -46,6 +46,35 @@ def dir_list(request, system_id, file_path=None):
 
 
 @login_required
+def view(request, data_uuid):
+    """ """
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+
+        try:
+            data = Data(uuid=data_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load data. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
+        context = {'process' : data.process,
+                   'project' : data.project,
+                   'specimen' : data.specimen,
+                   'data' : data}
+
+        return render(request, 'ids_projects/data/detail.html', context)
+
+    #########
+    # OTHER #
+    #########
+    else:
+        django.http.HttpResponseNotAllowed("Method not allowed")
+
+@login_required
 def file_select(request, relationship):
 
     process_uuid = request.GET.get('process_uuid', None)
@@ -124,6 +153,9 @@ def file_select(request, relationship):
                                 kwargs={'process_uuid': process_uuid}))
 
         try:
+            associationIds = process.associationIds
+            associationIds.append(process.uuid)
+            data.associationIds = associationIds
             result = data.save()
         except Exception as e:
             exception_msg = 'Unable to save file info as metadata. %s.' % e
@@ -180,6 +212,37 @@ def file_select(request, relationship):
     #########
     else:
         django.http.HttpResponseNotAllowed("Method not allowed")
+
+@login_required
+def do_checksum(request, data_uuid):
+    try:
+        data = Data(uuid=data_uuid, user=request.user)
+    except Exception as e:
+        exception_msg = 'Unable to load data. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
+    try:
+        data.calculate_checksum()
+    except Exception as e:
+        exception_msg = 'Unable to initiate checksum. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:data-view',
+                            kwargs={'data_uuid': data.uuid}))
+
+    sucess_msg = 'Initiated checksum job.'
+    logger.info(sucess_msg)
+    messages.success(request, sucess_msg)
+    return HttpResponseRedirect(
+                reverse('ids_projects:data-view',
+                        kwargs={'data_uuid': data.uuid}))
+
+@login_required
+def request_id(request, data_uuid, id_type):
+    pass
 
 @login_required
 def data_delete(request, data_uuid):

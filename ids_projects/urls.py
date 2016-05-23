@@ -12,6 +12,12 @@ urlpatterns = patterns(
     url(r'^dir/list/(?P<system_id>[^/]+)/(?P<file_path>.+)?', 'dir_list', name='dir-list'),
     # delete a data metadata object associated with a process
     url(r'^data/delete/(?P<data_uuid>.+?)$', 'data_delete', name='data-delete'),
+    # view a process
+    url(r'^data/(?P<data_uuid>.+?)$', 'view', name='data-view'),
+    # do checksum
+    url(r'^data/checksum/(?P<data_uuid>.+?)$', 'do_checksum', name='data-checksum'),
+    # request identifier
+    url(r'^data/request/(?P<id_type>.+?)/(?P<data_uuid>.+?)$', 'request_id', name='data-request-id'),
 )
 
 

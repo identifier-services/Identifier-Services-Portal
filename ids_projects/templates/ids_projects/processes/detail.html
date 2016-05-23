@@ -76,7 +76,7 @@
 
                 <div class="object-header">
                     <!-- TODO: link to file detail view -->
-                    <a href="#" class="header-link">{{ data.value.name }}</a>
+                    <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="header-link">{{ data.value.name }}</a>
                     {% if project.user_is_contributor %}
                         <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger btn-sm pull-right fix-me">Delete</a>
                     {% else %}
@@ -119,7 +119,7 @@
 
                 <div class="object-header">
                     <!-- TODO: link to file detail view -->
-                    <a href="#" class="header-link">{{ data.value.name }}</a>
+                    <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="header-link">{{ data.value.name }}</a>
                     {% if project.user_is_contributor %}
                         <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger btn-sm pull-right fix-me">Delete</a>
                     {% else %}

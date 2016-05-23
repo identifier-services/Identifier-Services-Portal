@@ -56,4 +56,8 @@
     {% if process and systems %}
         {% breadcrumb "Data" "ids_projects:data-view" data.uuid %}
     {% endif %}
+
+    {% if data %}
+        {% breadcrumb "Data" "ids_projects:data-view" data.uuid %}
+    {% endif %}
 {% endblock %}

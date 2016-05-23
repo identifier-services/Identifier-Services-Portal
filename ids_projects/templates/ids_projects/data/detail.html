@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}Process{% endblock %}
+
+{% block create_button %}
+    <a href="{% url 'ids_projects:file-select' relationship='input'%}?process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Input</a>
+    <a href="{% url 'ids_projects:file-select' relationship='output'%}?process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Output</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+
+    <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-5">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1 class="panel-title">{{ process.value.process_type }}</h1>
+            </div>
+            <div class="panel-body">
+                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                {% for key, value in process.value.items %}
+                    {% if "_" not in key and key != "process_type" %}
+                    <p><b>{{ key }}</b> {{ value }}</p>
+                    {% endif %}
+                {% endfor %}
+                <div class="row">
+                    <div class="col-xs-1">
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
+                        {% else %}
+                            <a href="#" class="btn btn-primary" disabled>Edit</a>
+                        {% endif %}
+                    </div>
+                    <div class="col-xs-2 pull-right col-xs-pull-2 col-sm-pull-2 col-md-pull-1">
+                        {% if project.user_is_contributor %}
+                            <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
+                        {% else %}
+                            <a href="#" class="btn btn-danger" disabled>Delete</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">
+      {% for key, value in data.value.items %}
+          {% if "_" not in key and key != "process_type" %}
+          <p><b>{{ key }}</b> {{ value }}</p>
+          {% endif %}
+      {% endfor %}
+      <div class="row">
+          <div class="col-xs-1">
+              {% if project.user_is_contributor %}
+                  <a href="{% url 'ids_projects:data-checksum' data_uuid=data.uuid %}" class="btn btn-primary">Calculate Checksum</a>
+              {% else %}
+                  <a href="#" class="btn btn-primary" disabled>Edit</a>
+              {% endif %}
+          </div>
+          <div class="col-xs-2 pull-right col-xs-pull-2 col-sm-pull-2 col-md-pull-1">
+              {% if project.user_is_contributor %}
+                  <a href="{% url 'ids_projects:data-request-id' data_uuid=data.uuid id_type='DOI' %}" class="btn btn-primary">Request DOI</a>
+              {% else %}
+                  <a href="#" class="btn btn-danger" disabled>Delete</a>
+              {% endif %}
+          </div>
+      </div>
+    </div>
+</div>
+{% endblock %}

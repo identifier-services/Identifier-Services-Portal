@@ -448,6 +448,8 @@ class Process(BaseMetadata):
         self._project = None
         self._specimen = None
         self._data = None
+        if self.value is None:
+            self.value = {}
         if not '_inputs' in self.value:
             self.value['_inputs'] = []
         if not '_outputs' in self.value:
@@ -497,6 +499,9 @@ class Data(BaseMetadata):
 
     def __init__(self, system_id=None, path=None, *args, **kwargs):
         super(Data, self).__init__(*args, **kwargs)
+        self._project = None
+        self._specimen = None
+        self._process = None
         self.system = None
         self.system_id = system_id
         self.path = path
@@ -546,6 +551,32 @@ class Data(BaseMetadata):
 
         self.set_initial({ 'value': file_info })
 
+    @property
+    def project(self, reset=False):
+        if self._project is None or reset:
+
+            meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
+            self._project = Project(initial_data = next(iter(meta_results), None), user=self.user)
+
+        return self._project
+
+    @property
+    def specimen(self, reset=False):
+        if self._specimen is None or reset:
+
+            meta_results = self._list_associated_meta(name=Specimen.name, relationship='parent')
+            self._specimen = Specimen(initial_data = next(iter(meta_results), None), user=self.user)
+
+        return self._specimen
+
+    @property
+    def process(self, reset=False):
+        if self._process is None or reset:
+
+            meta_results = self._list_associated_meta(name=Process.name, relationship='parent')
+            self._process = Process(initial_data = next(iter(meta_results), None), user=self.user)
+
+        return self._process
 
     def calculate_checksum(self):
         # using AgavePy, submit job to run analysis
