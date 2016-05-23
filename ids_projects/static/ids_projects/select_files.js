@@ -74,31 +74,17 @@
             file_path : file_path
         }
 
-        var redirect_url = url.replace('file/select?process_uuid=','process/')
+        var redirect_url = 'projects/';
+
+        if (url.indexOf("output") > -1) {
+            redirect_url = url.replace('file/select/output?process_uuid=','process/');
+        } else if (url.indexOf("input") > -1) {
+            redirect_url = url.replace('file/select/input?process_uuid=','process/');
+        }
 
         if (postdata.system_id && postdata.file_path) {
-            $.post(url, postdata).then(function(response) {
-                window.location.replace(redirect_url);
-            });
-        }
-    }
-
-    var get_fields = function get_fields() {
-        var url = window.location.href;
-
-        var postdata={
-            process_type : $('#id_process_type').val(),
-            specimen_uuid : $('#id_specimen_uuid').val(),
-            project_uuid : $('#id_project_uuid').val()
-        }
-
-        if (postdata.process_type) {
             $.post(url, postdata)
-            .then(function(response) {
-                $('#id_form_process_fields').html(response);
-                $('#id_process_type').attr('disabled', true);
-                $('#id_process_type').attr('readonly', true);
-            });
+            window.location.replace(redirect_url);
         }
     }
 
