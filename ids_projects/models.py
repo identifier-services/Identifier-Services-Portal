@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseClient(object):
-    def __init__(self, user=None):
+    def __init__(self, user=None, *args, **kwargs):
         self.system_ag = None
         self.user_ag = None
         self.user = None
@@ -53,7 +53,6 @@ class BaseMetadata(BaseClient):
     name = 'idsvc.object'
 
     def __init__(self, uuid=None, initial_data=None, *args, **kwargs):
-
         super(BaseMetadata, self).__init__(*args, **kwargs)
         self.contributors = None
         # this is a workaround until i figure out how to authenticate user through webhook
@@ -244,10 +243,13 @@ class BaseMetadata(BaseClient):
             # sure that the logged in user has privs
 
             if not self.user_is_contributor:
-                exception_msg = 'Unable update object.'
-                logger.exception(exception_msg)
-                raise Exception(exception_msg)
-
+                if self.public:
+                    exception_msg = 'Unable update object.'
+                    logger.exception(exception_msg)
+                    raise Exception(exception_msg)
+                else:
+                    # this is annoying workaround until agave permissions bug is fixed
+                    pass
             try:
                 response = self.system_ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
                 self.set_initial(response)
@@ -293,7 +295,12 @@ class BaseMetadata(BaseClient):
 
     @property
     def user_is_contributor(self):
-        return self.user.username in self.contributors
+        try:
+            return self.user.username in self.contributors
+        except Exception as e:
+            exception_msg = "Missing user client. %s" % e
+            logger.exception(exception_msg)
+            return False
 
     @property
     def body(self):
@@ -516,7 +523,9 @@ class Data(BaseMetadata):
 
         self.path = path
 
-        if self.system_id is not None and self.path is not None:
+        if self.system_id is not None \
+           and self.path is not None \
+           and self.public:
             self.load_file_info()
 
     def load_file_info(self):

@@ -20,8 +20,7 @@ def handle_webhook(request, hook_type, *args, **kwargs):
         checksum = data['checksum']
 
         try:
-            # meta = Data(uuid=uuid, public=False)
-            meta = Data(uuid=uuid)
+            meta = Data(uuid=uuid, public=False)
             logger.debug('Metadata for UUID %s: %s' % (uuid, meta.body))
         except Exception as e:
             logger.exception('Invalid UUID ( %s ), Agave object not found.' % uuid)
