@@ -601,7 +601,7 @@ class Data(BaseMetadata):
         name = "checksum"
         app_id = "idsvc_checksum-0.1"
         archive = False
-        agave_url = "agave://%s%s" % (self.system_id, self.path)
+        agave_url = "agave://%s/%s" % (self.system_id, self.path)
         inputs = { 'AGAVE_URL': agave_url }
         parameters = { 'UUID': self.uuid }
         body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters}
@@ -614,6 +614,7 @@ class Data(BaseMetadata):
             exception_msg = 'Unable to initiate job. %s' % e
             logger.error(exception_msg)
             raise Exception(exception_msg)
+
 
 class System(BaseClient):
 
