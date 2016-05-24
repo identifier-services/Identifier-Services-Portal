@@ -151,6 +151,14 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'default',
         },
+        'logfile': {
+            'level':'DEBUG',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR + "/logfile",
+            'maxBytes': 50000,
+            'backupCount': 2,
+            'formatter': 'default',
+        },
     },
     'loggers': {
         'django': {
@@ -159,11 +167,11 @@ LOGGING = {
             'propogate': True,
         },
         'ids': {
-            'handlers': ['console'],
+            'handlers': ['console', 'logfile'],
             'level': 'DEBUG',
         },
         'ids_projects': {
-            'handlers': ['console'],
+            'handlers': ['console', 'logfile'],
             'level': 'DEBUG',
         },
         'ids_specimens': {
