@@ -47,7 +47,7 @@
     <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">
       {% for key, value in data.value.items %}
           {% if "_" not in key and key != "process_type" %}
-          <p><b>{{ key }}</b> {{ value }}</p>
+          <p><b>{{ key }}</b> {% if key == 'length' %}{{ value|filesizeformat }}{% else %}{{ value }}{% endif %}</p>
           {% endif %}
       {% endfor %}
       <div class="row">
