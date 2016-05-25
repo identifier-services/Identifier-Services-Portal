@@ -15,9 +15,14 @@ def handle_webhook(request, hook_type, *args, **kwargs):
     if hook_type == 'update_checksum':
         logger.debug('Webhook request type: %s, body: %s' % (hook_type, request.body))
 
-        uuid = request.GET.get('UUID', None)
-        checksum = request.GET.get('checksum', None)
-        lastChecksumUpdated = request.GET.get('lastChecksumUpdated', None)
+        if request.GET:
+            uuid = request.GET.get('UUID', None)
+            checksum = request.GET.get('checksum', None)
+            lastChecksumUpdated = request.GET.get('lastChecksumUpdated', None)
+        elif request.POST:
+            uuid = request.POST.get('UUID', None)
+            checksum = request.POST.get('checksum', None)
+            lastChecksumUpdated = request.POST.get('lastChecksumUpdated', None)
 
         if uuid is None:
             logger.exception('Missing UUID.')
