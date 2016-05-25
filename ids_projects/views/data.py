@@ -173,13 +173,9 @@ def file_select(request, relationship):
                                 kwargs={'process_uuid': process_uuid}))
 
         if relationship == 'input':
-            logger.debug('Adding intput: %s' % result['uuid'])
             process.value['_inputs'].append(result['uuid'])
-            logger.debug('Intput: %s' % process.value['_inputs'])
         elif relationship == 'output':
-            logger.debug('Adding output: %s' % result['uuid'])
             process.value['_outputs'].append(result['uuid'])
-            logger.debug('Outputs: %s' % process.value['_outputs'])
 
         try:
             result = process.save()
@@ -198,6 +194,15 @@ def file_select(request, relationship):
             return HttpResponseRedirect(
                         reverse('ids_projects:process-view',
                                 kwargs={'process_uuid': process_uuid}))
+
+        try:
+            result = data.calculate_checksum()
+            success_msg = 'Initiated checksum, job id: %s.' % result['id']
+            logger.debug(success_msg)
+        except Exception as e:
+            exception_msg = 'Unable to initiate checksum. %s.' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
 
         success_msg = 'Successfully added file to process.'
         logger.info(success_msg)
