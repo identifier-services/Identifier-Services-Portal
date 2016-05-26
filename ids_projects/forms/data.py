@@ -1,11 +1,16 @@
 from django import forms
+from .base import DynamicForm
+import logging
 
-class DataForm(forms.Form):
-    system_id = forms.CharField(max_length=255)
-    path = forms.CharField(max_length=255)
+logger = logging.getLogger(__name__)
 
-class DirectoryForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        contents = kwargs.pop('contents')
-        super(DirectoryForm, self).__init__(*args, **kwargs)
-        self.fields["contents"] = forms.ChoiceField(widget=forms.RadioSelect, choices=contents)
+
+class DataTypeForm(forms.Form):
+    process_type = forms.ChoiceField()
+
+    def __init__(self, choices, *args, **kwargs):
+        super(DataTypeForm, self).__init__(*args, **kwargs)
+        self.fields['data_type'].choices = choices
+
+class SRAForm(forms.form):
+    pass
