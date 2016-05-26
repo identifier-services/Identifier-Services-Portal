@@ -2,6 +2,18 @@
  ** Site Styles **
  *****************/
 
+.dl-horizontal dt {
+    text-align: left;
+    width: 115px;
+}
+
+.dl-horizontal dd {
+  margin-left: 125px;
+  /*max-width: 200px;*/
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
 hr {
     margin: 12px 0;
 }
@@ -27,7 +39,7 @@ hr {
     padding: 10px 15px;
     border-radius: 4px;
     border: 1px solid #ddd;
-    /*margin-bottom: 10px;*/
+    margin-bottom: 10px;
 }
 
 .object-header .header-link {

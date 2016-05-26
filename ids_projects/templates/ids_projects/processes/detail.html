@@ -45,7 +45,6 @@
     </div>
 
     <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">
-        <h4>Inputs</h4>
 
         {% if not process.inputs %}
         <div class="object-header dark">
@@ -70,25 +69,43 @@
             </div>
         </div>
 
-            <div class="info-panel">
+            {% for data in process.inputs %}
 
-                {% for data in process.inputs %}
-
-                <div class="object-header">
-                    <!-- TODO: link to file detail view -->
-                    <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="header-link">{{ data.value.name }}</a>
-                    {% if project.user_is_contributor %}
-                        <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger btn-sm pull-right fix-me">Delete</a>
-                    {% else %}
-                        <a href="#" class="btn btn-danger btn-sm pull-right fix-me" disabled>Delete</a>
-                    {% endif %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Data</h1>
                 </div>
-
-                {% endfor %}
+                <div class="panel-body">
+                    <dl class="dl-horizontal">
+                      <dt>System</dt><dd>{{ data.value.system }}</dd>
+                      <dt>Path</dt><dd>{{ data.value.path }}</dd>
+                      <dt>File</dt>
+                      <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="header-link">
+                          <dd>{{ data.value.name }}</dd>
+                      </a>
+                      <dt>Size</dt><dd>{{ data.value.length|filesizeformat }}</dd>
+                      <dt>Last checked</dt><dd>{{ data.value.last_checksum_update }}</dd>
+                      <dt>Check Status</dt><dd>{{ data.value.check_status|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
+                    </dl>
+                    <div class="row">
+                        <div class="col-xs-1">
+                            <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="btn btn-primary">View</a>
+                        </div>
+                        <div class="col-xs-2 pull-right col-xs-pull-2 col-sm-pull-2 col-md-pull-1">
+                            {% if project.user_is_contributor %}
+                                <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger">Delete</a>
+                            {% else %}
+                                <a href="#" class="btn btn-danger" disabled>Delete</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            {% endfor %}
+
         {% endif %}
         <hr>
-        <h4>Outputs</h4>
 
         {% if not process.outputs %}
         <div class="object-header dark">
@@ -117,14 +134,35 @@
 
                 {% for data in process.outputs %}
 
-                <div class="object-header">
-                    <!-- TODO: link to file detail view -->
-                    <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="header-link">{{ data.value.name }}</a>
-                    {% if project.user_is_contributor %}
-                        <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger btn-sm pull-right fix-me">Delete</a>
-                    {% else %}
-                        <a href="#" class="btn btn-danger btn-sm pull-right fix-me" disabled>Delete</a>
-                    {% endif %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h1 class="panel-title">Data</h1>
+                    </div>
+                    <div class="panel-body">
+                        <dl class="dl-horizontal">
+                          <dt>System</dt><dd>{{ data.value.system }}</dd>
+                          <dt>Path</dt><dd>{{ data.value.path }}</dd>
+                          <dt>File</dt>
+                          <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="header-link">
+                              <dd>{{ data.value.name }}</dd>
+                          </a>
+                          <dt>Size</dt><dd>{{ data.value.length|filesizeformat }}</dd>
+                          <dt>Last Checked</dt><dd>{{ data.value.last_checksum_update|default:"Not yet calculated" }}</dd>
+                          <dt>Check Status</dt><dd>{{ data.value.check_status|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
+                        </dl>
+                        <div class="row">
+                            <div class="col-xs-1">
+                                <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="btn btn-primary">View</a>
+                            </div>
+                            <div class="col-xs-2 pull-right col-xs-pull-2 col-sm-pull-2 col-md-pull-1">
+                                {% if project.user_is_contributor %}
+                                    <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger">Delete</a>
+                                {% else %}
+                                    <a href="#" class="btn btn-danger" disabled>Delete</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {% endfor %}
