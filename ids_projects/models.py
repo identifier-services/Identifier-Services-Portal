@@ -605,7 +605,19 @@ class Data(BaseMetadata):
         inputs = { 'AGAVE_URL': agave_url }
         parameters = { 'UUID': self.uuid }
         body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters}
-        # using AgavePy, submit job to run analysis
+
+        try:
+            body = { 'checksum': None,
+                     'last_checksum_update': None,
+                     'checksum_conflict': None,
+                     'check_status': None }
+            self.set_initial(body)
+            self.save()
+        except Exception as e:
+            exception_msg = 'Unable to initiate job. %s' % e
+            logger.error(exception_msg)
+            raise Exception(exception_msg)
+
         try:
             logger.debug("Job submission body: %s" % body)
             resp = self.system_ag.jobs.submit(body=body)
