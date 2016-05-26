@@ -18,11 +18,11 @@ def handle_webhook(request, hook_type, *args, **kwargs):
         if request.GET:
             uuid = request.GET.get('UUID', None)
             checksum = request.GET.get('checksum', None)
-            last_checksum_update = request.GET.get('last_checksum_update', None)
+            last_checksum_update = request.GET.get('lastChecksumUpdated', None)
         elif request.POST:
             uuid = request.POST.get('UUID', None)
             checksum = request.POST.get('checksum', None)
-            last_checksum_update = request.POST.get('last_checksum_update', None)
+            last_checksum_update = request.POST.get('lastChecksumUpdated', None)
 
         if uuid is None:
             logger.exception('Missing UUID.')
