@@ -252,7 +252,7 @@
                             </div>
 
                                 {% for key, value in process.value.items %}
-                                    {% if key != "process_type" and key != "public" %}
+                                    {% if key != "process_type" and key != "public" and "_" not in key %}
                                     <div class="row info-item">
                                         <div class="col-xs-6">
                                             <b>{{ key.title }}</b>
