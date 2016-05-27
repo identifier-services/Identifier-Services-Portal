@@ -54,7 +54,10 @@ class BaseMetadata(BaseClient):
 
     def __init__(self, uuid=None, initial_data=None, *args, **kwargs):
         super(BaseMetadata, self).__init__(*args, **kwargs)
-        self.contributors = None
+
+        self._associated_meta = None
+        self._contributors = None
+
         # this is a workaround until i figure out how to authenticate user through webhook
         self.public = kwargs.get('public', True)
 
@@ -74,7 +77,7 @@ class BaseMetadata(BaseClient):
     def set_initial(self, initial_data):
         if 'uuid' in initial_data:
             self.uuid = initial_data['uuid']
-            self.load_contributors()
+            # self.load_contributors()
         if 'associationIds' in initial_data:
             self.associationIds = initial_data['associationIds']
         if 'created' in initial_data:
@@ -93,6 +96,8 @@ class BaseMetadata(BaseClient):
                     self.value[key] = value
 
     def load(self):
+        logger.debug('Calling meta.getMetdata(uuid=%s)...', self.uuid)
+
         if self.uuid is None:
             exception_msg = 'No UUID provided, Agave meta object not found.'
             logger.exception(exception_msg)
@@ -133,7 +138,7 @@ class BaseMetadata(BaseClient):
             raise Exception(exception_msg)
 
         self.set_initial(meta_result)
-        self.load_contributors()
+        # self.load_contributors()
 
     @classmethod
     def make(cls, uuid=None, initial_data=None, user=None, *args, **kwargs):
@@ -163,6 +168,8 @@ class BaseMetadata(BaseClient):
             return None
 
     def _list_associated_meta(self, name, relationship):
+        logger.debug('Loading associated metadata for uuid=%s: %s (%s)',
+                     self.uuid, name, relationship)
 
         if relationship == 'parent':
             query = { 'uuid': { '$in': self.associationIds } }
@@ -232,7 +239,7 @@ class BaseMetadata(BaseClient):
                         'permission': 'READ_WRITE'
                     })
 
-                self.contributors = [self.user.username, "idsvc_user"]
+                # TODO: should we add idsvc_user? not sure
 
                 self.set_initial(response)
             except Exception as e:
@@ -289,17 +296,23 @@ class BaseMetadata(BaseClient):
             raise Exception(exception_msg)
 
     def load_contributors(self):
+        logger.debug('Calling meta.listMetadataPermissions(uuid=%s)...', self.uuid)
+        contributor_list = []
         try:
-            contributor_list = []
             permissions_list = self.system_ag.meta.listMetadataPermissions(uuid=self.uuid)
             for entry in permissions_list:
                 if entry['permission']['write'] is True:
                     contributor_list.append(entry['username'])
-            self.contributors = contributor_list
         except Exception as e:
-            self.contributors = None
             exception_msg = 'Unable to list permissions on object. %s' % e
             logger.exception(exception_msg)
+        return contributor_list
+
+    @property
+    def contributors(self):
+        if self._contributors is None:
+            self._contributors = self.load_contributors()
+        return self._contributors
 
     @property
     def user_is_contributor(self):
@@ -337,7 +350,6 @@ class Project(BaseMetadata):
     @property
     def specimens(self, reset=False):
         if self._specimens is None or reset:
-
             meta_results = self._list_associated_meta(name=Specimen.name, relationship='child')
             self._specimens = [Specimen(initial_data=r, user=self.user) for r in meta_results]
 
@@ -495,21 +507,25 @@ class Process(BaseMetadata):
     @property
     def data(self, reset=False):
         if self._data is None or reset:
-
             meta_results = self._list_associated_meta(Data.name, relationship='child')
             self._data = [Data(initial_data=r, user=self.user) for r in meta_results]
-
         return self._data
 
     @property
     def inputs(self):
-        x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_inputs']]
-        return x
+        inputs = [d for d in self.data if d.uuid in self.value['_inputs']]
+        logger.debug(inputs)
+        return inputs
+        # x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_inputs']]
+        # return x
 
     @property
     def outputs(self):
-        x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_outputs']]
-        return x
+        outputs = [d for d in self.data if d.uuid in self.value['_outputs']]
+        logger.debug(outputs)
+        return outputs
+        # x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_outputs']]
+        # return x
 
 
 class Data(BaseMetadata):
@@ -534,10 +550,6 @@ class Data(BaseMetadata):
 
         self.path = path
         self.sra_id = sra_id
-        # if self.system_id is not None \
-        #    and self.path is not None \
-        #    and self.public:
-        #     self.load_file_info()
 
     def load_file_info(self):
         if self.user_ag is None:
@@ -559,7 +571,7 @@ class Data(BaseMetadata):
             try:
                 self.system = System(system_id=self.system_id, user=self.user)
             except Exception as e:
-                exception_msg = 'Unable to access system with system_id=%s.' % system_id
+                exception_msg = 'Unable to access system with system_id=%s.' % self.system_id
                 logger.error(exception_msg)
                 raise Exception(exception_msg)
 
@@ -580,6 +592,16 @@ class Data(BaseMetadata):
             logger.warning(warning_msg)
 
         self.set_initial({ 'value': file_info })
+
+    def share(self, username, permission):
+        try:
+            self.user_ag.files.updatePermissions(systemId=self.system_id,
+                                                 filePath=self.value['path'],
+                                                 body=json.dumps({'username': username,
+                                                                  'permission': permission,
+                                                                  'recursive': False}))
+        except:
+            logger.exception('Unable to share file')
 
     @property
     def project(self, reset=False):
@@ -637,7 +659,7 @@ class Data(BaseMetadata):
         try:
             logger.debug("Job submission body: %s" % body)
             response = self.system_ag.jobs.submit(body=body)
-            logger.debug("Job submission response: %s" % resp)
+            logger.debug("Job submission response: %s" % response)
         except Exception as e:
             exception_msg = 'Unable to initiate job. %s' % e
             logger.error(exception_msg)
@@ -796,15 +818,16 @@ class System(BaseClient):
         # }
         #TODO: implement system save
         raise(NotImplementedError)
-        if self.id is None:
-            return self.user_ag.systems.add(fileToUpload=None)
-        else:
-            return self.user_ag.systems.update(systemId=self.id, body=None)
+
+        # if self.id is None:
+        #     return self.user_ag.systems.add(fileToUpload=None)
+        # else:
+        #     return self.user_ag.systems.update(systemId=self.id, body=None)
 
     def delete(self):
         #TODO: see if this works
         raise(NotImplemented)
-        return self.user_ag.systems.delete(systemId=self.id)
+        # return self.user_ag.systems.delete(systemId=self.id)
 
     @property
     def body(self):
