@@ -5,8 +5,8 @@
 {% block title %}Process{% endblock %}
 
 {% block create_button %}
-    <a href="{% url 'ids_projects:file-select' relationship='input'%}?process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Input</a>
-    <a href="{% url 'ids_projects:file-select' relationship='output'%}?process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Output</a>
+    <a href="{% url 'ids_projects:data-type'%}?relationship=input&process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Input</a>
+    <a href="{% url 'ids_projects:data-type'%}?relationship=output&process_uuid={{process.uuid}}" class="btn btn-primary pull-right">Add Output</a>
 {% endblock %}
 
 {% block content %}
@@ -51,7 +51,7 @@
             <div>
                 No input data for {{ process.value.process_type }}
                 {% if project.user_is_contributor %}
-                    <a href="{% url 'ids_projects:file-select' relationship='input'%}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="{% url 'ids_projects:data-type'%}?relationship=input&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 {% else %}
                     <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
                 {% endif %}
@@ -62,7 +62,7 @@
             <div>
                 Input data for {{ process.value.process_type }}
                 {% if project.user_is_contributor %}
-                    <a href="{% url 'ids_projects:file-select' relationship='input'%}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="{% url 'ids_projects:data-type'%}?relationship=input&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 {% else %}
                     <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
                 {% endif %}
@@ -77,6 +77,9 @@
                 </div>
                 <div class="panel-body">
                     <dl class="dl-horizontal">
+                      {% if data.value.sra_id %}
+                      <dt>SRA</dt><dd>{{ data.value.sra_id }}</dd>
+                      {% else %}
                       <dt>System</dt><dd>{{ data.value.system }}</dd>
                       <dt>Path</dt><dd>{{ data.value.path }}</dd>
                       <dt>File</dt>
@@ -84,8 +87,9 @@
                           <dd>{{ data.value.name }}</dd>
                       </a>
                       <dt>Size</dt><dd>{{ data.value.length|filesizeformat }}</dd>
+                      {% endif %}
                       <dt>Last Checked</dt><dd>{% if data.value.lastChecksumUpdated %}{{ data.value.lastChecksumUpdated|default:"Not yet calculated" }}{% else %}{{ data.value.last_checksum_update|default:"Not yet calculated" }}{% endif %}</dd>
-                      <dt>Check Status</dt><dd>{{ data.value.checkStatus|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
+                      <!-- TODO: Check Status -->
                     </dl>
                     <div class="row">
                         <div class="col-xs-1">
@@ -112,7 +116,7 @@
             <div>
                 No output data for {{ process.value.process_type }}
                 {% if project.user_is_contributor %}
-                    <a href="{% url 'ids_projects:file-select' relationship='output'%}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="{% url 'ids_projects:data-type'%}?relationship=output&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 {% else %}
                     <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
                 {% endif %}
@@ -123,7 +127,7 @@
             <div>
                 Output data for {{ process.value.process_type }}
                 {% if project.user_is_contributor %}
-                    <a href="{% url 'ids_projects:file-select' relationship='output'%}?process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
+                    <a href="{% url 'ids_projects:data-type'%}?relationship=output&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
                 {% else %}
                     <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
                 {% endif %}
@@ -140,6 +144,9 @@
                     </div>
                     <div class="panel-body">
                         <dl class="dl-horizontal">
+                          {% if data.value.sra_id %}
+                          <dt>SRA</dt><dd>{{ data.value.sra_id }}</dd>
+                          {% else %}
                           <dt>System</dt><dd>{{ data.value.system }}</dd>
                           <dt>Path</dt><dd>{{ data.value.path }}</dd>
                           <dt>File</dt>
@@ -147,8 +154,9 @@
                               <dd>{{ data.value.name }}</dd>
                           </a>
                           <dt>Size</dt><dd>{{ data.value.length|filesizeformat }}</dd>
+                          {% endif %}
                           <dt>Last Checked</dt><dd>{% if data.value.lastChecksumUpdated %}{{ data.value.lastChecksumUpdated|default:"Not yet calculated" }}{% else %}{{ data.value.last_checksum_update|default:"Not yet calculated" }}{% endif %}</dd>
-                          <dt>Check Status</dt><dd>{{ data.value.checkStatus|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
+                          <!-- TODO: Check Status -->
                         </dl>
                         <div class="row">
                             <div class="col-xs-1">

@@ -46,15 +46,19 @@
 
     <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">
       <dl class="dl-horizontal">
+        {% if data.value.sra_id %}
+        <dt>SRA</dt><dd>{{ data.value.sra_id }}</dd>
+        {% else %}
         <dt>System</dt><dd>{{ data.value.system }}</dd>
         <dt>Path</dt><dd>{{ data.value.path }}</dd>
         <dt>File</dt><dd>{{ data.value.name }}</dd>
         <dt>Size</dt><dd>{{ data.value.length|filesizeformat }}</dd>
         <dt>Last Modified</dt><dd>{{ data.value.lastModified }}</dd>
         <dt>Permissions</dt><dd>{{ data.value.permissions }}</dd>
+        {% endif %}
         <dt>Checksum</dt><dd>{{ data.value.checksum }}</dd>
         <dt>Last Checked</dt><dd>{% if data.value.lastChecksumUpdated %}{{ data.value.lastChecksumUpdated|default:"Not yet calculated" }}{% else %}{{ data.value.last_checksum_update|default:"Not yet calculated" }}{% endif %}</dd>
-        <dt>Check Status</dt><dd>{{ data.value.checkStatus|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
+        <!-- TODO: Check Status -->
       </dl>
       <div class="row">
           <div class="col-xs-1">

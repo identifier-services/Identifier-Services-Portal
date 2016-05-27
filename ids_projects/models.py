@@ -239,8 +239,6 @@ class BaseMetadata(BaseClient):
                         'permission': 'READ_WRITE'
                     })
 
-                # TODO: should we add idsvc_user? not sure
-
                 self.set_initial(response)
             except Exception as e:
                 # rollback
@@ -540,6 +538,9 @@ class Data(BaseMetadata):
         self._process = None
         self.system = None
 
+        if not self.value:
+            self.value = {}
+
         if system_id is None:
             system_id = self.value.get('system', None)
 
@@ -550,6 +551,10 @@ class Data(BaseMetadata):
 
         self.path = path
         self.sra_id = sra_id
+
+        if self.sra_id is not None:
+            # TODO figure out a cleaner way to do this
+            self.value['sra_id'] = self.sra_id
 
     def load_file_info(self):
         if self.user_ag is None:
@@ -637,19 +642,20 @@ class Data(BaseMetadata):
 
         if self.sra_id:
             inputs = { 'SRA': self.sra_id }
+            parameters = { 'UUID': self.uuid, 'SRA': self.sra_id }
         else:
             agave_url = "agave://%s/%s" % (self.system_id, self.path)
             inputs = { 'AGAVE_URL': agave_url }
+            parameters = { 'UUID': self.uuid }
 
-        parameters = { 'UUID': self.uuid }
         body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters, 'archive': archive}
 
         try:
-            body = { 'checksum': None,
+            values = { 'checksum': None,
                      'lastChecksumUpdated': None,
                      'checksumConflict': None,
                      'checkStatus': None }
-            self.set_initial(body)
+            self.set_initial(values)
             self.save()
         except Exception as e:
             exception_msg = 'Unable to initiate job. %s' % e

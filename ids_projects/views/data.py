@@ -131,18 +131,18 @@ def type_select(request):
 def add_sra(request, relationship):
     process_uuid = request.GET.get('process_uuid', None)
 
+    try:
+        process = Process(uuid=process_uuid, user=request.user)
+    except Exception as e:
+        exception_msg = 'Unable to load process. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
     #######
     # GET #
     #######
     if request.method == 'GET':
-
-        try:
-            process = Process(uuid=process_uuid, user=request.user)
-        except Exception as e:
-            exception_msg = 'Unable to load process. %s' % e
-            logger.error(exception_msg)
-            messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
 
         form_sra_create = SRAForm()
 
@@ -170,8 +170,7 @@ def add_sra(request, relationship):
             try:
                 data = Data(sra_id=sra_id, user=request.user)
             except Exception as e:
-                exception_msg = 'Unable to access system with system_id=%s. %s'\
-                                % (system_id, e)
+                exception_msg = 'Unable to access metadata. %s' % e
                 logger.error(exception_msg)
                 messages.warning(request, exception_msg)
                 return HttpResponseRedirect(

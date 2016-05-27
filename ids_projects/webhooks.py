@@ -48,6 +48,7 @@ def handle_webhook(request, hook_type, *args, **kwargs):
             try:
             	meta.value['checksum'] = checksum
             	meta.value['lastChecksumUpdated'] = updated_time.strftime(time_template)
+                meta.value['checkStatus'] = True
             	meta.save()
                 logger.debug('New checksum saved for UUID: %s!' % uuid)
             except Exception as e:
@@ -57,6 +58,7 @@ def handle_webhook(request, hook_type, *args, **kwargs):
             try:
             	meta.value['checksum'] = checksum
             	meta.value['lastChecksumUpdated'] = updated_time.strftime(time_template)
+                meta.value['checkStatus'] = True
             	meta.save()
                 logger.debug('Checksum is identical, timestamp updated for UUID: %s!' % uuid)
             except Exception as e:
@@ -66,6 +68,7 @@ def handle_webhook(request, hook_type, *args, **kwargs):
             try:
                 meta.value['checksumConflict'] = checksum
             	meta.value['lastChecksumUpdated'] = updated_time.strftime(time_template)
+                meta.value['checkStatus'] = False
             	meta.save()
                 logger.warning('Checksum is NOT consistent with previous for UUID: %s!' % uuid)
             except Exception as e:
