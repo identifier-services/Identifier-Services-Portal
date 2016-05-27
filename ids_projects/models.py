@@ -516,7 +516,7 @@ class Data(BaseMetadata):
 
     name = 'idsvc.data'
 
-    def __init__(self, system_id=None, path=None, sra=None, *args, **kwargs):
+    def __init__(self, system_id=None, path=None, sra_id=None, *args, **kwargs):
         super(Data, self).__init__(*args, **kwargs)
 
         self._project = None
@@ -533,7 +533,7 @@ class Data(BaseMetadata):
             path = self.value.get('path', None)
 
         self.path = path
-        self.sra = sra
+        self.sra_id = sra_id
         # if self.system_id is not None \
         #    and self.path is not None \
         #    and self.public:
@@ -613,8 +613,8 @@ class Data(BaseMetadata):
         app_id = "idsvc_checksum-0.1"
         archive = False
 
-        if self.sra:
-            inputs = { 'SRA': self.sra }
+        if self.sra_id:
+            inputs = { 'SRA': self.sra_id }
         else:
             agave_url = "agave://%s/%s" % (self.system_id, self.path)
             inputs = { 'AGAVE_URL': agave_url }

@@ -12,6 +12,7 @@ from django.http import (JsonResponse,
                          HttpResponseServerError)
 from django.shortcuts import render
 import json, logging, urllib
+from ..forms.data import DataTypeForm, SRAForm
 from ..models import Project, Specimen, Process, System, Data
 from helper import client, collapse_meta
 
@@ -72,6 +73,171 @@ def view(request, data_uuid):
     #########
     else:
         django.http.HttpResponseNotAllowed("Method not allowed")
+
+def type_select(request):
+    process_uuid = request.GET.get('process_uuid', None)
+    relationship = request.GET.get('relationship', None)
+
+    data_type_choices = [('', 'Choose one'),('SRA', 'SRA'),('File','File')]
+
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+
+        try:
+            process = Process(uuid=process_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load process. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
+        form_data_type = DataTypeForm(data_type_choices)
+
+        context = {
+            'project': process.project,
+            'specimen': process.specimen,
+            'process': process,
+            'form_data_type': form_data_type
+        }
+
+        return render(request, 'ids_projects/data/type_select.html', context)
+
+    ########
+    # POST #
+    ########
+    elif request.method == 'POST':
+
+        form_data_type = DataTypeForm(data_type_choices, request.POST)
+
+        if form_data_type.is_valid():
+
+            data = form_data_type.cleaned_data
+            data_type = data.get('data_type')
+
+            if data_type == 'SRA':
+                return HttpResponseRedirect('%s?process_uuid=%s' %
+                    (reverse('ids_projects:add-sra', kwargs={'relationship': relationship}), process_uuid)
+                )
+            elif data_type == 'File':
+                return HttpResponseRedirect('%s?process_uuid=%s' %
+                    (reverse('ids_projects:file-select', kwargs={'relationship': relationship}), process_uuid)
+                )
+
+    return render(request, 'ids_projects/data/type_select.html', context)
+
+@login_required
+def add_sra(request, relationship):
+    process_uuid = request.GET.get('process_uuid', None)
+
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+
+        try:
+            process = Process(uuid=process_uuid, user=request.user)
+        except Exception as e:
+            exception_msg = 'Unable to load process. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+
+        form_sra_create = SRAForm()
+
+        context = {
+            'project': process.project,
+            'specimen': process.specimen,
+            'process': process,
+            'form_sra_create': form_sra_create
+        }
+
+        return render(request, 'ids_projects/data/add_sra.html', context)
+
+    ########
+    # POST #
+    ########
+    elif request.method == 'POST':
+
+        form_sra_create = SRAForm(request.POST)
+
+        if form_sra_create.is_valid():
+
+            body = form_sra_create.cleaned_data
+            sra_id = body.get('sra_id')
+
+            try:
+                data = Data(sra_id=sra_id, user=request.user)
+            except Exception as e:
+                exception_msg = 'Unable to access system with system_id=%s. %s'\
+                                % (system_id, e)
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:process-view',
+                                    kwargs={'process_uuid': process_uuid}))
+
+            try:
+                associationIds = process.associationIds
+                associationIds.append(process.uuid)
+                data.associationIds = associationIds
+                result = data.save()
+            except Exception as e:
+                exception_msg = 'Unable to save sra metadata. %s.' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:process-view',
+                                    kwargs={'process_uuid': process_uuid}))
+
+            if not 'uuid' in result:
+                warning_msg = 'Invalid API response. %s' % result
+                logger.warning(warning_msg)
+                messages.warning(request, warning_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:process-view',
+                                    kwargs={'process_uuid': process_uuid}))
+
+            if relationship == 'input':
+                process.value['_inputs'].append(result['uuid'])
+            elif relationship == 'output':
+                process.value['_outputs'].append(result['uuid'])
+
+            try:
+                result = process.save()
+            except Exception as e:
+                exception_msg = 'Unable to add SRA to process. %s.' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:process-view',
+                                    kwargs={'process_uuid': process_uuid}))
+
+            if not 'uuid' in result:
+                warning_msg = 'Invalid API response. %s' % result
+                logger.warning(warning_msg)
+                messages.warning(request, warning_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:process-view',
+                                    kwargs={'process_uuid': process_uuid}))
+
+            try:
+                result = data.calculate_checksum()
+                success_msg = 'Initiated checksum, job id: %s.' % result['id']
+                logger.debug(success_msg)
+            except Exception as e:
+                exception_msg = 'Unable to initiate checksum. %s.' % e
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+
+    success_msg = "SRA successfully added."
+    logger.info(success_msg)
+    messages.success(request, success_msg)
+    return HttpResponseRedirect(
+                reverse('ids_projects:process-view',
+                        kwargs={'process_uuid': process.uuid}))
+
 
 @login_required
 def file_select(request, relationship):

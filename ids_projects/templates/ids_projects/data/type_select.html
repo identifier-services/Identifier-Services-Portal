@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 staticfiles %}
+
+{% block title %}Source Data Type{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+
+    {% bootstrap_form form_data_type %}
+
+    <div>
+        <button type="submit" class="btn btn-primary">Next</button>
+        <a href="{% url 'ids_projects:process-view' process_uuid=process.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+    </div>
+</form>
+{% endblock %}

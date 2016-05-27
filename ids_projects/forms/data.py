@@ -6,11 +6,11 @@ logger = logging.getLogger(__name__)
 
 
 class DataTypeForm(forms.Form):
-    process_type = forms.ChoiceField()
+    data_type = forms.ChoiceField()
 
     def __init__(self, choices, *args, **kwargs):
         super(DataTypeForm, self).__init__(*args, **kwargs)
         self.fields['data_type'].choices = choices
 
-class SRAForm(forms.form):
-    pass
+class SRAForm(forms.Form):
+    sra_id = forms.CharField(max_length=255)
