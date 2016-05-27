@@ -205,6 +205,15 @@ class BaseMetadata(BaseClient):
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
 
+            # check to see if parent is public
+            if not self.name == 'idsvc.project':
+                meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
+                for meta in meta_results:
+                    public = meta.value.get('public', False)
+                    # if parent is public, new meta should be public
+                    if public:
+                        self.value['public'] = 'True'
+
             try:
                 # always create objects with the system user
                 response = self.system_ag.meta.addMetadata(body=self.body)
@@ -294,12 +303,15 @@ class BaseMetadata(BaseClient):
 
     @property
     def user_is_contributor(self):
-        try:
-            return self.user.username in self.contributors
-        except Exception as e:
-            exception_msg = "Missing user client. %s" % e
-            logger.exception(exception_msg)
-            return False
+        if not self.public == False:
+            try:
+                return self.user.username in self.contributors
+            except Exception as e:
+                exception_msg = "Missing user client. %s" % e
+                logger.exception(exception_msg)
+                return False
+        else: # permissions bug workaround
+            return True
 
     @property
     def body(self):
@@ -377,8 +389,6 @@ class Project(BaseMetadata):
             raise Exception(exception_msg)
 
         for item in self.specimens + self.processes + self.data:
-
-            # import pdb; pdb.set_trace()
 
             try:
                 item.value['public'] = 'True' if public else 'False'
