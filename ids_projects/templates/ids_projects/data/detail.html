@@ -53,8 +53,8 @@
         <dt>Last Modified</dt><dd>{{ data.value.lastModified }}</dd>
         <dt>Permissions</dt><dd>{{ data.value.permissions }}</dd>
         <dt>Checksum</dt><dd>{{ data.value.checksum }}</dd>
-        <dt>Last Checked</dt><dd>{% if  data.value.lastChecksumUpdated %}{{ data.value.lastChecksumUpdated }}{% else %}{{ data.value.last_checksum_update|default:"Not yet calculated" }}{% endif %}</dd>
-        <dt>Check Status</dt><dd>{{ data.value.check_status|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
+        <dt>Last Checked</dt><dd>{% if data.value.lastChecksumUpdated %}{{ data.value.lastChecksumUpdated|default:"Not yet calculated" }}{% else %}{{ data.value.last_checksum_update|default:"Not yet calculated" }}{% endif %}</dd>
+        <dt>Check Status</dt><dd>{{ data.value.checkStatus|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
       </dl>
       <div class="row">
           <div class="col-xs-1">

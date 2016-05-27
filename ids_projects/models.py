@@ -619,9 +619,9 @@ class Data(BaseMetadata):
 
         try:
             body = { 'checksum': None,
-                     'last_checksum_update': None,
-                     'checksum_conflict': None,
-                     'check_status': None }
+                     'lastChecksumUpdated': None,
+                     'checksumConflict': None,
+                     'checkStatus': None }
             self.set_initial(body)
             self.save()
         except Exception as e:
