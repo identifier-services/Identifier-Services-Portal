@@ -54,7 +54,10 @@ class BaseMetadata(BaseClient):
 
     def __init__(self, uuid=None, initial_data=None, *args, **kwargs):
         super(BaseMetadata, self).__init__(*args, **kwargs)
-        self.contributors = None
+
+        self._associated_meta = None
+        self._contributors = None
+
         # this is a workaround until i figure out how to authenticate user through webhook
         self.public = kwargs.get('public', True)
 
@@ -74,7 +77,7 @@ class BaseMetadata(BaseClient):
     def set_initial(self, initial_data):
         if 'uuid' in initial_data:
             self.uuid = initial_data['uuid']
-            self.load_contributors()
+            # self.load_contributors()
         if 'associationIds' in initial_data:
             self.associationIds = initial_data['associationIds']
         if 'created' in initial_data:
@@ -93,6 +96,8 @@ class BaseMetadata(BaseClient):
                     self.value[key] = value
 
     def load(self):
+        logger.debug('Calling meta.getMetdata(uuid=%s)...', self.uuid)
+
         if self.uuid is None:
             exception_msg = 'No UUID provided, Agave meta object not found.'
             logger.exception(exception_msg)
@@ -133,7 +138,7 @@ class BaseMetadata(BaseClient):
             raise Exception(exception_msg)
 
         self.set_initial(meta_result)
-        self.load_contributors()
+        # self.load_contributors()
 
     @classmethod
     def make(cls, uuid=None, initial_data=None, user=None, *args, **kwargs):
@@ -163,6 +168,8 @@ class BaseMetadata(BaseClient):
             return None
 
     def _list_associated_meta(self, name, relationship):
+        logger.debug('Loading associated metadata for uuid=%s: %s (%s)',
+                     self.uuid, name, relationship)
 
         if relationship == 'parent':
             query = { 'uuid': { '$in': self.associationIds } }
@@ -223,7 +230,7 @@ class BaseMetadata(BaseClient):
                         'permission': 'READ_WRITE'
                     })
 
-                self.contributors = [self.user.username]
+                self._contributors.append(self.user.username)
                 # TODO: should we add idsvc_user? not sure
 
                 self.set_initial(response)
@@ -281,17 +288,23 @@ class BaseMetadata(BaseClient):
             raise Exception(exception_msg)
 
     def load_contributors(self):
+        logger.debug('Calling meta.listMetadataPermissions(uuid=%s)...', self.uuid)
+        contributor_list = []
         try:
-            contributor_list = []
             permissions_list = self.system_ag.meta.listMetadataPermissions(uuid=self.uuid)
             for entry in permissions_list:
                 if entry['permission']['write'] is True:
                     contributor_list.append(entry['username'])
-            self.contributors = contributor_list
         except Exception as e:
-            self.contributors = None
             exception_msg = 'Unable to list permissions on object. %s' % e
             logger.exception(exception_msg)
+        return contributor_list
+
+    @property
+    def contributors(self):
+        if self._contributors is None:
+            self._contributors = self.load_contributors()
+        return self._contributors
 
     @property
     def user_is_contributor(self):
@@ -326,7 +339,6 @@ class Project(BaseMetadata):
     @property
     def specimens(self, reset=False):
         if self._specimens is None or reset:
-
             meta_results = self._list_associated_meta(name=Specimen.name, relationship='child')
             self._specimens = [Specimen(initial_data=r, user=self.user) for r in meta_results]
 
