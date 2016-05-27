@@ -48,7 +48,7 @@ def list(request):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 
 def view(request, project_uuid):
@@ -77,7 +77,7 @@ def view(request, project_uuid):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 
 @login_required
@@ -128,7 +128,7 @@ def create(request):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 
 @login_required
@@ -189,7 +189,7 @@ def edit(request, project_uuid):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 
 @login_required
@@ -216,7 +216,7 @@ def make_public(request, project_uuid):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 
 @login_required
@@ -243,7 +243,7 @@ def make_private(request, project_uuid):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 
 @login_required
@@ -296,4 +296,4 @@ def delete(request, project_uuid):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
