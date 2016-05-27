@@ -658,7 +658,7 @@ class Data(BaseMetadata):
         try:
             logger.debug("Job submission body: %s" % body)
             response = self.system_ag.jobs.submit(body=body)
-            logger.debug("Job submission response: %s" % resp)
+            logger.debug("Job submission response: %s" % response)
         except Exception as e:
             exception_msg = 'Unable to initiate job. %s' % e
             logger.error(exception_msg)
