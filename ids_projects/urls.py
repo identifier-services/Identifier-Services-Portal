@@ -6,6 +6,10 @@ from django.conf.urls import patterns, include, url
 #########
 urlpatterns = patterns(
     'ids_projects.views.data',
+    # itermediate step between adding and sra or a file
+    url(r'^data/type_select?$', 'type_select', name='data-type'),
+    # create a file metadata object associated with an SRA
+    url(r'^data/add_sra/(?P<relationship>.+?)$', 'add_sra', name='add-sra'),
     # create a file metadata object associated with a process
     url(r'^file/select/(?P<relationship>.+?)$', 'file_select', name='file-select'),
     # list content at given path on system
