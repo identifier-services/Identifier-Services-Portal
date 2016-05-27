@@ -142,6 +142,7 @@ def file_select(request, relationship):
 
         try:
             data = Data(system_id=system_id, path=file_path, user=request.user)
+            data.load_file_info()
         except Exception as e:
             exception_msg = 'Unable to access system with system_id=%s. %s'\
                             % (system_id, e)
@@ -155,6 +156,8 @@ def file_select(request, relationship):
             associationIds = process.associationIds
             associationIds.append(process.uuid)
             data.associationIds = associationIds
+            logger.debug('Sharing data with portal user...')
+            data.share(username='idsvc_user', permission='READ')
             result = data.save()
         except Exception as e:
             exception_msg = 'Unable to save file info as metadata. %s.' % e

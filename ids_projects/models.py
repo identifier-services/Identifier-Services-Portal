@@ -230,7 +230,6 @@ class BaseMetadata(BaseClient):
                         'permission': 'READ_WRITE'
                     })
 
-                self._contributors.append(self.user.username)
                 # TODO: should we add idsvc_user? not sure
 
                 self.set_initial(response)
@@ -495,21 +494,25 @@ class Process(BaseMetadata):
     @property
     def data(self, reset=False):
         if self._data is None or reset:
-
             meta_results = self._list_associated_meta(Data.name, relationship='child')
             self._data = [Data(initial_data=r, user=self.user) for r in meta_results]
-
         return self._data
 
     @property
     def inputs(self):
-        x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_inputs']]
-        return x
+        inputs = [d for d in self.data if d.uuid in self.value['_inputs']]
+        logger.debug(inputs)
+        return inputs
+        # x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_inputs']]
+        # return x
 
     @property
     def outputs(self):
-        x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_outputs']]
-        return x
+        outputs = [d for d in self.data if d.uuid in self.value['_outputs']]
+        logger.debug(outputs)
+        return outputs
+        # x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_outputs']]
+        # return x
 
 
 class Data(BaseMetadata):
@@ -535,10 +538,10 @@ class Data(BaseMetadata):
 
         self.path = path
 
-        if self.system_id is not None \
-           and self.path is not None \
-           and self.public:
-            self.load_file_info()
+        # if self.system_id is not None \
+        #    and self.path is not None \
+        #    and self.public:
+        #     self.load_file_info()
 
     def load_file_info(self):
         if self.user_ag is None:
@@ -560,7 +563,7 @@ class Data(BaseMetadata):
             try:
                 self.system = System(system_id=self.system_id, user=self.user)
             except Exception as e:
-                exception_msg = 'Unable to access system with system_id=%s.' % system_id
+                exception_msg = 'Unable to access system with system_id=%s.' % self.system_id
                 logger.error(exception_msg)
                 raise Exception(exception_msg)
 
@@ -581,6 +584,16 @@ class Data(BaseMetadata):
             logger.warning(warning_msg)
 
         self.set_initial({ 'value': file_info })
+
+    def share(self, username, permission):
+        try:
+            self.user_ag.files.updatePermissions(systemId=self.system_id,
+                                                 filePath=self.value['path'],
+                                                 body=json.dumps({'username': username,
+                                                                  'permission': permission,
+                                                                  'recursive': False}))
+        except:
+            logger.exception('Unable to share file')
 
     @property
     def project(self, reset=False):
