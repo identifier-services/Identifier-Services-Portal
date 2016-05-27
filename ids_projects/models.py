@@ -223,8 +223,7 @@ class BaseMetadata(BaseClient):
                         'permission': 'READ_WRITE'
                     })
 
-                self.contributors = [self.user.username]
-                # TODO: should we add idsvc_user? not sure
+                self.contributors = [self.user.username, "idsvc_user"]
 
                 self.set_initial(response)
             except Exception as e:
@@ -378,6 +377,9 @@ class Project(BaseMetadata):
             raise Exception(exception_msg)
 
         for item in self.specimens + self.processes + self.data:
+
+            # import pdb; pdb.set_trace()
+
             try:
                 item.value['public'] = 'True' if public else 'False'
                 item.save()
@@ -505,7 +507,6 @@ class Data(BaseMetadata):
     name = 'idsvc.data'
 
     def __init__(self, system_id=None, path=None, *args, **kwargs):
-        # import pdb; pdb.set_trace()
         super(Data, self).__init__(*args, **kwargs)
 
         self._project = None
@@ -606,26 +607,28 @@ class Data(BaseMetadata):
         parameters = { 'UUID': self.uuid }
         body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters}
 
-        # try:
-        #     body = { 'checksum': None,
-        #              'last_checksum_update': None,
-        #              'checksum_conflict': None,
-        #              'check_status': None }
-        #     self.set_initial(body)
-        #     self.save()
-        # except Exception as e:
-        #     exception_msg = 'Unable to initiate job. %s' % e
-        #     logger.error(exception_msg)
-        #     raise Exception(exception_msg)
+        try:
+            body = { 'checksum': None,
+                     'last_checksum_update': None,
+                     'checksum_conflict': None,
+                     'check_status': None }
+            self.set_initial(body)
+            self.save()
+        except Exception as e:
+            exception_msg = 'Unable to initiate job. %s' % e
+            logger.error(exception_msg)
+            raise Exception(exception_msg)
 
         try:
             logger.debug("Job submission body: %s" % body)
-            resp = self.system_ag.jobs.submit(body=body)
+            response = self.system_ag.jobs.submit(body=body)
             logger.debug("Job submission response: %s" % resp)
         except Exception as e:
             exception_msg = 'Unable to initiate job. %s' % e
             logger.error(exception_msg)
             raise Exception(exception_msg)
+
+        return response
 
 
 class System(BaseClient):
