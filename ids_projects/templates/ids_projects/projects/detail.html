@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% load bootstrap3 %}
+{% load bootstrap3 staticfiles %}
 
 {% block title %}Projects{% endblock %}
 
@@ -13,7 +13,7 @@
                 <h1 class="panel-title">Project</h1>
             </div>
             <div class="panel-body">
-                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                <p><img class="img-responsive" src="{% static 'images/img2.jpg' %}"></p>
                 <p><b>Project Name: </b> {{ project.value.title }}</p>
                 <p><b>Investigation Type: </b> {{ project.value.investigation_type }}</p>
                 <p><b>Description: </b> {{ project.value.description }}</p>
@@ -102,7 +102,7 @@
                 {% if project.user_is_contributor %}
                     <a href="{% url 'ids_projects:process-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a>
                 {% else %}
-                    <a href="#" class="btn btn-primary"disabled>Add </a>
+                    <a href="#" class="btn btn-primary" disabled>Add </a>
                 {% endif %}
             </div>
         </div><hr>
