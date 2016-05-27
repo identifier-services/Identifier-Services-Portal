@@ -516,7 +516,7 @@ class Data(BaseMetadata):
 
     name = 'idsvc.data'
 
-    def __init__(self, system_id=None, path=None, *args, **kwargs):
+    def __init__(self, system_id=None, path=None, sra=None, *args, **kwargs):
         super(Data, self).__init__(*args, **kwargs)
 
         self._project = None
@@ -533,11 +533,11 @@ class Data(BaseMetadata):
             path = self.value.get('path', None)
 
         self.path = path
-
-        if self.system_id is not None \
-           and self.path is not None \
-           and self.public:
-            self.load_file_info()
+        self.sra = sra
+        # if self.system_id is not None \
+        #    and self.path is not None \
+        #    and self.public:
+        #     self.load_file_info()
 
     def load_file_info(self):
         if self.user_ag is None:
@@ -612,10 +612,15 @@ class Data(BaseMetadata):
         name = "checksum"
         app_id = "idsvc_checksum-0.1"
         archive = False
-        agave_url = "agave://%s/%s" % (self.system_id, self.path)
-        inputs = { 'AGAVE_URL': agave_url }
+
+        if self.sra:
+            inputs = { 'SRA': self.sra }
+        else:
+            agave_url = "agave://%s/%s" % (self.system_id, self.path)
+            inputs = { 'AGAVE_URL': agave_url }
+
         parameters = { 'UUID': self.uuid }
-        body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters}
+        body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters, 'archive': archive}
 
         try:
             body = { 'checksum': None,
