@@ -84,8 +84,8 @@
                           <dd>{{ data.value.name }}</dd>
                       </a>
                       <dt>Size</dt><dd>{{ data.value.length|filesizeformat }}</dd>
-                      <dt>Last Checked</dt><dd>{% if  data.value.lastChecksumUpdated %}{{ data.value.lastChecksumUpdated }}{% else %}{{ data.value.last_checksum_update|default:"Not yet calculated" }}{% endif %}</dd>
-                      <dt>Check Status</dt><dd>{{ data.value.check_status|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
+                      <dt>Last Checked</dt><dd>{% if data.value.lastChecksumUpdated %}{{ data.value.lastChecksumUpdated|default:"Not yet calculated" }}{% else %}{{ data.value.last_checksum_update|default:"Not yet calculated" }}{% endif %}</dd>
+                      <dt>Check Status</dt><dd>{{ data.value.checkStatus|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
                     </dl>
                     <div class="row">
                         <div class="col-xs-1">
@@ -147,8 +147,8 @@
                               <dd>{{ data.value.name }}</dd>
                           </a>
                           <dt>Size</dt><dd>{{ data.value.length|filesizeformat }}</dd>
-                          <dt>Last Checked</dt><dd>{% if  data.value.lastChecksumUpdated %}{{ data.value.lastChecksumUpdated }}{% else %}{{ data.value.last_checksum_update|default:"Not yet calculated" }}{% endif %}</dd>
-                          <dt>Check Status</dt><dd>{{ data.value.check_status|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
+                          <dt>Last Checked</dt><dd>{% if data.value.lastChecksumUpdated %}{{ data.value.lastChecksumUpdated|default:"Not yet calculated" }}{% else %}{{ data.value.last_checksum_update|default:"Not yet calculated" }}{% endif %}</dd>
+                          <dt>Check Status</dt><dd>{{ data.value.checkStatus|yesno:"Valid,Conflict,Not yet calculated" }}</dd>
                         </dl>
                         <div class="row">
                             <div class="col-xs-1">

@@ -18,11 +18,11 @@ def handle_webhook(request, hook_type, *args, **kwargs):
         if request.GET:
             uuid = request.GET.get('UUID', None)
             checksum = request.GET.get('checksum', None)
-            last_checksum_update = request.GET.get('lastChecksumUpdated', None)
+            # last_checksum_update = request.GET.get('lastChecksumUpdated', None)
         elif request.POST:
             uuid = request.POST.get('UUID', None)
             checksum = request.POST.get('checksum', None)
-            last_checksum_update = request.POST.get('lastChecksumUpdated', None)
+            # last_checksum_update = request.POST.get('lastChecksumUpdated', None)
 
         if uuid is None:
             logger.exception('Missing UUID.')
@@ -47,7 +47,7 @@ def handle_webhook(request, hook_type, *args, **kwargs):
         if previous_checksum is None:
             try:
             	meta.value['checksum'] = checksum
-            	meta.value['last_checksum_update'] = updated_time.strftime(time_template)
+            	meta.value['lastChecksumUpdated'] = updated_time.strftime(time_template)
             	meta.save()
                 logger.debug('New checksum saved for UUID: %s!' % uuid)
             except Exception as e:
@@ -56,7 +56,7 @@ def handle_webhook(request, hook_type, *args, **kwargs):
         elif previous_checksum == checksum:
             try:
             	meta.value['checksum'] = checksum
-            	meta.value['last_checksum_update'] = updated_time.strftime(time_template)
+            	meta.value['lastChecksumUpdated'] = updated_time.strftime(time_template)
             	meta.save()
                 logger.debug('Checksum is identical, timestamp updated for UUID: %s!' % uuid)
             except Exception as e:
@@ -64,8 +64,8 @@ def handle_webhook(request, hook_type, *args, **kwargs):
                 return HttpResponse("Error")
         else:
             try:
-                meta.value['checksum_conflict'] = checksum
-            	meta.value['last_checksum_update'] = updated_time.strftime(time_template)
+                meta.value['checksumConflict'] = checksum
+            	meta.value['lastChecksumUpdated'] = updated_time.strftime(time_template)
             	meta.save()
                 logger.warning('Checksum is NOT consistent with previous for UUID: %s!' % uuid)
             except Exception as e:

@@ -212,6 +212,15 @@ class BaseMetadata(BaseClient):
                 logger.exception(exception_msg)
                 raise Exception(exception_msg)
 
+            # check to see if parent is public
+            if not self.name == 'idsvc.project':
+                meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
+                for meta in meta_results:
+                    public = meta.value.get('public', False)
+                    # if parent is public, new meta should be public
+                    if public:
+                        self.value['public'] = 'True'
+
             try:
                 # always create objects with the system user
                 response = self.system_ag.meta.addMetadata(body=self.body)
@@ -307,12 +316,15 @@ class BaseMetadata(BaseClient):
 
     @property
     def user_is_contributor(self):
-        try:
-            return self.user.username in self.contributors
-        except Exception as e:
-            exception_msg = "Missing user client. %s" % e
-            logger.exception(exception_msg)
-            return False
+        if not self.public == False:
+            try:
+                return self.user.username in self.contributors
+            except Exception as e:
+                exception_msg = "Missing user client. %s" % e
+                logger.exception(exception_msg)
+                return False
+        else: # permissions bug workaround
+            return True
 
     @property
     def body(self):
@@ -389,6 +401,7 @@ class Project(BaseMetadata):
             raise Exception(exception_msg)
 
         for item in self.specimens + self.processes + self.data:
+
             try:
                 item.value['public'] = 'True' if public else 'False'
                 item.save()
@@ -520,7 +533,6 @@ class Data(BaseMetadata):
     name = 'idsvc.data'
 
     def __init__(self, system_id=None, path=None, *args, **kwargs):
-        # import pdb; pdb.set_trace()
         super(Data, self).__init__(*args, **kwargs)
 
         self._project = None
@@ -631,26 +643,28 @@ class Data(BaseMetadata):
         parameters = { 'UUID': self.uuid }
         body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters}
 
-        # try:
-        #     body = { 'checksum': None,
-        #              'last_checksum_update': None,
-        #              'checksum_conflict': None,
-        #              'check_status': None }
-        #     self.set_initial(body)
-        #     self.save()
-        # except Exception as e:
-        #     exception_msg = 'Unable to initiate job. %s' % e
-        #     logger.error(exception_msg)
-        #     raise Exception(exception_msg)
+        try:
+            body = { 'checksum': None,
+                     'lastChecksumUpdated': None,
+                     'checksumConflict': None,
+                     'checkStatus': None }
+            self.set_initial(body)
+            self.save()
+        except Exception as e:
+            exception_msg = 'Unable to initiate job. %s' % e
+            logger.error(exception_msg)
+            raise Exception(exception_msg)
 
         try:
             logger.debug("Job submission body: %s" % body)
-            resp = self.system_ag.jobs.submit(body=body)
+            response = self.system_ag.jobs.submit(body=body)
             logger.debug("Job submission response: %s" % resp)
         except Exception as e:
             exception_msg = 'Unable to initiate job. %s' % e
             logger.error(exception_msg)
             raise Exception(exception_msg)
+
+        return response
 
 
 class System(BaseClient):
@@ -803,15 +817,16 @@ class System(BaseClient):
         # }
         #TODO: implement system save
         raise(NotImplementedError)
-        if self.id is None:
-            return self.user_ag.systems.add(fileToUpload=None)
-        else:
-            return self.user_ag.systems.update(systemId=self.id, body=None)
+
+        # if self.id is None:
+        #     return self.user_ag.systems.add(fileToUpload=None)
+        # else:
+        #     return self.user_ag.systems.update(systemId=self.id, body=None)
 
     def delete(self):
         #TODO: see if this works
         raise(NotImplemented)
-        return self.user_ag.systems.delete(systemId=self.id)
+        # return self.user_ag.systems.delete(systemId=self.id)
 
     @property
     def body(self):
