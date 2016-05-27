@@ -51,7 +51,7 @@ def list(request):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 
 def view(request, process_uuid):
@@ -80,7 +80,7 @@ def view(request, process_uuid):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 
 @login_required
