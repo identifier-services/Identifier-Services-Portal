@@ -55,3 +55,17 @@ class AgaveOAuthToken(models.Model):
         self.save()
         logger.debug('Agave OAuth token for user=%s refreshed: %s' % (self.user.username,
                                                                       self.masked_token))
+
+    def token_callback(self, access_token, refresh_token, created_at, expires_in):
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+        self.created = created_at
+        self.expires_in = expires_in
+        self.save()
+
+    @property
+    def api_client(self):
+        return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
+                     token=self.access_token,
+                     refresh_token=self.refresh_token,
+                     token_callback=self.token_callback)
