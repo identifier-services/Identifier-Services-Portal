@@ -514,16 +514,12 @@ class Process(BaseMetadata):
         inputs = [d for d in self.data if d.uuid in self.value['_inputs']]
         logger.debug(inputs)
         return inputs
-        # x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_inputs']]
-        # return x
 
     @property
     def outputs(self):
         outputs = [d for d in self.data if d.uuid in self.value['_outputs']]
         logger.debug(outputs)
         return outputs
-        # x = [Data(uuid=uuid, user=self.user) for uuid in self.value['_outputs']]
-        # return x
 
 
 class Data(BaseMetadata):
@@ -550,11 +546,13 @@ class Data(BaseMetadata):
             path = self.value.get('path', None)
 
         self.path = path
-        self.sra_id = sra_id
 
-        if self.sra_id is not None:
-            # TODO figure out a cleaner way to do this
-            self.value['sra_id'] = self.sra_id
+        if sra_id is None:
+            sra_id = self.value.get('sra_id', None)
+        else:
+            self.value['sra_id'] = sra_id
+
+        self.sra_id = sra_id
 
     def load_file_info(self):
         if self.user_ag is None:
@@ -641,20 +639,19 @@ class Data(BaseMetadata):
         archive = False
 
         if self.sra_id:
-            inputs = { 'SRA': self.sra_id }
             parameters = { 'UUID': self.uuid, 'SRA': self.sra_id }
+            body={'name': name, 'appId': app_id, 'parameters': parameters}
         else:
             agave_url = "agave://%s/%s" % (self.system_id, self.path)
             inputs = { 'AGAVE_URL': agave_url }
             parameters = { 'UUID': self.uuid }
-
-        body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters, 'archive': archive}
+            body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters}
 
         try:
             values = { 'checksum': None,
-                     'lastChecksumUpdated': None,
-                     'checksumConflict': None,
-                     'checkStatus': None }
+                       'lastChecksumUpdated': None,
+                       'checksumConflict': None,
+                       'checkStatus': None }
             self.set_initial(values)
             self.save()
         except Exception as e:
@@ -665,7 +662,7 @@ class Data(BaseMetadata):
         try:
             logger.debug("Job submission body: %s" % body)
             response = self.system_ag.jobs.submit(body=body)
-            logger.debug("Job submission response: %s" % response)
+            logger.debug("Job submission response: %s" % response['id'])
         except Exception as e:
             exception_msg = 'Unable to initiate job. %s' % e
             logger.error(exception_msg)
