@@ -31,6 +31,7 @@ class BaseMetadata(BaseAgaveObject):
         self.body = kwargs.get('body', meta.get('value', None))
 
     def load_from_meta(self, meta):
+        """Set instance variables from dictionary or json"""
         if type(meta) is str:
             meta = json.loads(meta)
 
@@ -46,10 +47,12 @@ class BaseMetadata(BaseAgaveObject):
         self._links = meta.get('_links', None)
 
     def load_from_agave(self):
+        """Load metadata from tenant, if UUID is not None"""
         meta = self.user_ag.meta.getMetadata(uuid=self.uuid)
         self.load_from_meta(meta)
 
     def save(self):
+        """Add or update metadata object on tenant"""
         if self.uuid is None:
             response = self.api_client.meta.addMetadata(body=self.meta)
         else:
@@ -57,6 +60,7 @@ class BaseMetadata(BaseAgaveObject):
         self.load_from_meta(response)
 
     def delete(self):
+        """Delete metadata object on tenant"""
         if self.uuid is not None:
             self.api_client.meta.deleteMetadata(uuid=self.uuid)
             self.uuid = None
