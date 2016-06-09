@@ -10,10 +10,13 @@ from django.http import (HttpResponse,
                          HttpResponseServerError)
 from django.shortcuts import render
 from django.core.urlresolvers import reverse
+from ids.utils import get_portal_api_client
 from ..forms.projects import ProjectForm
 from ..models import Project
 from helper import client, collapse_meta
 import json, logging
+
+import ..more_efficient_models as m
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +27,11 @@ def list(request):
     # GET #
     #######
     if request.method == 'GET':
+
+        if request.user.is_anonymous():
+            api_client = get_portal_api_client()
+        else:
+            api_client = request.user.agave_oauth.api_client
 
         try:
             project = Project(user=request.user)
