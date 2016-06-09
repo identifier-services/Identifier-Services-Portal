@@ -76,3 +76,48 @@ class BaseMetadata(BaseAgaveObject):
 
     def to_json(self):
         return json.dumps(self.meta)
+
+class Project(BaseMetadata):
+    """ """
+    name = 'idsvc.project'
+
+    def __init__(self, *args, **kwargs):
+        """ """
+        super(Project, self).__init__(*args, **kwargs)
+
+class Specimen(BaseMetadata):
+    """ """
+    name = 'idsvc.specimen'
+
+    def __init__(self, *args, **kwargs):
+        """ """
+        super(Specimen, self).__init__(*args, **kwargs)
+
+class Process(BaseMetadata):
+    """ """
+    name = 'idsvc.process'
+
+    def __init__(self, *args, **kwargs):
+        """ """
+        super(Process, self).__init__(*args, **kwargs)
+
+class Data(BaseMetadata):
+    """ """
+    name = 'idsvc.data'
+
+    def __init__(self, *args, **kwargs):
+        """ """
+        super(Data, self).__init__(*args, **kwargs)
+
+# questions:
+#   * create all objects with user client (particular client determined in the view)?
+#   * share with system agave user to make public?
+#       - remember, all project objects need to be shared, including future objects after a project is made public
+#   * no public flag?
+#   * scenerio, we have a new view for public projects (we also have a view for private projects)
+#     the user clicks 'view' on a public project (that the user doesn't own). the app routes the user to /project/uuid
+#       - how does the project-detail view know that the project is a public project not owned by the user?
+#       - should we have separate views for public projects? /project/public/uuid?
+#   * how do we list Specimens, Processes, Data, if there is no heirarchy (other than everything a chile of Project)?
+#       - is there actually a 'dynamic' heirarchy? dependent on the type of project?
+#       - how would that work?
