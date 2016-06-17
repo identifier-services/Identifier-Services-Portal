@@ -9,6 +9,8 @@ class BaseAgaveObject(object):
 
 class BaseMetadata(BaseAgaveObject):
     """Base class for IDS Metadata (Project, Specimen, Process, Data)"""
+    name = "idsvc.basemetadata"
+
     def __init__(self, *args, **kwargs):
         """Required Parameter:
             api_client      # AgavePy client
@@ -85,8 +87,27 @@ class BaseMetadata(BaseAgaveObject):
 
     def load_from_agave(self):
         """Load metadata from tenant, if UUID is not None"""
-        meta = self.user_ag.meta.getMetadata(uuid=self.uuid)
+        meta = self._api_client.meta.getMetadata(uuid=self.uuid)
+
+        created = meta.get('created').isoformat()
+        lastUpdated = meta.get('lastUpdated').isoformat()
+
+        # isoformat always same length, remove zeros in microsecond
+        meta['created'] = created[:23] + created[26:]
+        meta['lastUpdated'] = lastUpdated[:23] + lastUpdated[26:]
+
         self.load_from_meta(meta)
+
+    @classmethod
+    def make(cls, meta, api_client, *args, **kwargs):
+        return cls(meta=meta, api_client=api_client, *args, **kwargs)
+
+    def list(self):
+        query = {'name': self.name}
+        results = self._api_client.meta.listMetadata(q=json.dumps(query))
+
+        if results is not None:
+            return [self.make(meta=r, api_client=self._api_client) for r in results]
 
     def save(self):
         """Add or update metadata object on tenant"""

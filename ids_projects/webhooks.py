@@ -42,7 +42,7 @@ def handle_webhook(request, hook_type, *args, **kwargs):
         updated_time = datetime.datetime.now()
         previous_checksum = meta.value.get('checksum', None)
 
-        time_template = "%Y-%m-%d %H:%M:%S"
+        time_template = "%Y-%m-%dT%H:%M:%S"
 
         if previous_checksum is None:
             try:
