@@ -134,8 +134,8 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
         self.assertDictEqual(base_meta.meta, meta)
 
-    def test_save_base_metadata(self):
-        """Test saving a base metadata object"""
+    def save_base_metadata(self):
+        """Reusable method for saving a base metadata object"""
 
         name = 'idsvc-test-meta'
         body = { 'color': 'blue' }
@@ -152,140 +152,188 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         self.assertTrue(all(item in base_meta.meta.items() for item in meta.items()))
 
+        return base_meta
+
+    def test_save_base_metadata(self):
+        """Test saving a base metadata object"""
+
+        self.save_base_metadata()
+
+        # cleanup
+
+        self.delete_base_metadata()
+
     def test_list_base_metadata(self):
         """Test listing metadata objects"""
 
+        # start out by creating some metadata
+
+        self.save_base_metadata()
+
         name = 'idsvc-test-meta'
         meta = { 'name': name }
+
+        # then list metadata with name = 'idsvc-test-meta'
 
         base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
         response = base_meta.list()
 
         # we should have at least one in the list, since we just created one
+
         self.assertTrue(len(response)>0)
+
+        # cleanup
+
+        self.delete_base_metadata()
 
     def test_load_from_agave(self):
         """Create a new BaseMetadata object and compare it to one from our list"""
 
-        name = 'idsvc-test-meta'
-        meta = { 'name': name }
+        # create some metadata
 
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
-        response = base_meta.list()
+        base_meta_object_a = self.save_base_metadata()
 
-        base_meta_object_a = response[0]
+        # load the same metadata object again from agave
+
         base_meta_object_b = BaseMetadata(api_client=IDS_SYS_CLEINT, uuid=base_meta_object_a.uuid)
         base_meta_object_b.load_from_agave()
 
-        # the agave api does not return the same set of _links for listMetadata
-        # and getMetadata operations (getMetadata returns associationIds in
-        # _links, this may be a bug, and owner, permissions, self.
-        # listMetadata just returns self.)
+        # compare, make sure we're looking at the same thing (omitting
+        # '_links', because listMetadata and getMetadata return a different
+        # set of links.
 
-        # example:
+        a = [(k,v) for k, v, in base_meta_object_a.__dict__.items() if k != '_links']
+        b = [(k,v) for k, v, in base_meta_object_a.__dict__.items() if k != '_links']
 
-        # from listMetadata
+        self.assertEqual(a, b)
 
-        # {'_api_client': <agavepy.agave.Agave object at 0x10cf07610>,
-        #  '_downstream_objects': None,
-        #  '_links': {u'self': {u'href': u'https://agave.iplantc.org/meta/v2/data/2189514473711145446-242ac1110-0001-012'}},
-        #  '_upstream_objects': None,
-        #  'associationIds': [],
-        #  'body': {u'color': u'blue'},
-        #  'created': u'2016-06-16T19:19:12.973-05:00',
-        #  'internalUsername': None,
-        #  'lastUpdated': u'2016-06-16T19:19:12.973-05:00',
-        #  'name': u'idsvc-test-meta',
-        #  'owner': u'idsvc_user',
-        #  'schemaId': None,
-        #  'uuid': u'2189514473711145446-242ac1110-0001-012'}
-        #
+        # cleanup
 
-        # from getMetadata
-        #
-        # {'_api_client': <agavepy.agave.Agave object at 0x10cf07610>,
-        #  '_downstream_objects': None,
-        #  '_links': {u'associationIds': [],
-        #             u'owner': {u'href': u'https://agave.iplantc.org/profiles/v2/idsvc_user'},
-        #             u'permissions': {u'href': u'https://agave.iplantc.org/meta/v2/data/2189514473711145446-242ac1110-0001-012/pems'},
-        #             u'self': {u'href': u'https://agave.iplantc.org/meta/v2/data/2189514473711145446-242ac1110-0001-012'}},
-        #  '_upstream_objects': None,
-        #  'associationIds': [],
-        #  'body': {u'color': u'blue'},
-        #  'created': '2016-06-16T19:19:12.973-05:00',
-        #  'internalUsername': None,
-        #  'lastUpdated': '2016-06-16T19:19:12.973-05:00',
-        #  'name': u'idsvc-test-meta',
-        #  'owner': u'idsvc_user',
-        #  'schemaId': None,
-        #  'uuid': u'2189514473711145446-242ac1110-0001-012'}
-
-        # workaround
-        dict_a = base_meta_object_a.__dict__
-        dict_b = base_meta_object_b.__dict__
-        del dict_a['_links']
-        del dict_b['_links']
-
-        self.assertEqual(dict_a, dict_b)
+        self.delete_base_metadata()
 
     def test_edit_base_metadata(self):
         """Test editing a base metadata object"""
-        name = 'idsvc-test-meta'
-        meta = { 'name': name }
 
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
-        response = base_meta.list()
+        # start out by creating some metadata
 
-        base_meta_object_a = response[0]
+        base_meta_object_a = self.save_base_metadata()
+
+        # load the same metadata object again from agave
+
         base_meta_object_b = BaseMetadata(api_client=IDS_SYS_CLEINT, uuid=base_meta_object_a.uuid)
         base_meta_object_b.load_from_agave()
 
-        # workaround see test_load_from_agave for explanation
-        dict_a = base_meta_object_a.__dict__
-        dict_b = base_meta_object_b.__dict__
-        del dict_a['_links']
-        del dict_b['_links']
+        # compare, make sure we're looking at the same thing (omitting
+        # '_links', because listMetadata and getMetadata return a different
+        # set of links)
 
-        self.assertEqual(dict_a, dict_b)
+        a = [(k,v) for k, v, in base_meta_object_a.__dict__.items() if k != '_links']
+        b = [(k,v) for k, v, in base_meta_object_a.__dict__.items() if k != '_links']
 
-        ### TODO: fix problem
-        return
-        ### AttributeError: 'BaseMetadata' object has no attribute '_links'
+        self.assertEqual(a, b)
+
+        # now let's edit, first add some information
 
         base_meta_object_a.body.update({'fruit':'apple'})
+
+        # then save
+
         result = base_meta_object_a.save()
 
-        self.assertIn('uuid', response)
+        # check to make sure we get the newly saved metadata objects in the result
 
-        self.assertNotEqual(dict_a, dict_b)
+        self.assertIn('uuid', result)
+
+        # now check to make sure that a != b
+
+        a = [(k,v) for k, v, in base_meta_object_a.__dict__.items() if k != '_links']
+
+        self.assertNotEqual(a, b)
 
         # load again from agave just to be sure
 
         base_meta_object_a = BaseMetadata(api_client=IDS_SYS_CLEINT, uuid=base_meta_object_a.uuid)
-        base_meta_object_b.load_from_agave()
+        base_meta_object_a.load_from_agave()
 
-        dict_a = base_meta_object_a.__dict__
-        del dict_a['_links']
+        a = [(k,v) for k, v, in base_meta_object_a.__dict__.items() if k != '_links']
 
-        self.assertNotEqual(dict_a, dict_b)
+        self.assertNotEqual(a, b)
 
-    def test_delete_base_metadata(self):
-        """Test deleting a base metadata object"""
+        # cleanup
+
+        self.delete_base_metadata()
+
+    def delete_base_metadata(self):
+        """Delete all metadata with name = 'idsvc-test-meta'"""
+
+        # get a list of metadata objects with name = 'idsvc-test-meta'
+
         name = 'idsvc-test-meta'
         meta = { 'name': name }
 
         base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
         response = base_meta.list()
 
-        # we should have at least one in the list, since we just created one
-        self.assertTrue(len(response)>0)
+        # we will delete any and all metadata with name = 'idsvc-test-meta'
 
-        list_len = len(response)
+        for mo in response:
+            mo.delete()
 
-        meta_to_delete = response[0]
-        meta_to_delete.delete()
+        # check delete, list metadata with name = 'idsvc-test-meta'
 
         base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
         response = base_meta.list()
 
-        self.assertTrue(len(response)<list_len)
+        self.assertEqual(len(response), 0)
+
+    def test_delete_base_metadata(self):
+        """Test deleting a base metadata object"""
+
+        # start out by creating some metadata
+
+        self.save_base_metadata()
+
+        # delete all metadata with name = 'idsvc-test-meta'
+
+        self.delete_base_metadata()
+
+    def create_metadata_family(self):
+        grandpa = self.save_base_metadata()
+
+        pa = self.save_base_metadata()
+        pa.associationIds.extend([grandpa.uuid]+[grandpa.associationIds])
+        pa.save()
+
+        sis = self.save_base_metadata()
+        sis.associationIds.extend([pa.uuid]+[pa.associationIds])
+        sis.save()
+
+        brother = self.save_base_metadata()
+        brother.associationIds.extend([pa.uuid]+[pa.associationIds])
+        brother.save()
+
+        cousin = self.save_base_metadata()
+        cousin.associationIds.extend([grandpa.uuid]+[grandpa.associationIds])
+        cousin.save()
+
+        self.assertIn(grandpa.uuid, pa.associationIds)
+        self.assertIn(grandpa.uuid, sis.associationIds)
+        self.assertIn(grandpa.uuid, brother.associationIds)
+        self.assertIn(grandpa.uuid, cousin.associationIds)
+
+        self.assertIn(pa.uuid, sis.associationIds)
+        self.assertIn(pa.uuid, brother.associationIds)
+
+    def test_upstream_associated_metadata(self):
+        """Test to see that model returns parent, grandparent objects"""
+
+        # create some associated metadata
+
+        self.create_metadata_family()
+
+    def test_downstream_associated_metadata(self):
+        """Test to see that model returns child objects"""
+
+        # create some associated metadata
+
+        self.create_metadata_family()

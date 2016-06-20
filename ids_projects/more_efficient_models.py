@@ -1,4 +1,4 @@
-import json
+import json, datetime
 
 class BaseAgaveObject(object):
     """Anything that we want in all our Agave objects, contains only the api
@@ -25,6 +25,19 @@ class BaseMetadata(BaseAgaveObject):
         """
         super(BaseMetadata, self).__init__(*args, **kwargs)
 
+        # create these instance variables for later
+
+        self.uuid = None
+        self.body = None
+        self.owner = None
+        self.schemaId = None
+        self.internalUsername = None
+        self.associationIds = None
+        self.name = None
+        self._links = None
+        self._upstream_objects = None
+        self._downstream_objects = None
+
         # get meta if passed to constructor, convert to dict if necessary
 
         meta = kwargs.get('meta', {})
@@ -40,11 +53,6 @@ class BaseMetadata(BaseAgaveObject):
             body = json.loads(body)
         self.body = body
         self.uuid = kwargs.get('uuid', meta.get('uuid', None))
-
-        # create these instance variables for later
-
-        self._upstream_objects = None
-        self._downstream_objects = None
 
     def flush_associated(self):
         """Clears cached associated objects"""
@@ -80,10 +88,18 @@ class BaseMetadata(BaseAgaveObject):
         self.schemaId = meta.get('schemaId', None)
         self.internalUsername = meta.get('internalUsername', None)
         self.associationIds = meta.get('associationIds', None)
-        self.lastUpdated = meta.get('lastUpdated', None)
         self.name = meta.get('name', None)
-        self.created = meta.get('created', None)
         self._links = meta.get('_links', None)
+
+        lastUpdated = meta.get('lastUpdated', None)
+        if type(lastUpdated) is datetime.datetime:
+            lastUpdated = lastUpdated.isoformat()
+        self.lastUpdated = lastUpdated
+
+        created = meta.get('created', None)
+        if type(created) is datetime.datetime:
+            created = created.isoformat()
+        self.created = created
 
     def load_from_agave(self):
         """Load metadata from tenant, if UUID is not None"""
