@@ -1,4 +1,7 @@
-import json, datetime
+import json, datetime, logging
+
+logger = logging.getLogger(__name__)
+
 
 class BaseAgaveObject(object):
     """Anything that we want in all our Agave objects, contains only the api
@@ -6,6 +9,7 @@ class BaseAgaveObject(object):
     def __init__(self, api_client, *args, **kwargs):
         # TODO: if type(api_client) is not agavepy.agave.Agave: raise Exception()
         self._api_client = api_client
+
 
 class BaseMetadata(BaseAgaveObject):
     """Base class for IDS Metadata (Project, Specimen, Process, Data)"""
@@ -35,8 +39,8 @@ class BaseMetadata(BaseAgaveObject):
         self.associationIds = None
         self.name = None
         self._links = None
-        self._upstream_objects = None
-        self._downstream_objects = None
+        self._my_associations = None
+        self._associations_to_me = None
 
         # get meta if passed to constructor, convert to dict if necessary
 
@@ -54,28 +58,96 @@ class BaseMetadata(BaseAgaveObject):
         self.body = body
         self.uuid = kwargs.get('uuid', meta.get('uuid', None))
 
-    def flush_associated(self):
-        """Clears cached associated objects"""
-        self._upstream_objects = None
-        self._downstream_objects = None
+    def add_association_to(self, related_object):
+        """
+        Add the related object to this instance's my_associations list, and
+        add the related object's uuid to this instance's associationIds list.
+        Must save this instance to persist this association in Agave.
+        """
+
+        # check for uuid
+
+        if 'uuid' not in dir(related_object) or related_object.uuid is None:
+            exception_msg = "Related object must have a UUID to add "\
+                            "association to this instance."
+            raise Exception(exception_msg)
+
+        # create a list of associated objects, include the related object
+        # all all objects to which the related object is associated
+
+        associated_objects = [related_object] + related_object.my_associations
+
+        for associated_object in associated_objects:
+
+            # skip if the object is already in the appropriate lists
+
+            if associated_object in self.my_associations \
+                and associated_object.uuid in self.associationIds:
+                continue
+
+            # add object if not already in the list
+
+            if associated_object not in self.my_associations:
+                self.my_associations.append(associated_object)
+
+            # add object's uuid if not already in the list
+
+            if associated_object.uuid not in self.associationIds:
+                self.associationIds.append(associated_object.uuid)
+
+            # call the object's add_association_from method, which will
+            # add this instance only if it is not present the realted object's
+            # associations_to_me list
+
+            associated_object.add_association_from(self)
+
+    def add_association_from(self, related_object):
+        """
+        Add this instance's UUID to a remote metadata object's associationIds list
+        """
+
+        # return if the object is already in the list
+
+        if related_object in self.associations_to_me:
+            return
+
+        # check for uuid
+
+        if self.uuid is None:
+            exception_msg = "This instance must have a UUID to add "\
+                            "association from a related object."
+            raise Exception(exception_msg)
+
+        # add the related object if not already in the associations list
+
+        self._associations_to_me.append(related_object)
+
+        # call the object's add_association_to method, which will add this instance
+        # only if it is not present the realted object's my_associations list
+
+        related_object.add_association_to(self)
 
     @property
-    def upstream_objects(self):
+    def my_associations(self):
         """Retrieves all metadata objects corresponding to this instance's associationIds"""
-        if self._upstream_objects is None:
-            query = { 'uuid': { '$in': self.associationIds } }
-            self._upstream_objects = self._api_client.meta.listMetadata(q=json.dumps(query))
 
-        return self._upstream_objects
+        if self._my_associations is None:
+            query = { 'uuid': { '$in': self.associationIds } }
+            results = self._api_client.meta.listMetadata(q=json.dumps(query))
+            self._my_associations = [self.make(meta=r, api_client=self._api_client) for r in results]
+
+        return self._my_associations
 
     @property
-    def downstream_objects(self):
+    def associations_to_me(self):
         """Retrieves all metadata objects that have this instance's UUID in their associationIds"""
-        if self._downstream_objects is None:
-            query = { 'associationIds': self.uuid }
-            self._downstream_objects = self._api_client.meta.listMetadata(q=json.dumps(query))
 
-        return self._downstream_objects
+        if self._associations_to_me is None:
+            query = { 'associationIds': self.uuid }
+            results = self._api_client.meta.listMetadata(q=json.dumps(query))
+            self._associations_to_me = [self.make(meta=r, api_client=self._api_client) for r in results]
+
+        return self._associations_to_me
 
     def load_from_meta(self, meta):
         """Set instance variables from dictionary or json"""
@@ -168,6 +240,7 @@ class BaseMetadata(BaseAgaveObject):
         """The meta property, formatted as json string"""
         return json.dumps(self.meta)
 
+
 class Project(BaseMetadata):
     """ """
     name = 'idsvc.project'
@@ -175,6 +248,19 @@ class Project(BaseMetadata):
     def __init__(self, *args, **kwargs):
         """ """
         super(Project, self).__init__(*args, **kwargs)
+
+    @property
+    def specimens(self, reset=False):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.specimen']
+
+    @property
+    def processes(self, reset=False):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.process']
+
+    @property
+    def data(self, reset=False):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.data']
+
 
 class Specimen(BaseMetadata):
     """ """
@@ -184,6 +270,19 @@ class Specimen(BaseMetadata):
         """ """
         super(Specimen, self).__init__(*args, **kwargs)
 
+    @property
+    def project(self):
+        return [x for x in self.my_associations if x.name == 'idsvc.project']
+
+    @property
+    def process(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.process']
+
+    @property
+    def data(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.data']
+
+
 class Process(BaseMetadata):
     """ """
     name = 'idsvc.process'
@@ -192,6 +291,26 @@ class Process(BaseMetadata):
         """ """
         super(Process, self).__init__(*args, **kwargs)
 
+    @property
+    def project(self):
+        return [x for x in self.my_associations if x.name == 'idsvc.project']
+
+    @property
+    def specimens(self):
+        return [x for x in self.my_associations if x.name == 'idsvc.specimen']
+
+    @property
+    def data(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.data']
+
+    @property
+    def inputs(self):
+        return [x for x in self.data if x.uuid in self.body['_inputs']]
+
+    @property
+    def outputs(self):
+        return [x for x in self.data if x.uuid in self.body['_outputs']]
+
 class Data(BaseMetadata):
     """ """
     name = 'idsvc.data'
@@ -199,6 +318,56 @@ class Data(BaseMetadata):
     def __init__(self, *args, **kwargs):
         """ """
         super(Data, self).__init__(*args, **kwargs)
+
+    @property
+    def project(self):
+        return [x for x in self.my_associations if x.name == 'idsvc.project']
+
+    @property
+    def specimens(self):
+        return [x for x in self.my_associations if x.name == 'idsvc.specimen']
+
+    @property
+    def processes(self):
+        return [x for x in self.my_associations if x.name == 'idsvc.process']
+
+    def calculate_checksum(self):
+        name = "checksum"
+        app_id = "idsvc_checksum-0.1"
+        archive = False
+
+        if self.sra_id:
+            parameters = { 'UUID': self.uuid, 'SRA': self.sra_id }
+            body={'name': name, 'appId': app_id, 'parameters': parameters}
+        else:
+            agave_url = "agave://%s/%s" % (self.system_id, self.path)
+            inputs = { 'AGAVE_URL': agave_url }
+            parameters = { 'UUID': self.uuid }
+            body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters}
+
+        try:
+            self.meta['value'].update(
+                 { 'checksum': None,
+                   'lastChecksumUpdated': None,
+                   'checksumConflict': None,
+                   'checkStatus': None })
+            self.save()
+        except Exception as e:
+            exception_msg = 'Unable to initiate job. %s' % e
+            logger.error(exception_msg)
+            raise Exception(exception_msg)
+
+        try:
+            logger.debug("Job submission body: %s" % body)
+            response = self._api_client.jobs.submit(body=body)
+            logger.debug("Job submission response: %s" % response['id'])
+        except Exception as e:
+            exception_msg = 'Unable to initiate job. %s' % e
+            logger.error(exception_msg)
+            raise Exception(exception_msg)
+
+        return response
+
 
 # questions:
 #   * create all objects with user client (particular client determined in the view)?

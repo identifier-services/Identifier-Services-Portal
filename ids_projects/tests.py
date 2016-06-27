@@ -2,7 +2,9 @@ from django.test import TestCase
 from agavepy.agave import Agave
 from more_efficient_models import (BaseAgaveObject, BaseMetadata, Project,
                                    Specimen, Process, Data)
-import os
+import os, logging
+
+logger = logging.getLogger(__name__)
 
 # import subprocess
 # base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -297,43 +299,112 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         self.delete_base_metadata()
 
-    def create_metadata_family(self):
-        grandpa = self.save_base_metadata()
+    def printy(self, oj, a, b, c, d, e):
+        print "\n  {:<15}{:<15}".format('assoc','remote assoc')
+        if a is not None: print "A {:<15}{:<15}".format([oj[x] for x in a.associationIds], [oj[x.uuid] for x in a.associations_to_me])
+        if b is not None: print "B {:<15}{:<15}".format([oj[x] for x in b.associationIds], [oj[x.uuid] for x in b.associations_to_me])
+        if c is not None: print "C {:<15}{:<15}".format([oj[x] for x in c.associationIds], [oj[x.uuid] for x in c.associations_to_me])
+        if d is not None: print "D {:<15}{:<15}".format([oj[x] for x in d.associationIds], [oj[x.uuid] for x in d.associations_to_me])
+        if e is not None: print "E {:<15}{:<15}".format([oj[x] for x in e.associationIds], [oj[x.uuid] for x in e.associations_to_me])
+        print
 
-        pa = self.save_base_metadata()
-        pa.associationIds.extend([grandpa.uuid]+[grandpa.associationIds])
-        pa.save()
+    def test_associations(self):
+        """Create a few metadata objects with associations, and test to see
+        that model returns appropriate associations between objects"""
 
-        sis = self.save_base_metadata()
-        sis.associationIds.extend([pa.uuid]+[pa.associationIds])
-        sis.save()
+        oj = {}
 
-        brother = self.save_base_metadata()
-        brother.associationIds.extend([pa.uuid]+[pa.associationIds])
-        brother.save()
+        # create a
+        a = self.save_base_metadata()
 
-        cousin = self.save_base_metadata()
-        cousin.associationIds.extend([grandpa.uuid]+[grandpa.associationIds])
-        cousin.save()
+        oj[a.uuid] = 'A'
 
-        self.assertIn(grandpa.uuid, pa.associationIds)
-        self.assertIn(grandpa.uuid, sis.associationIds)
-        self.assertIn(grandpa.uuid, brother.associationIds)
-        self.assertIn(grandpa.uuid, cousin.associationIds)
+        # create b, point b to a
+        b = self.save_base_metadata()
 
-        self.assertIn(pa.uuid, sis.associationIds)
-        self.assertIn(pa.uuid, brother.associationIds)
+        oj[b.uuid] = 'B'
 
-    def test_upstream_associated_metadata(self):
-        """Test to see that model returns parent, grandparent objects"""
+        b.add_association_to(a)
 
-        # create some associated metadata
+        # save a, b
+        b.save()
+        a.save()
 
-        self.create_metadata_family()
+        self.printy(oj, a, b, None, None, None)
 
-    def test_downstream_associated_metadata(self):
-        """Test to see that model returns child objects"""
+        # test b pointing to a
+        self.assertIn(a, b.my_associations)
+        # test to see if a is aware of association from b
+        # self.assertIn(b, a.associations_to_me)
 
-        # create some associated metadata
+        # create c, point c to b
+        c = self.save_base_metadata()
 
-        self.create_metadata_family()
+        oj[c.uuid] = 'C'
+
+        c.add_association_to(b)
+
+        # a.save()
+
+        # save b, c
+        c.save()
+        b.save()
+
+        self.printy(oj, a, b, c, None, None)
+
+        # test c pointing to a
+        self.assertIn(a, c.my_associations)
+        # test c aware of association from a
+        self.assertIn(c, a.associations_to_me)
+
+        # test c pointing to b
+        self.assertIn(b, c.my_associations)
+        # test b aware of association from c
+        self.assertIn(c, b.associations_to_me)
+
+        # create d, point to b
+        d = self.save_base_metadata()
+
+        oj[d.uuid] = 'D'
+
+        d.add_association_to(b)
+
+        # a.save()
+
+        # save d, b
+        d.save()
+        b.save()
+
+        self.printy(oj, a, b, c, d, None)
+
+        # test d pointing to a
+        self.assertIn(a, d.my_associations)
+        # test a aware of assoication from d
+        self.assertIn(d, a.associations_to_me)
+
+        # test d pointing to b
+        self.assertIn(b, d.my_associations)
+        # test b aware of association from d
+        self.assertIn(d, b.associations_to_me)
+
+        # create e, point to a
+        e = self.save_base_metadata()
+
+        oj[e.uuid] = 'E'
+
+        e.add_association_to(a)
+
+        # save e, a
+        e.save()
+        a.save()
+
+        self.printy(oj, a, b, c, d, e)
+
+        # test e pointing to a
+        self.assertIn(a, e.my_associations)
+        # test a aware of association from e
+        self.assertIn(b, a.associations_to_me)
+
+        return { 'root': a,
+                 'internal': [b],
+                 'leaf': [c,d,e] }
