@@ -148,6 +148,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
                  'name': name }
 
         base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
+
         response = base_meta.save()
         self.assertIn('uuid', response)
         self.assertIsNotNone(base_meta.uuid)
@@ -330,7 +331,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         b.save()
         a.save()
 
-        self.printy(oj, a, b, None, None, None)
+        # self.printy(oj, a, b, None, None, None)
 
         # test b pointing to a
         self.assertIn(a, b.my_associations)
@@ -350,7 +351,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         c.save()
         b.save()
 
-        self.printy(oj, a, b, c, None, None)
+        # self.printy(oj, a, b, c, None, None)
 
         # test c pointing to a
         self.assertIn(a, c.my_associations)
@@ -375,7 +376,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         d.save()
         b.save()
 
-        self.printy(oj, a, b, c, d, None)
+        # self.printy(oj, a, b, c, d, None)
 
         # test d pointing to a
         self.assertIn(a, d.my_associations)
@@ -398,13 +399,55 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         e.save()
         a.save()
 
-        self.printy(oj, a, b, c, d, e)
+        # self.printy(oj, a, b, c, d, e)
 
         # test e pointing to a
         self.assertIn(a, e.my_associations)
         # test a aware of association from e
         self.assertIn(b, a.associations_to_me)
 
-        return { 'root': a,
-                 'internal': [b],
-                 'leaf': [c,d,e] }
+class ProjectTests(TestCase, BaseClientTests):
+    """Tests for Project in IDS models"""
+
+    def save_project(self):
+        """Reusable method for saving a project object"""
+
+        project = Project(api_client=TEST_USER1_CLIENT)
+        response = project.save()
+        self.assertIn('uuid', response)
+        self.assertIsNotNone(project.uuid)
+        self.assertIsNotNone(project.name)
+
+        return project
+
+    def delete_project(self):
+        """Delete all projects with name = 'idsvc-test-meta.project'"""
+
+        # get a list of all projects
+
+        project = Project(api_client=TEST_USER1_CLIENT)
+        response = project.list()
+
+        # we will delete all projects owned by TEST_USER1_CLIENT
+
+        for mo in response:
+            mo.delete()
+
+        response = project.list()
+
+        self.assertEqual(len(response), 0)
+
+    def test_save_project(self):
+        """Create a project, save it, and cleanup by deleting all projects"""
+        self.save_project()
+        self.delete_project()
+
+    def test_list_projects(self):
+        """Create a project, save it, list projects, cleanup by deleting all projects"""
+
+        project = self.save_project()
+
+        proj_list = project.list()
+        self.assertNotEqual(len(proj_list), 0)
+
+        self.delete_project()

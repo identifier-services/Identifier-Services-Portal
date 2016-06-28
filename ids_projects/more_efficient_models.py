@@ -32,12 +32,12 @@ class BaseMetadata(BaseAgaveObject):
         # create these instance variables for later
 
         self.uuid = None
-        self.body = None
+        self.body = {}
         self.owner = None
         self.schemaId = None
         self.internalUsername = None
         self.associationIds = None
-        self.name = None
+        # self.name = None
         self._links = None
         self._my_associations = None
         self._associations_to_me = None
@@ -52,7 +52,7 @@ class BaseMetadata(BaseAgaveObject):
         # explicit constructor parameters take precedence over values found in
         # meta dictionary (namely 'uuid', and 'value' aka 'body')
 
-        body = kwargs.get('body', meta.get('value', None))
+        body = kwargs.get('body', meta.get('value', {}))
         if type(body) is str:
             body = json.loads(body)
         self.body = body
@@ -155,12 +155,13 @@ class BaseMetadata(BaseAgaveObject):
             meta = json.loads(meta)
 
         self.uuid = meta.get('uuid', None)
-        self.body = meta.get('value', None)
+        self.body = meta.get('value', {})
         self.owner = meta.get('owner', None)
         self.schemaId = meta.get('schemaId', None)
         self.internalUsername = meta.get('internalUsername', None)
         self.associationIds = meta.get('associationIds', None)
-        self.name = meta.get('name', None)
+        if meta.get('name', None):
+            self.name = meta.get('name', None)
         self._links = meta.get('_links', None)
 
         lastUpdated = meta.get('lastUpdated', None)
