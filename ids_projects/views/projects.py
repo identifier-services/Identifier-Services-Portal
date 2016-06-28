@@ -139,7 +139,7 @@ def create(request):
             body.update({ 'creator': user_full })
 
             try:
-                project = Project(api_client=api_client, value=body)
+                project = Project(api_client=api_client, body=body)
                 result = project.save()
 
             except Exception as e:

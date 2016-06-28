@@ -183,7 +183,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         body = { 'color': 'blue' }
 
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, value=body)
+        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, body=body)
 
         response = base_meta.save()
         self.assertIn('uuid', response)
