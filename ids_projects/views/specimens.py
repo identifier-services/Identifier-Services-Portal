@@ -30,7 +30,7 @@ def list(request):
         project_uuid = request.GET.get('project_uuid', None)
         if not project_uuid:
             messages.warning(request, 'Missing project UUID, cannot find specimens.')
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
         try:
             project = Project(uuid=project_uuid, user=request.user)
@@ -38,7 +38,7 @@ def list(request):
             exception_msg = 'Unable to load project. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect('/projects/')
+            return HttpResponseRedirect('/projects/private/')
 
         context = {'project': project, 'specimens': project.specimens}
         return render(request, 'ids_projects/specimens/index.html', context)
@@ -83,7 +83,7 @@ def create(request):
 
     if not project_uuid:
         messages.warning(request, 'Missing project UUID, cannot create specimen.')
-        return HttpResponseRedirect(reverse('ids_projects:project-list'))
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
     #######
     # GET #
@@ -158,7 +158,7 @@ def edit(request, specimen_uuid):
         exception_msg = 'Unable to edit specimen. %s' % e
         logger.exception(exception_msg)
         messages.warning(request, exception_msg)
-        return HttpResponseRedirect('/projects/')
+        return HttpResponseRedirect('/projects/private/')
 
     #######
     # GET #
@@ -229,7 +229,7 @@ def delete(request, specimen_uuid):
             exception_msg = 'Unable to load specimen. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect('/projects/')
+            return HttpResponseRedirect('/projects/private/')
 
         for process in specimen.processes:
             try:
@@ -253,10 +253,10 @@ def delete(request, specimen_uuid):
             exception_msg = 'Unable to delete specimen. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect('/projects/')
+            return HttpResponseRedirect('/projects/private/')
 
         messages.success(request, 'Successfully deleted project.')
-        return HttpResponseRedirect('/projects/')
+        return HttpResponseRedirect('/projects/private/')
 
     #########
     # OTHER #

@@ -20,9 +20,18 @@
                         <span class="sr-only">Home</span>
                     </a>
                 </li>
+                {% if user.is_authenticated %}
                 <li class="">
-                    <a href="/projects/">Browse Projects</a>
+                    <a href="/projects/public">Public Projects</a>
                 </li>
+                <li class="">
+                    <a href="/projects/private">{{ user.first_name }}'s Projects</a>
+                </li>
+                {% else %}
+                <li class="">
+                    <a href="/projects/public">Browse Public Projects</a>
+                </li>
+                {% endif %}
             </ul>
             {% if user.is_authenticated %}
             <ul class="nav navbar-nav navbar-right">

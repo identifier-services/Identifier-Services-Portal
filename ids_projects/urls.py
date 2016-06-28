@@ -86,8 +86,12 @@ urlpatterns += patterns(
 ############
 urlpatterns += patterns(
     'ids_projects.views.projects',
-    # list all projects
-    url(r'^projects/?$', 'list', name='project-list'),
+    # list public projects
+    url(r'^projects/public/?$', 'list_public', name='project-list-public'),
+    # list private projects
+    url(r'^projects/private/?$', 'list_private', name='project-list-private'),
+    # # list all projects
+    # url(r'^projects/?$', 'list', name='project-list-private'),
     # create project
     url(r'^project/create/?$', 'create', name='project-create'),
     # edit project

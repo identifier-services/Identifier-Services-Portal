@@ -30,7 +30,7 @@ def list(request):
         specimen_uuid = request.GET.get('specimen_uuid', None)
         if not specimen_uuid:
             messages.warning(request, 'Missing specimen UUID, cannot find processes.')
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
         try:
             specimen = Specimen(uuid=specimen_uuid, user=request.user)
@@ -38,7 +38,7 @@ def list(request):
             exception_msg = 'Unable to load specimen, processes. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
         context = { 'project': specimen.project,
                     'specimen' : specimen,
@@ -67,7 +67,7 @@ def view(request, process_uuid):
             exception_msg = 'Unable to load process. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
         context = {'process' : process,
                    'project' : process.project,
@@ -89,7 +89,7 @@ def create(request):
     specimen_uuid = request.GET.get('specimen_uuid', None)
     if not specimen_uuid:
         messages.warning(request, 'Missing specimen UUID, cannot create processes.')
-        return HttpResponseRedirect(reverse('ids_projects:project-list'))
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
     try:
         specimen = Specimen(uuid=specimen_uuid, user=request.user)
@@ -97,7 +97,7 @@ def create(request):
         exception_msg = 'Unable to load specimen, cannot create process. %s' % e
         logger.error(exception_msg)
         messages.warning(request, exception_msg)
-        return HttpResponseRedirect(reverse('ids_projects:project-list'))
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
     try:
         project = specimen.project
@@ -213,7 +213,7 @@ def edit(request, process_uuid):
     except Exception as e:
         logger.error('Error editing process. {}'.format(e.message))
         messages.warning(request, 'Process not found.')
-        return HttpResponseRedirect('/projects/')
+        return HttpResponseRedirect('/projects/private/')
 
     object_descriptions = getattr(settings, 'OBJ_DESCR')
     investigation_types = object_descriptions['investigation_types']

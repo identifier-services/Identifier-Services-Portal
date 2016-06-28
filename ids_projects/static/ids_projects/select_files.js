@@ -74,7 +74,7 @@
             file_path : file_path
         }
 
-        var redirect_url = 'projects/';
+        var redirect_url = 'projects/private/';
 
         if (url.indexOf("output") > -1) {
             redirect_url = url.replace('file/select/output?process_uuid=','process/');

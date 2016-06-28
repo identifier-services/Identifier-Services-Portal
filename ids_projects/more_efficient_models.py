@@ -52,6 +52,8 @@ class BaseMetadata(BaseAgaveObject):
         # explicit constructor parameters take precedence over values found in
         # meta dictionary (namely 'uuid', and 'value' aka 'body')
 
+        # check to see if body is in kwargs, if not get from meta, if not just
+        # create an empty {}
         body = kwargs.get('body', meta.get('value', {}))
         if type(body) is str:
             body = json.loads(body)

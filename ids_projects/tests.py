@@ -141,7 +141,6 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         name = 'idsvc-test-meta'
         body = { 'color': 'blue' }
-        name = 'idsvc-test-meta'
 
         meta = { 'name': name,
                  'value': body,
@@ -161,6 +160,38 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         """Test saving a base metadata object"""
 
         self.save_base_metadata()
+
+        # cleanup
+
+        self.delete_base_metadata()
+
+    def test_save_with_no_meta(self):
+        """Test saving without providing metadata"""
+
+        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT)
+
+        response = base_meta.save()
+        self.assertIn('uuid', response)
+        self.assertIsNotNone(base_meta.uuid)
+
+        # cleanup
+
+        self.delete_base_metadata()
+
+    def test_save_with_body_no_meta(self):
+        """Test saving with body but without 'meta'"""
+
+        body = { 'color': 'blue' }
+
+        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, value=body)
+
+        response = base_meta.save()
+        self.assertIn('uuid', response)
+        self.assertIsNotNone(base_meta.uuid)
+
+        print "original body: {}, new object body: {}".format(body.items(), base_meta.body.items())
+
+        self.assertTrue(all(item in base_meta.body.items() for item in body.items()))
 
         # cleanup
 

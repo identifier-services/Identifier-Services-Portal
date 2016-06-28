@@ -13,6 +13,36 @@
 {% endblock %}
 
 {% block content %}
+
+{% if type == 'private' %}
+<div class="row">
+    <div class="container">
+        <h3>{{ user.first_name }}'s Projects</h3>
+        {% if not private_projects %}
+        <h4>You don't have any private projects.</h4>
+        <a href="{% url 'ids_projects:project-create' %}" class="btn btn-primary">Create Project</a>
+        {% endif %}
+    </div>
+{% for project in private_projects %}
+    <div class="col-xs-6 col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                <p><h4>{{ project.value.title }}</h4>
+                <b>Type: </b>{{ project.value.investigation_type }}</p>
+                <p><b>Description: </b>{{ project.value.description }}</p>
+                <p><b>Access: </b> {% if project.value.public == 'True' %}Public{% else %}Private{% endif %}</p>
+                <div class="row">
+                    <div class="col-xs-3">
+                        <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-primary">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% else %}
 <div class="row">
     <div class="container">
       <h3>Public Projects</h3>
@@ -33,58 +63,11 @@
                     <div class="col-xs-3">
                         <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-primary">View</a>
                     </div>
-
-                    <div class="col-xs-3 col-xs-offset-2 col-sm-offset-5">
-                      {% if project.user_is_contributor %}
-                          <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
-                      {% else %}
-                          <a href="#" class="btn btn-danger" disabled>Delete</a>
-                      {% endif %}
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 {% endfor %}
-</div>
-<div class="row">
-    <div class="container">
-      {% if user.is_anonymous %}
-          <h3>Private Projects</h3>
-          <h4>You must log in to create projects projects.</h4>
-          <a href="{% url 'login' %}" class="btn btn-success">Login</a>
-      {% else %}
-          <h3>{{ user.first_name }}'s Projects</h3>
-          {% if not private_projects %}
-          <h4>You don't have any private projects.</h4>
-          <a href="{% url 'ids_projects:project-create' %}" class="btn btn-primary">Create Project</a>
-          {% endif %}
-      {% endif %}
-    </div>
-{% for project in private_projects %}
-    <div class="col-xs-6 col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-                <p><h4>{{ project.value.title }}</h4>
-                <b>Type: </b>{{ project.value.investigation_type }}</p>
-                <p><b>Description: </b>{{ project.value.description }}</p>
-                <p><b>Access: </b> {% if project.value.public == 'True' %}Public{% else %}Private{% endif %}</p>
-                <div class="row">
-                    <div class="col-xs-3">
-                        <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-primary">View</a>
-                    </div>
-                    <div class="col-xs-3 col-xs-offset-2 col-sm-offset-5">
-                        {% if project.user_is_contributor %}
-                            <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
-                        {% else %}
-                            <a href="#" class="btn btn-danger" disabled>Delete</a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endfor %}
+{% endif %}
 </div>
 {% endblock %}

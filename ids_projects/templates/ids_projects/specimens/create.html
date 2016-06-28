@@ -23,7 +23,7 @@
         {% elif project %}
             <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-warning pull-right">Cancel</a>
         {% else %}
-            <a href="{% url 'ids_projects:project-list' %}" class="btn btn-warning pull-right">Cancel</a>
+            <a href="{% url 'ids_projects:project-list-private' %}" class="btn btn-warning pull-right">Cancel</a>
         {% endif %}
     </div>
 </form>

@@ -59,7 +59,7 @@ def view(request, data_uuid):
             exception_msg = 'Unable to load data. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
         context = {'process' : data.process,
                    'project' : data.project,
@@ -91,7 +91,7 @@ def type_select(request):
             exception_msg = 'Unable to load process. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
         form_data_type = DataTypeForm(data_type_choices)
 
@@ -137,7 +137,7 @@ def add_sra(request, relationship):
         exception_msg = 'Unable to load process. %s' % e
         logger.error(exception_msg)
         messages.warning(request, exception_msg)
-        return HttpResponseRedirect(reverse('ids_projects:project-list'))
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
     #######
     # GET #
@@ -257,7 +257,7 @@ def file_select(request, relationship):
         exception_msg = 'Unable to load process. %s' % e
         logger.error(exception_msg)
         messages.warning(request, exception_msg)
-        return HttpResponseRedirect(reverse('ids_projects:project-list'))
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
     #######
     # GET #
@@ -399,7 +399,7 @@ def do_checksum(request, data_uuid):
             exception_msg = 'Unable to load data. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list'))
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
         try:
             data.calculate_checksum()
@@ -458,6 +458,6 @@ def data_delete(request, data_uuid):
             elif parent.name == 'idsvc.process':
                 return HttpResponseRedirect('/process/{}'.format(parent_id))
             else:
-                return HttpResponseRedirect('/projects/')
+                return HttpResponseRedirect('/projects/private/')
         else:
-            return HttpResponseRedirect('/projects/')
+            return HttpResponseRedirect('/projects/private/')
