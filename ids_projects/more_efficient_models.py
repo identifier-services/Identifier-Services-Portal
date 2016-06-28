@@ -155,7 +155,8 @@ class BaseMetadata(BaseAgaveObject):
             meta = json.loads(meta)
 
         self.uuid = meta.get('uuid', None)
-        self.body = meta.get('value', {})
+        if meta.get('value', None):
+            self.body = meta.get('value', None)
         self.owner = meta.get('owner', None)
         self.schemaId = meta.get('schemaId', None)
         self.internalUsername = meta.get('internalUsername', None)
@@ -210,9 +211,13 @@ class BaseMetadata(BaseAgaveObject):
         return response
 
     def delete(self):
-        """Delete metadata object on tenant"""
+        """Delete metadata object, and all metadata associated to this object"""
         if self.uuid is None:
             raise Exception('Cannot delete without UUID.')
+
+        # delete all objects that have this object's uuid in their associationIds
+        for item in self.associations_to_me:
+            item.delete()
 
         response = self._api_client.meta.deleteMetadata(uuid=self.uuid)
         self.uuid = None
@@ -251,15 +256,15 @@ class Project(BaseMetadata):
         super(Project, self).__init__(*args, **kwargs)
 
     @property
-    def specimens(self, reset=False):
+    def specimens(self):
         return [x for x in self.associations_to_me if x.name == 'idsvc.specimen']
 
     @property
-    def processes(self, reset=False):
+    def processes(self):
         return [x for x in self.associations_to_me if x.name == 'idsvc.process']
 
     @property
-    def data(self, reset=False):
+    def data(self):
         return [x for x in self.associations_to_me if x.name == 'idsvc.data']
 
 
