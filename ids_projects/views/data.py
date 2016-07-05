@@ -13,7 +13,7 @@ from django.http import (JsonResponse,
 from django.shortcuts import render
 import json, logging, urllib
 from ..forms.data import DataTypeForm, SRAForm
-from ..models import Project, Specimen, Process, System, Data
+from ..more_efficient_models import Project, Specimen, Process, System, Data
 from helper import client, collapse_meta
 
 logger = logging.getLogger(__name__)
@@ -26,11 +26,13 @@ def dir_list(request, system_id, file_path=None):
     ########
     if request.method == 'GET':
 
+        api_client = request.user.agave_oauth.api_client
+
         if file_path is None:
             file_path = '/'
 
         try:
-            system = System(system_id=system_id, user=request.user)
+            system = System(api_client=api_client, system_id=system_id)
         except:
             exception_msg = 'Unable to access system with system_id=%s.' % system_id
             logger.error(exception_msg)
@@ -53,8 +55,13 @@ def view(request, data_uuid):
     #######
     if request.method == 'GET':
 
+        if request.user.is_anonymous():
+            api_client = get_portal_api_client()
+        else:
+            api_client = request.user.agave_oauth.api_client
+
         try:
-            data = Data(uuid=data_uuid, user=request.user)
+            data = Data(api_client=api_client, uuid=data_uuid)
         except Exception as e:
             exception_msg = 'Unable to load data. %s' % e
             logger.error(exception_msg)
@@ -80,13 +87,18 @@ def type_select(request):
 
     data_type_choices = [('', 'Choose one'),('SRA', 'SRA'),('File','File')]
 
+    if request.user.is_anonymous():
+        api_client = get_portal_api_client()
+    else:
+        api_client = request.user.agave_oauth.api_client
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
         try:
-            process = Process(uuid=process_uuid, user=request.user)
+            process = Process(api_client=api_client, uuid=process_uuid)
         except Exception as e:
             exception_msg = 'Unable to load process. %s' % e
             logger.error(exception_msg)
@@ -131,8 +143,13 @@ def type_select(request):
 def add_sra(request, relationship):
     process_uuid = request.GET.get('process_uuid', None)
 
+    if request.user.is_anonymous():
+        api_client = get_portal_api_client()
+    else:
+        api_client = request.user.agave_oauth.api_client
+
     try:
-        process = Process(uuid=process_uuid, user=request.user)
+        process = Process(api_client=api_client, uuid=process_uuid)
     except Exception as e:
         exception_msg = 'Unable to load process. %s' % e
         logger.error(exception_msg)
@@ -243,6 +260,8 @@ def file_select(request, relationship):
 
     process_uuid = request.GET.get('process_uuid', None)
 
+    api_client = request.user.agave_oauth.api_client
+
     if relationship not in ('input','output'):
         exception_msg = "Invalid relationship type, must be 'input', or 'output'."
         logger.error(exception_msg)
@@ -252,7 +271,7 @@ def file_select(request, relationship):
                             kwargs={'process_uuid': process.uuid}))
 
     try:
-        process = Process(uuid=process_uuid, user=request.user)
+        process = Process(api_client=api_client, uuid=process_uuid)
     except Exception as e:
         exception_msg = 'Unable to load process. %s' % e
         logger.error(exception_msg)
@@ -265,7 +284,7 @@ def file_select(request, relationship):
     if request.method == 'GET':
 
         try:
-            system = System(user=request.user)
+            system = System(api_client=api_client)
             systems = system.list()
         except Exception as e:
             exception_msg = 'Unable to load systems. %s' % e

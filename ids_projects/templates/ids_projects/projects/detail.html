@@ -14,11 +14,11 @@
             </div>
             <div class="panel-body">
                 <p><img class="img-responsive" src="{% static 'images/img2.jpg' %}"></p>
-                <p><b>Project Name: </b> {{ project.body.title }}</p>
-                <p><b>Investigation Type: </b> {{ project.body.investigation_type }}</p>
-                <p><b>Description: </b> {{ project.body.description }}</p>
-                <p><b>Creator: </b>{{ project.body.creator }}</p>
-                <p><b>Access: </b> {% if project.body.public == 'True' %}Public{% else %}Private{% endif %}</p>
+                <p><b>Project Name: </b> {{ project.value.title }}</p>
+                <p><b>Investigation Type: </b> {{ project.value.investigation_type }}</p>
+                <p><b>Description: </b> {{ project.value.description }}</p>
+                <p><b>Creator: </b>{{ project.value.creator }}</p>
+                <!-- <p><b>Access: </b> {% if project.value.public == 'True' %}Public{% else %}Private{% endif %}</p> -->
                 <div class="visible-xs">
                     <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
                     <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
@@ -76,7 +76,7 @@
             <div class="info-panel">
 
                 <div class="object-header darker">
-                    <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="header-link">{{ specimen.body.taxon_name }} {{ specimen.body.specimen_id }}</a>
+                    <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="header-link">{{ specimen.value.taxon_name }} {{ specimen.value.specimen_id }}</a>
                 </div>
 
                 <div>
@@ -85,7 +85,7 @@
                             <b>Taxon Name</b>
                         </div>
                         <div class="col-xs-6">
-                            {{ specimen.body.taxon_name }}
+                            {{ specimen.value.taxon_name }}
                         </div>
                     </div>
                     <div class="row info-item">
@@ -93,7 +93,7 @@
                             <b>Specimen ID</b>
                         </div>
                         <div class="col-xs-6">
-                            {{ specimen.body.specimen_id }}
+                            {{ specimen.value.specimen_id }}
                         </div>
                     </div>
                     <div class="row info-item">
@@ -101,7 +101,7 @@
                             <b>Organ/Tissue</b>
                         </div>
                         <div class="col-xs-6">
-                            {{ specimen.body.organ_or_tissue }}
+                            {{ specimen.value.organ_or_tissue }}
                         </div>
                     </div>
                     <div class="row info-item">
@@ -109,7 +109,7 @@
                             <b>Developmental Stage</b>
                         </div>
                         <div class="col-xs-6">
-                            {{ specimen.body.developmental_stage }}
+                            {{ specimen.value.developmental_stage }}
                         </div>
                     </div>
                     <div class="row info-item">
@@ -117,7 +117,7 @@
                             <b>Haploid Chromosone Count</b>
                         </div>
                         <div class="col-xs-6">
-                            {{ specimen.body.haploid_chromosome_count }}
+                            {{ specimen.value.haploid_chromosome_count }}
                         </div>
                     </div>
                     <div class="row info-item">
@@ -125,7 +125,7 @@
                             <b>Ploidy</b>
                         </div>
                         <div class="col-xs-6">
-                            {{ specimen.body.ploidy }}
+                            {{ specimen.value.ploidy }}
                         </div>
                     </div>
                     <div class="row info-item">
@@ -133,7 +133,7 @@
                             <b>Propagation</b>
                         </div>
                         <div class="col-xs-6">
-                            {{ specimen.body.propagation }}
+                            {{ specimen.value.propagation }}
                         </div>
                     </div>
                     <div class="row info-item">
@@ -141,7 +141,7 @@
                             <b>Estimated Genome Size</b>
                         </div>
                         <div class="col-xs-6">
-                            {{ specimen.body.estimated_genome_size }}
+                            {{ specimen.value.estimated_genome_size }}
                         </div>
                     </div>
 
@@ -151,7 +151,7 @@
                                 {% if specimen.short %}
                                     No processes for {{ specimen.short }}
                                 {% else %}
-                                    No processes for {{ specimen.body.taxon_name }} {{ specimen.body.specimen_id }}
+                                    No processes for {{ specimen.value.taxon_name }} {{ specimen.value.specimen_id }}
                                 {% endif %}
 
                                 <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
@@ -163,7 +163,7 @@
                                 {% if specimen.short %}
                                     Processes for {{ specimen.short }}
                                 {% else %}
-                                    Processes for {{ specimen.body.taxon_name }} {{ specimen.body.specimen_id }}
+                                    Processes for {{ specimen.value.taxon_name }} {{ specimen.value.specimen_id }}
                                 {% endif %}
 
                                 <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
@@ -176,10 +176,10 @@
                             {% for process in specimen.processes %}
 
                             <div class="object-header">
-                                <a href="{% url 'ids_projects:process-view' process_uuid=process.uuid %}" class="header-link">{{ process.body.process_type }}</a>
+                                <a href="{% url 'ids_projects:process-view' process_uuid=process.uuid %}" class="header-link">{{ process.value.process_type }}</a>
                             </div>
 
-                                {% for key, body in process.body.items %}
+                                {% for key, body in process.value.items %}
                                     {% if key != "process_type" and key != "public" and "_" not in key %}
                                     <div class="row info-item">
                                         <div class="col-xs-6">

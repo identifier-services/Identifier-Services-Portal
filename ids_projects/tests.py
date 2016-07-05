@@ -76,21 +76,21 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         self.assertIsNotNone(base_meta)
         self.assertEqual(base_meta._api_client, IDS_SYS_CLEINT)
 
-    def test_uuid_base_metadata_param(self):
-        """Test uuid parameter to base metadata constructor"""
-        uuid = 'ABC'
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, uuid=uuid)
-        self.assertEqual(base_meta.uuid, uuid)
+    # def test_uuid_base_metadata_param(self):
+    #     """Test uuid parameter to base metadata constructor"""
+    #     uuid = 'ABC'
+    #     base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, uuid=uuid)
+    #     self.assertEqual(base_meta.uuid, uuid)
 
-    def test_body_base_metadata_param(self):
-        """Test body parameter to base metadata constructor"""
-        body = { 'color': 'blue' }
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, body=body)
-        self.assertEqual(base_meta.body, body)
+    def test_value_base_metadata_param(self):
+        """Test value parameter to base metadata constructor"""
+        value = { 'color': 'blue' }
+        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, value=value)
+        self.assertEqual(base_meta.value, value)
 
     def test_meta_base_metadata_param(self):
         """Test meta parameter to base metadata constructor"""
-        name = 'idsvc-test-meta'
+        name = 'idsvc.basemeta'
         meta = { 'name': name }
         base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
         # base_meta.meta will return null values that we did not specifiy
@@ -99,7 +99,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
     def test_name_attribute_in_base_metadata(self):
         """Test name attribute in base metadata object"""
-        name = 'idsvc-test-meta'
+        name = 'idsvc.basemeta'
         meta = { 'name': name }
         base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
         self.assertEqual(base_meta.name, meta['name'])
@@ -107,22 +107,22 @@ class BaseMetadataTests(TestCase, BaseClientTests):
     def test_all_attributes_in_base_metadata(self):
         """Test name attribute in base metadata object"""
 
-        name = 'idsvc-test-meta'
+        name = 'idsvc.basemeta'
         uuid = 'ABC'
-        body = { 'color': 'blue' }
+        value = { 'color': 'blue' }
         owner = 'bob'
         schemaId = None
         internalUsername = None
         associationIds = ['CDE', 'EFG']
         lastUpdated = '2016-06-15T17:09:06.137-05:00'
-        name = 'idsvc-test-meta'
+        name = 'idsvc.basemeta'
         created = '2016-06-15T17:09:06.137-05:00'
         _links =  ''
 
         meta = {
             'name': name,
             'uuid': uuid,
-            'value': body,
+            'value': value,
             'owner': owner,
             'schemaId': schemaId,
             'internalUsername': internalUsername,
@@ -139,12 +139,9 @@ class BaseMetadataTests(TestCase, BaseClientTests):
     def save_base_metadata(self):
         """Reusable method for saving a base metadata object"""
 
-        name = 'idsvc-test-meta'
-        body = { 'color': 'blue' }
+        value = { 'color': 'blue' }
 
-        meta = { 'name': name,
-                 'value': body,
-                 'name': name }
+        meta = { 'value': value }
 
         base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
 
@@ -152,7 +149,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         self.assertIn('uuid', response)
         self.assertIsNotNone(base_meta.uuid)
 
-        self.assertTrue(all(item in base_meta.meta.items() for item in meta.items()))
+        self.assertTrue(all([item in base_meta.meta.items() for item in meta.items()]))
 
         return base_meta
 
@@ -178,20 +175,18 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         self.delete_base_metadata()
 
-    def test_save_with_body_no_meta(self):
-        """Test saving with body but without 'meta'"""
+    def test_save_with_value_no_meta(self):
+        """Test saving with value but without 'meta'"""
 
-        body = { 'color': 'blue' }
+        value = { 'color': 'blue' }
 
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, body=body)
+        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, value=value)
 
         response = base_meta.save()
         self.assertIn('uuid', response)
         self.assertIsNotNone(base_meta.uuid)
 
-        print "original body: {}, new object body: {}".format(body.items(), base_meta.body.items())
-
-        self.assertTrue(all(item in base_meta.body.items() for item in body.items()))
+        self.assertTrue(all(item in base_meta.value.items() for item in value.items()))
 
         # cleanup
 
@@ -204,13 +199,9 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         self.save_base_metadata()
 
-        name = 'idsvc-test-meta'
-        meta = { 'name': name }
+        # then list metadata with name = 'idsvc.basemeta'
 
-        # then list metadata with name = 'idsvc-test-meta'
-
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
-        response = base_meta.list()
+        response = BaseMetadata.list(api_client=IDS_SYS_CLEINT)
 
         # we should have at least one in the list, since we just created one
 
@@ -268,7 +259,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         # now let's edit, first add some information
 
-        base_meta_object_a.body.update({'fruit':'apple'})
+        base_meta_object_a.value.update({'fruit':'apple'})
 
         # then save
 
@@ -298,25 +289,23 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         self.delete_base_metadata()
 
     def delete_base_metadata(self):
-        """Delete all metadata with name = 'idsvc-test-meta'"""
+        """Delete all metadata with name = 'idsvc.basemeta'"""
 
-        # get a list of metadata objects with name = 'idsvc-test-meta'
+        # get a list of metadata objects with name = 'idsvc.basemeta'
 
-        name = 'idsvc-test-meta'
+        name = 'idsvc.basemeta'
         meta = { 'name': name }
 
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
-        response = base_meta.list()
+        response = BaseMetadata.list(IDS_SYS_CLEINT)
 
-        # we will delete any and all metadata with name = 'idsvc-test-meta'
+        # we will delete any and all metadata with name = 'idsvc.basemeta'
 
         for mo in response:
             mo.delete()
 
-        # check delete, list metadata with name = 'idsvc-test-meta'
+        # check delete, list metadata with name = 'idsvc.basemeta'
 
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
-        response = base_meta.list()
+        response = BaseMetadata.list(IDS_SYS_CLEINT)
 
         self.assertEqual(len(response), 0)
 
@@ -327,7 +316,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         self.save_base_metadata()
 
-        # delete all metadata with name = 'idsvc-test-meta'
+        # delete all metadata with name = 'idsvc.basemeta'
 
         self.delete_base_metadata()
 
@@ -452,19 +441,18 @@ class ProjectTests(TestCase, BaseClientTests):
         return project
 
     def delete_project(self):
-        """Delete all projects with name = 'idsvc-test-meta.project'"""
+        """Delete all projects with name = 'idsvc.project'"""
 
         # get a list of all projects
 
-        project = Project(api_client=TEST_USER1_CLIENT)
-        response = project.list()
+        response = Project.list(api_client=TEST_USER1_CLIENT)
 
         # we will delete all projects owned by TEST_USER1_CLIENT
 
         for mo in response:
             mo.delete()
 
-        response = project.list()
+        response = Project.list(api_client=TEST_USER1_CLIENT)
 
         self.assertEqual(len(response), 0)
 
@@ -478,7 +466,7 @@ class ProjectTests(TestCase, BaseClientTests):
 
         project = self.save_project()
 
-        proj_list = project.list()
+        proj_list = Project.list(project._api_client)
         self.assertNotEqual(len(proj_list), 0)
 
         self.delete_project()

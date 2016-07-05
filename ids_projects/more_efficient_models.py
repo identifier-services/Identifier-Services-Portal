@@ -30,35 +30,55 @@ class BaseMetadata(BaseAgaveObject):
         super(BaseMetadata, self).__init__(*args, **kwargs)
 
         # create these instance variables for later
-
         self.uuid = None
-        self.body = {}
+        self.value = {}
         self.owner = None
         self.schemaId = None
         self.internalUsername = None
         self.associationIds = None
-        # self.name = None
         self._links = None
         self._my_associations = None
         self._associations_to_me = None
 
-        # get meta if passed to constructor, convert to dict if necessary
+        # get 'meta' and 'uuid' arguments
+        meta = kwargs.get('meta')
+        uuid = kwargs.get('uuid')
 
-        meta = kwargs.get('meta', {})
+        # if uuid is provided explicitly and meta is not, load object from
+        # agave and return
+        if meta is None:
+            meta = { 'uuid': None, 'value': {} }
+            if uuid is not None:
+                self.uuid = uuid
+                self.load_from_agave()
+                return
+
+        # get arguments
+        # meta = kwargs.get('meta', { 'uuid': None, 'value': {} })
+        value = kwargs.get('value')
+        # uuid = kwargs.get('uuid')
+
+        # convert 'meta' to dictionary if necessary
         if type(meta) is str:
             meta = json.loads(meta)
-        self.load_from_meta(meta)
+
+        # convert 'value' to dictionary if necessary
+        if type(value) is str:
+            value = json.loads(value)
 
         # explicit constructor parameters take precedence over values found in
-        # meta dictionary (namely 'uuid', and 'value' aka 'body')
+        # meta dictionary, so overwrite 'uuid' in meta if 'uuid' found in kwargs
+        if uuid is not None:
+            meta.update({ 'uuid': uuid })
 
-        # check to see if body is in kwargs, if not get from meta, if not just
-        # create an empty {}
-        body = kwargs.get('body', meta.get('value', {}))
-        if type(body) is str:
-            body = json.loads(body)
-        self.body = body
-        self.uuid = kwargs.get('uuid', meta.get('uuid', None))
+        # explicit constructor parameters take precedence over values found in
+        # meta dictionary, so overwrite 'value' in meta if 'value' found in kwargs
+        if value is not None:
+            meta.update({ 'value': value })
+
+        # set instance variables
+        self.load_from_meta(meta)
+
 
     def add_association_to(self, related_object):
         """
@@ -85,7 +105,7 @@ class BaseMetadata(BaseAgaveObject):
 
             if associated_object in self.my_associations \
                 and associated_object.uuid in self.associationIds:
-                continue
+                continue # skip, go on to next association
 
             # add object if not already in the list
 
@@ -111,7 +131,7 @@ class BaseMetadata(BaseAgaveObject):
         # return if the object is already in the list
 
         if related_object in self.associations_to_me:
-            return
+            return # already in the list
 
         # check for uuid
 
@@ -134,9 +154,27 @@ class BaseMetadata(BaseAgaveObject):
         """Retrieves all metadata objects corresponding to this instance's associationIds"""
 
         if self._my_associations is None:
+
+            self._my_associations = []
+
             query = { 'uuid': { '$in': self.associationIds } }
             results = self._api_client.meta.listMetadata(q=json.dumps(query))
-            self._my_associations = [self.make(meta=r, api_client=self._api_client) for r in results]
+
+            for assoc_meta in results:
+
+                if assoc_meta.name == 'idsvc.project':
+                    assoc_object = Project(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.specimen':
+                    assoc_object = Specimen(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.process':
+                    assoc_object = Process(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.data':
+                    assoc_object = Data(meta=assoc_meta, api_client=self._api_client)
+
+                self._my_associations.append(assoc_object)
 
         return self._my_associations
 
@@ -145,9 +183,27 @@ class BaseMetadata(BaseAgaveObject):
         """Retrieves all metadata objects that have this instance's UUID in their associationIds"""
 
         if self._associations_to_me is None:
+
+            self._associations_to_me = []
+
             query = { 'associationIds': self.uuid }
             results = self._api_client.meta.listMetadata(q=json.dumps(query))
-            self._associations_to_me = [self.make(meta=r, api_client=self._api_client) for r in results]
+
+            for assoc_meta in results:
+
+                if assoc_meta.name == 'idsvc.project':
+                    assoc_object = Project(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.specimen':
+                    assoc_object = Specimen(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.process':
+                    assoc_object = Process(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.data':
+                    assoc_object = Data(meta=assoc_meta, api_client=self._api_client)
+
+                self._associations_to_me.append(assoc_object)
 
         return self._associations_to_me
 
@@ -157,15 +213,17 @@ class BaseMetadata(BaseAgaveObject):
             meta = json.loads(meta)
 
         self.uuid = meta.get('uuid', None)
-        if meta.get('value', None):
-            self.body = meta.get('value', None)
+        self.value = meta.get('value', None)
         self.owner = meta.get('owner', None)
         self.schemaId = meta.get('schemaId', None)
         self.internalUsername = meta.get('internalUsername', None)
         self.associationIds = meta.get('associationIds', None)
+        self._links = meta.get('_links', None)
+
+        # TODO: instance variable for name is mixed up with list being an
+        # instance method, make list a class method, pass in api_client
         if meta.get('name', None):
             self.name = meta.get('name', None)
-        self._links = meta.get('_links', None)
 
         lastUpdated = meta.get('lastUpdated', None)
         if type(lastUpdated) is datetime.datetime:
@@ -191,15 +249,12 @@ class BaseMetadata(BaseAgaveObject):
         self.load_from_meta(meta)
 
     @classmethod
-    def make(cls, meta, api_client, *args, **kwargs):
-        return cls(meta=meta, api_client=api_client, *args, **kwargs)
-
-    def list(self):
-        query = {'name': self.name}
-        results = self._api_client.meta.listMetadata(q=json.dumps(query))
+    def list(cls, api_client):
+        query = {'name': cls.name}
+        results = api_client.meta.listMetadata(q=json.dumps(query))
 
         if results is not None:
-            return [self.make(meta=r, api_client=self._api_client) for r in results]
+            return [cls(meta=r, api_client=api_client) for r in results]
 
     def save(self):
         """Add or update metadata object on tenant"""
@@ -241,7 +296,7 @@ class BaseMetadata(BaseAgaveObject):
                  'lastUpdated': self.lastUpdated,
                  'name': self.name,
                  'created': self.created,
-                 'value': self.body,
+                 'value': self.value,
                  '_links': self._links }
 
     def to_json(self):
@@ -280,7 +335,7 @@ class Specimen(BaseMetadata):
 
     @property
     def project(self):
-        return [x for x in self.my_associations if x.name == 'idsvc.project']
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
 
     @property
     def process(self):
@@ -301,11 +356,11 @@ class Process(BaseMetadata):
 
     @property
     def project(self):
-        return [x for x in self.my_associations if x.name == 'idsvc.project']
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
 
     @property
-    def specimens(self):
-        return [x for x in self.my_associations if x.name == 'idsvc.specimen']
+    def specimen(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.specimen']))
 
     @property
     def data(self):
@@ -313,11 +368,12 @@ class Process(BaseMetadata):
 
     @property
     def inputs(self):
-        return [x for x in self.data if x.uuid in self.body['_inputs']]
+        return [x for x in self.data if x.uuid in self.value['_inputs']]
 
     @property
     def outputs(self):
-        return [x for x in self.data if x.uuid in self.body['_outputs']]
+        return [x for x in self.data if x.uuid in self.value['_outputs']]
+
 
 class Data(BaseMetadata):
     """ """
@@ -329,15 +385,15 @@ class Data(BaseMetadata):
 
     @property
     def project(self):
-        return [x for x in self.my_associations if x.name == 'idsvc.project']
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
 
     @property
-    def specimens(self):
-        return [x for x in self.my_associations if x.name == 'idsvc.specimen']
+    def specimen(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.specimen']))
 
     @property
-    def processes(self):
-        return [x for x in self.my_associations if x.name == 'idsvc.process']
+    def process(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.process']))
 
     def calculate_checksum(self):
         name = "checksum"
@@ -376,6 +432,113 @@ class Data(BaseMetadata):
 
         return response
 
+
+class System(BaseAgaveObject):
+
+    def __init__(self, *args, **kwargs):
+
+        super(System, self).__init__(*args, **kwargs)
+        self.id = None
+        self.name = None
+        self.type = None
+        self.description = None
+        self.status = None
+        self.public = None
+        self.default = None
+        self._links = None
+
+        # get 'meta' and 'uuid' arguments
+        system_id = kwargs.get('system_id')
+        meta = kwargs.get('meta')
+
+        if meta is not None:
+            self.load_from_meta(meta)
+
+        if system_id is not None:
+            self.id = system_id
+            self.load_from_agave()
+
+    def load_from_meta(self, meta):
+        if 'id' in meta:
+            self.id = meta['id']
+        if 'name' in meta:
+            self.name = meta['name']
+        if 'type' in meta:
+            self.type = meta['type']
+        if 'description' in meta:
+            self.description = meta['description']
+        if 'status' in meta:
+            self.status = meta['status']
+        if 'public' in meta:
+            self.public = meta['public']
+        if 'default' in meta:
+            self.default = meta['default']
+        if '_links' in meta:
+            self._links = meta['_links']
+
+    def list(self, system_type="STORAGE"):
+        if self._api_client is None:
+            exception_msg = 'Missing user client, cannot list systems.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        try:
+            results = self._api_client.systems.list(type=system_type)
+        except Exception as e:
+            exception_msg = 'Unable to list systems. %s' % e
+            logger.debug(exception_msg)
+            raise e
+
+        return [System(initial_data = r) for r in results]
+
+    def listing(self, path):
+
+        if not self.id:
+            exception_msg = 'Missing system id, cannot list files.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        if not self.user_ag:
+            exception_msg = 'Missing user client, cannot list files.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        try:
+            results = self._api_client.files.list(systemId=self.id, filePath=path)
+            return results
+        except Exception as e:
+            exception_msg = 'Unable to list files. %s' % e
+            logger.debug(exception_msg)
+            raise e
+
+    def load_from_agave(self):
+        meta = self._api_client.systems.get(systemId=self.id)
+        self.load_from_meta(meta)
+
+    @property
+    def body(self):
+        return {
+            'id' : self.id,
+            'name' : self.name,
+            'type' : self.type,
+            'description' : self.description,
+            'status' : self.status,
+            'public' : self.public,
+            'default' : self.default,
+            '_links' : self._links,
+        }
+
+
+# TODO: make list a class method, and pass in api_client
+
+# Notes 6/28:
+# create any object with logged in user's client
+# share with idsvc_user
+# webhook will update using system
+# when user publishes...
+# tree will become public through flag
+# ! no delete for public project !
+# each view we check permission of logged in user for that thing only
 
 # questions:
 #   * create all objects with user client (particular client determined in the view)?

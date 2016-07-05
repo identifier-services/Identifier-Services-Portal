@@ -12,10 +12,9 @@ from django.http import (HttpResponse,
 from django.shortcuts import render
 import json, logging
 from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
-from ..models import Project, Specimen, Process
+from ..more_efficient_models import Project, Specimen, Process
 from helper import client, collapse_meta
 from requests import HTTPError
-
 
 logger = logging.getLogger(__name__)
 
@@ -27,22 +26,35 @@ def list(request):
     #######
     if request.method == 'GET':
 
+        project_uuid = request.GET.get('project_uuid', None)
         specimen_uuid = request.GET.get('specimen_uuid', None)
-        if not specimen_uuid:
-            messages.warning(request, 'Missing specimen UUID, cannot find processes.')
+
+        if not specimen_uuid and not project_uuid:
+            messages.warning(request, 'Missing project or specimen UUID, cannot find processes.')
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
+        project = None
+        specimen = None
+        process = None
+
         try:
-            specimen = Specimen(uuid=specimen_uuid, user=request.user)
+            if not specimen_uuid:
+                project = Project(api_client=api_client, uuid=project_uuid)
+                processes = project.processes
+            else:
+                specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
+                processes = specimen.processes
+                project = Specimen.project
+
         except Exception as e:
-            exception_msg = 'Unable to load specimen, processes. %s' % e
+            exception_msg = 'Unable to load project, specimen, or processes. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
-        context = { 'project': specimen.project,
+        context = { 'project': project,
                     'specimen' : specimen,
-                    'processes': specimen.processes
+                    'processes': processes
                   }
 
         return render(request, 'ids_projects/processes/index.html', context)
@@ -61,8 +73,13 @@ def view(request, process_uuid):
     #######
     if request.method == 'GET':
 
+        if request.user.is_anonymous():
+            api_client = get_portal_api_client()
+        else:
+            api_client = request.user.agave_oauth.api_client
+
         try:
-            process = Process(uuid=process_uuid, user=request.user)
+            process = Process(api_client=api_client, uuid=process_uuid)
         except Exception as e:
             exception_msg = 'Unable to load process. %s' % e
             logger.error(exception_msg)
@@ -72,7 +89,9 @@ def view(request, process_uuid):
         context = {'process' : process,
                    'project' : process.project,
                    'specimen' : process.specimen,
-                   'datas' : process.data}
+                   'datas' : process.data,
+                   'inputs': process.inputs,
+                   'outputs': process.outputs, }
 
         return render(request, 'ids_projects/processes/detail.html', context)
 
@@ -86,21 +105,32 @@ def view(request, process_uuid):
 @login_required
 def create(request):
     """Create a new process related to a specimen"""
+
+    project_uuid = request.GET.get('project_uuid', None)
     specimen_uuid = request.GET.get('specimen_uuid', None)
-    if not specimen_uuid:
-        messages.warning(request, 'Missing specimen UUID, cannot create processes.')
+
+    if not specimen_uuid and not project_uuid:
+        messages.warning(request, 'Missing project or specimen UUID, cannot find processes.')
         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
+    api_client = request.user.agave_oauth.api_client
+
+    project = None
+    specimen = None
+
     try:
-        specimen = Specimen(uuid=specimen_uuid, user=request.user)
+        if not specimen_uuid:
+            project = Project(api_client=api_client, uuid=project_uuid)
+        else:
+            specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
+            project = specimen.project
     except Exception as e:
-        exception_msg = 'Unable to load specimen, cannot create process. %s' % e
+        exception_msg = 'Unable to load project or specimen, cannot create process. %s' % e
         logger.error(exception_msg)
         messages.warning(request, exception_msg)
         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
     try:
-        project = specimen.project
         investigation_type = project.value['investigation_type'].lower()
 
         object_descriptions = getattr(settings, 'OBJ_DESCR')
@@ -164,13 +194,17 @@ def create(request):
                 data.update(form_process_type.cleaned_data.copy())
                 data.update(form_process_fields.cleaned_data.copy())
 
-                associationIds = specimen.associationIds
-                associationIds.append(specimen.uuid)
+                if project and not specimen:
+                    associationIds = project.associationIds
+                    associationIds.append(project.uuid)
+                elif specimen:
+                    associationIds = specimen.associationIds
+                    associationIds.append(specimen.uuid)
 
-                body = { 'associationIds': associationIds, 'value': data }
+                meta = { 'associationIds': associationIds, 'value': data }
 
                 try:
-                    process = Process(initial_data=body, user=request.user)
+                    process = Process(api_client=api_client, meta=meta)
                     result = process.save()
                 except HTTPError as e:
                     exception_msg = 'Unable to create new process. %s' % e
@@ -204,8 +238,11 @@ def create(request):
 @login_required
 def edit(request, process_uuid):
     """Edit existing process metadata"""
+
+    api_client = request.user.agave_oauth.api_client
+
     try:
-        process = Process(uuid=process_uuid, user=request.user)
+        process = Process(api_client=api_client, uuid=process_uuid)
     except HTTPError as e:
         logger.error('Error editing process. {}'.format(e.message))
         messages.warning(request, 'Error editing process.')
@@ -228,7 +265,7 @@ def edit(request, process_uuid):
     # GET #
     #######
     if request.method == 'GET':
-        context = {'form_process_edit': ProcessFieldsForm(process_fields, initial=process.body),
+        context = {'form_process_edit': ProcessFieldsForm(process_fields, initial=process.value),
                    'specimen': process.specimen,
                    'project': process.project,
                    'process': process}
@@ -244,9 +281,7 @@ def edit(request, process_uuid):
         if form.is_valid():
 
             try:
-                # will not overwrite association ids
-                body = { 'value': form.cleaned_data }
-                process.set_initial(body)
+                process.value.update(form.cleaned_data)
                 result = process.save()
             except Exception as e:
                 exception_msg = 'Unable to edit process. %s' % e
@@ -269,29 +304,39 @@ def edit(request, process_uuid):
                         reverse('ids_projects:process-view',
                                 kwargs={'process_uuid': process.uuid}))
 
+
 @login_required
 def delete(request, process_uuid):
     """Delete a process"""
-    process = Process(uuid=process_uuid, user=request.user)
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
 
-    # TODO: delete data, or just associate data with project?
-    for data in process.data:
-        # remove process_uuid from associationIds on data, leaving only project_uuid
+        api_client = request.user.agave_oauth.api_client
+
         try:
-            data.associationIds.remove(process_uuid)
-        except HTTPError as e:
-            logger.debug('Error while attempting to remove process_uuid from data metadata: %s' % e)
+            process = Process(api_client=api_client, uuid=specimen_uuid)
+            specimen = process.specimen
+            project = process.project
+            process.delete()
+        except Exception as e:
+            exception_msg = 'Unable to delete process. %s' % e
+            logger.exception(exception_msg)
+            messages.warning(request, exception_msg)
+            if specimen:
+                return HttpResponseRedirect('/specimen/{}/'.format(specimen.uuid))
+            else:
+                return HttpResponseRedirect('/project/{}/'.format(project.uuid))
 
-    try:
-        project = process.project
-        specimen = process.specimen
-        process.delete()
         messages.success(request, 'Successfully deleted process.')
-    except HTTPError as e:
-        logger.debug('Error while attempting to delete process metadata: %s' % e)
-        messages.success(request, 'Encountered error while attempting to delete process.')
+        if specimen:
+            return HttpResponseRedirect('/specimen/{}'.format(specimen.uuid))
+        else:
+            return HttpResponseRedirect('/project/{}'.format(project.uuid))
 
-    if specimen:
-        return HttpResponseRedirect('/specimen/{}'.format(specimen.uuid))
+    #########
+    # OTHER #
+    #########
     else:
-        return HttpResponseRedirect('/project/{}'.format(project.uuid))
+        return HttpResponseBadRequest("Method not allowed")

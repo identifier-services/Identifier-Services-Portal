@@ -26,18 +26,10 @@
                 {% endfor %}
                 <div class="row">
                     <div class="col-xs-1">
-                        {% if project.user_is_contributor %}
-                            <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
-                        {% else %}
-                            <a href="#" class="btn btn-primary" disabled>Edit</a>
-                        {% endif %}
+                        <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
                     </div>
                     <div class="col-xs-2 pull-right col-xs-pull-2 col-sm-pull-2 col-md-pull-1">
-                        {% if project.user_is_contributor %}
-                            <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
-                        {% else %}
-                            <a href="#" class="btn btn-danger" disabled>Delete</a>
-                        {% endif %}
+                        <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
                     </div>
                 </div>
             </div>
@@ -50,11 +42,7 @@
         <div class="object-header dark">
             <div>
                 No input data for {{ process.value.process_type }}
-                {% if project.user_is_contributor %}
-                    <a href="{% url 'ids_projects:data-type'%}?relationship=input&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
-                {% else %}
-                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
-                {% endif %}
+                <a href="{% url 'ids_projects:data-type'%}?relationship=input&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
             </div>
         </div>
         {% else %}
@@ -96,11 +84,7 @@
                             <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="btn btn-primary">View</a>
                         </div>
                         <div class="col-xs-2 pull-right col-xs-pull-2 col-sm-pull-2 col-md-pull-1">
-                            {% if project.user_is_contributor %}
-                                <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger">Delete</a>
-                            {% else %}
-                                <a href="#" class="btn btn-danger" disabled>Delete</a>
-                            {% endif %}
+                            <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger">Delete</a>
                         </div>
                     </div>
                 </div>
@@ -115,22 +99,14 @@
         <div class="object-header dark">
             <div>
                 No output data for {{ process.value.process_type }}
-                {% if project.user_is_contributor %}
-                    <a href="{% url 'ids_projects:data-type'%}?relationship=output&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
-                {% else %}
-                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
-                {% endif %}
+                <a href="{% url 'ids_projects:data-type'%}?relationship=output&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
             </div>
         </div>
         {% else %}
         <div class="object-header dark">
             <div>
                 Output data for {{ process.value.process_type }}
-                {% if project.user_is_contributor %}
-                    <a href="{% url 'ids_projects:data-type'%}?relationship=output&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
-                {% else %}
-                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
-                {% endif %}
+                <a href="{% url 'ids_projects:data-type'%}?relationship=output&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
             </div>
         </div>
 
@@ -163,11 +139,7 @@
                                 <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="btn btn-primary">View</a>
                             </div>
                             <div class="col-xs-2 pull-right col-xs-pull-2 col-sm-pull-2 col-md-pull-1">
-                                {% if project.user_is_contributor %}
-                                    <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger">Delete</a>
-                                {% else %}
-                                    <a href="#" class="btn btn-danger" disabled>Delete</a>
-                                {% endif %}
+                                <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger">Delete</a>
                             </div>
                         </div>
                     </div>

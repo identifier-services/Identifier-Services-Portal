@@ -12,10 +12,9 @@ from django.http import (HttpResponse,
 from django.shortcuts import render
 import json, logging
 from ..forms.specimens import SpecimenForm
-from ..models import Project, Specimen
+from ..more_efficient_models import Project, Specimen
 from helper import client, collapse_meta
 from requests import HTTPError
-
 
 logger = logging.getLogger(__name__)
 
@@ -28,12 +27,18 @@ def list(request):
     if request.method == 'GET':
 
         project_uuid = request.GET.get('project_uuid', None)
+
         if not project_uuid:
             messages.warning(request, 'Missing project UUID, cannot find specimens.')
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
+        if request.user.is_anonymous():
+            api_client = get_portal_api_client()
+        else:
+            api_client = request.user.agave_oauth.api_client
+
         try:
-            project = Project(uuid=project_uuid, user=request.user)
+            project = Project(api_client=api_client, uuid=project_uuid)
         except Exception as e:
             exception_msg = 'Unable to load project. %s' % e
             logger.error(exception_msg)
@@ -57,13 +62,18 @@ def view(request, specimen_uuid):
     #######
     if request.method == 'GET':
 
+        if request.user.is_anonymous():
+            api_client = get_portal_api_client()
+        else:
+            api_client = request.user.agave_oauth.api_client
+
         try:
-            specimen = Specimen(uuid = specimen_uuid, user=request.user)
+            specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
         except Exception as e:
             exception_msg = 'Unable to load specimen. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect('/projects/')
+            return HttpResponseRedirect('/projects/private')
 
         context = { 'specimen': specimen, 'project': specimen.project }
 
@@ -85,13 +95,15 @@ def create(request):
         messages.warning(request, 'Missing project UUID, cannot create specimen.')
         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
+    api_client = request.user.agave_oauth.api_client
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
         try:
-            project = Project(uuid=project_uuid, user=request.user)
+            project = Project(api_client=api_client, uuid=project_uuid)
         except Exception as e:
             exception_msg = 'Unable to load project. %s' % e
             logger.exception(exception_msg)
@@ -113,11 +125,11 @@ def create(request):
 
         if form.is_valid():
 
-            body = { 'associationIds':[project_uuid],
+            meta = { 'associationIds':[project_uuid],
                      'value':form.cleaned_data }
 
             try:
-                specimen = Specimen(initial_data=body, user=request.user)
+                specimen = Specimen(api_client=api_client, meta=meta)
                 result = specimen.save()
             except Exception as e:
                 exception_msg = 'Unable to create new specimen. %s' % e
@@ -151,9 +163,12 @@ def create(request):
 
 @login_required
 def edit(request, specimen_uuid):
-    """ """
+    """Edit a specimen, given the uuid"""
+
+    api_client = request.user.agave_oauth.api_client
+
     try:
-        specimen = Specimen(uuid=specimen_uuid, user=request.user)
+        specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
     except Exception as e:
         exception_msg = 'Unable to edit specimen. %s' % e
         logger.exception(exception_msg)
@@ -165,7 +180,7 @@ def edit(request, specimen_uuid):
     #######
     if request.method == 'GET':
 
-        context = {'form_specimen_edit': SpecimenForm(initial=specimen.body),
+        context = {'form_specimen_edit': SpecimenForm(initial=specimen.value),
                    'specimen': specimen,
                    'project': specimen.project}
 
@@ -181,9 +196,7 @@ def edit(request, specimen_uuid):
         if form.is_valid():
 
             try:
-                # will not overwrite association ids
-                body = { 'value': form.cleaned_data }
-                specimen.set_initial(body)
+                specimen.value.update(form.cleaned_data)
                 result = specimen.save()
             except Exception as e:
                 exception_msg = 'Unable to edit specimen. %s' % e
@@ -221,45 +234,23 @@ def delete(request, specimen_uuid):
     #######
     if request.method == 'GET':
 
-        # TODO: Ask user if process and file data should be deleted
+        api_client = request.user.agave_oauth.api_client
 
         try:
-            specimen = Specimen(uuid=specimen_uuid, user=request.user)
-        except Exception as e:
-            exception_msg = 'Unable to load specimen. %s' % e
-            logger.error(exception_msg)
-            messages.warning(request, exception_msg)
-            return HttpResponseRedirect('/projects/private/')
-
-        for process in specimen.processes:
-            try:
-                process.delete()
-            except Exception as e:
-                exception_msg = 'Unable to delete process. %s' % e
-                logger.error(exception_msg)
-                messages.warning(request, exception_msg)
-
-        for data in specimen.data:
-            try:
-                data.delete()
-            except Exception as e:
-                exception_msg = 'Unable to delete data. %s' % e
-                logger.error(exception_msg)
-                messages.warning(request, exception_msg)
-
-        try:
+            specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
+            project = specimen.project
             specimen.delete()
         except Exception as e:
             exception_msg = 'Unable to delete specimen. %s' % e
-            logger.error(exception_msg)
+            logger.exception(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect('/projects/private/')
+            return HttpResponseRedirect('/project/{}/'.format(project.uuid))
 
-        messages.success(request, 'Successfully deleted project.')
-        return HttpResponseRedirect('/projects/private/')
+        messages.success(request, 'Successfully deleted specimen.')
+        return HttpResponseRedirect('/project/{}/'.format(project.uuid))
 
     #########
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")

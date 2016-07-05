@@ -326,6 +326,7 @@ class Process(BaseMetadata):
     def outputs(self):
         return [x for x in self.data if x.uuid in self.value['_outputs']]
 
+
 class Data(BaseMetadata):
     """ """
     name = 'idsvc.data'
@@ -382,6 +383,7 @@ class Data(BaseMetadata):
             raise Exception(exception_msg)
 
         return response
+
 
 # TODO: make list a class method, and pass in api_client
 

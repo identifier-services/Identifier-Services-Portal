@@ -29,8 +29,7 @@ def list_public(request):
         api_client = get_portal_api_client()
 
         try:
-            project = Project(api_client=api_client)
-            projects = project.list()
+            projects = Project.list(api_client=api_client)
         except Exception as e:
             exception_msg = 'Unable to load projects. %s' % e
             logger.error(exception_msg)
@@ -59,13 +58,15 @@ def list_private(request):
         api_client = request.user.agave_oauth.api_client
 
         try:
-            project = Project(api_client=api_client)
-            projects = project.list()
+            projects = Project.list(api_client=api_client)
         except Exception as e:
             exception_msg = 'Unable to load projects. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
             return HttpResponseRedirect('/')
+
+        # for project in projects:
+        #     print "\n\nprivate_project.meta: %s\n\n" % project.meta
 
         context = { 'type': 'private', 'private_projects': projects, 'create_button': True }
 
@@ -92,6 +93,7 @@ def view(request, project_uuid):
 
         try:
             project = Project(api_client=api_client, uuid=project_uuid)
+
         except Exception as e:
             exception_msg = 'Unable to load project. %s' % e
             logger.error(exception_msg)
@@ -139,9 +141,8 @@ def create(request):
             body.update({ 'creator': user_full })
 
             try:
-                project = Project(api_client=api_client, body=body)
+                project = Project(api_client=api_client, value=body)
                 result = project.save()
-
             except Exception as e:
                 exception_msg = 'Unable to create new project. %s' % e
                 logger.error(exception_msg)
@@ -184,7 +185,7 @@ def edit(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        context = { 'form_project_edit': ProjectForm(initial=project.body),
+        context = { 'form_project_edit': ProjectForm(initial=project.value),
                     'project': project }
         return render(request, 'ids_projects/projects/create.html', context)
 
@@ -198,7 +199,7 @@ def edit(request, project_uuid):
         if form.is_valid():
 
             try:
-                project.body = form.cleaned_data
+                project.value.update(form.cleaned_data)
                 result = project.save()
             except Exception as e:
                 exception_msg = 'Unable to create new project. %s' % e
@@ -288,7 +289,7 @@ def make_private(request, project_uuid):
 
 @login_required
 def delete(request, project_uuid):
-    """Delete a project """
+    """Delete a project"""
     api_client = request.user.agave_oauth.api_client
 
     #######
