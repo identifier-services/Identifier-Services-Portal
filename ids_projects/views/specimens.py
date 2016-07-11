@@ -13,12 +13,13 @@ from django.shortcuts import render
 import json, logging
 from ..forms.specimens import SpecimenForm
 from ..more_efficient_models import Project, Specimen
+from ids.utils import get_portal_api_client
 from helper import client, collapse_meta
 from requests import HTTPError
 
 logger = logging.getLogger(__name__)
 
-
+@login_required
 def list(request):
     """List all specimens related to a project"""
     #######
@@ -55,6 +56,7 @@ def list(request):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 
+@login_required
 def view(request, specimen_uuid):
     """ """
     #######

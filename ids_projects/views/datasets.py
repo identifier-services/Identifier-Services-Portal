@@ -13,6 +13,7 @@ from django.shortcuts import render
 import json, logging
 from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
 from ..more_efficient_models import Project, Data, Dataset
+from ids.utils import get_portal_api_client
 from requests import HTTPError
 
 logger = logging.getLogger(__name__)
@@ -321,6 +322,25 @@ def edit(request, dataset_uuid):
                         reverse('ids_projects:process-view',
                                 kwargs={'process_uuid': process.uuid}))
 
+@login_required
+def add_data(self, dataset_uuid):
+    pass
+
+@login_required
+def remove_data(self, dataset_uuid):
+    pass
+
+@login_required
+def make_public(self, dataset_uuid):
+    pass
+
+@login_required
+def make_private(self, dataset_uuid):
+    pass
+
+@login_required
+def request_doi(self, dataset_uuid):
+    pass
 
 @login_required
 def delete(request, dataset_uuid):

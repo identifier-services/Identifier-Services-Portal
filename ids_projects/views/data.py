@@ -14,6 +14,7 @@ from django.shortcuts import render
 import json, logging, urllib
 from ..forms.data import DataTypeForm, SRAForm
 from ..more_efficient_models import Project, Specimen, Process, System, Data
+from ids.utils import get_portal_api_client
 from helper import client, collapse_meta
 
 logger = logging.getLogger(__name__)
@@ -284,8 +285,7 @@ def file_select(request, relationship):
     if request.method == 'GET':
 
         try:
-            system = System(api_client=api_client)
-            systems = system.list()
+            systems = System.list(api_client=api_client, system_type="STORAGE")
         except Exception as e:
             exception_msg = 'Unable to load systems. %s' % e
             logger.error(exception_msg)
@@ -325,7 +325,7 @@ def file_select(request, relationship):
                                 kwargs={'process_uuid': process_uuid}))
 
         try:
-            data = Data(system_id=system_id, path=file_path, user=request.user)
+            data = Data(api_client=api_client, system_id=system_id, path=file_path)
             data.load_file_info()
         except Exception as e:
             exception_msg = 'Unable to access system with system_id=%s. %s'\
@@ -340,8 +340,6 @@ def file_select(request, relationship):
             associationIds = process.associationIds
             associationIds.append(process.uuid)
             data.associationIds = associationIds
-            logger.debug('Sharing data with portal user...')
-            data.share(username='idsvc_user', permission='READ')
             result = data.save()
         except Exception as e:
             exception_msg = 'Unable to save file info as metadata. %s.' % e

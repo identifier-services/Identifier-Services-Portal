@@ -19,32 +19,32 @@ import json, logging
 logger = logging.getLogger(__name__)
 
 
-def list_public(request):
-    """List public projects"""
-    #######
-    # GET #
-    #######
-    if request.method == 'GET':
-
-        api_client = get_portal_api_client()
-
-        try:
-            projects = Project.list(api_client=api_client)
-        except Exception as e:
-            exception_msg = 'Unable to load projects. %s' % e
-            logger.error(exception_msg)
-            messages.warning(request, exception_msg)
-            return HttpResponseRedirect('/')
-
-        context = { 'type': 'public', 'public_projects':projects, 'create_button':True }
-
-        return render(request, 'ids_projects/projects/index.html', context)
-
-    #########
-    # OTHER #
-    #########
-    else:
-        return HttpResponseBadRequest("Method not allowed")
+# def list_public(request):
+#     """List public projects"""
+#     #######
+#     # GET #
+#     #######
+#     if request.method == 'GET':
+#
+#         api_client = get_portal_api_client()
+#
+#         try:
+#             projects = Project.list(api_client=api_client)
+#         except Exception as e:
+#             exception_msg = 'Unable to load projects. %s' % e
+#             logger.error(exception_msg)
+#             messages.warning(request, exception_msg)
+#             return HttpResponseRedirect('/')
+#
+#         context = { 'type': 'public', 'public_projects':projects, 'create_button':True }
+#
+#         return render(request, 'ids_projects/projects/index.html', context)
+#
+#     #########
+#     # OTHER #
+#     #########
+#     else:
+#         return HttpResponseBadRequest("Method not allowed")
 
 
 @login_required
@@ -79,6 +79,7 @@ def list_private(request):
         return HttpResponseBadRequest("Method not allowed")
 
 
+@login_required
 def view(request, project_uuid):
     """Queries project metadata and all associated metadata"""
     #######

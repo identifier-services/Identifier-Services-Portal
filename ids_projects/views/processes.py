@@ -13,12 +13,14 @@ from django.shortcuts import render
 import json, logging
 from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
 from ..more_efficient_models import Project, Specimen, Process
+from ids.utils import get_portal_api_client
 from helper import client, collapse_meta
 from requests import HTTPError
 
 logger = logging.getLogger(__name__)
 
 
+@login_required
 def list(request):
     """List all processes related to a specimen"""
     #######
@@ -66,6 +68,7 @@ def list(request):
         return HttpResponseBadRequest("Method not allowed")
 
 
+@login_required
 def view(request, process_uuid):
     """ """
     #######

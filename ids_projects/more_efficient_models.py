@@ -396,6 +396,13 @@ class Process(BaseMetadata):
         """
         super(Process, self).__init__(*args, **kwargs)
 
+        inputs = self.value.get('_inputs', [])
+        outputs = self.value.get('_outputs', [])
+
+        # creates input output items if they didn't exist
+        self.value.update({ '_inputs': inputs })
+        self.value.update({ '_outputs': outputs })
+
     @property
     def project(self):
         return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
@@ -462,6 +469,22 @@ class Data(BaseMetadata):
         """
         super(Data, self).__init__(*args, **kwargs)
 
+        self.system = None
+        system_id = kwargs.get('system_id')
+        path = kwargs.get('path')
+
+        if system_id is not None:
+            self.system_id = system_id
+            self.value.update({ 'system_id': system_id })
+        else:
+            self.system_id = self.value.get('system_id')
+
+        if path is not None:
+            self.path = path
+            self.value.update({ 'path': path })
+        else:
+            self.path = self.value.get('path')
+
     @property
     def project(self):
         return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
@@ -477,6 +500,60 @@ class Data(BaseMetadata):
     @property
     def datasets(self):
         return [x for x in self.associations_to_me if x.name == 'idsvc.datasets']
+
+    def load_file_info(self):
+        if self.system_id is None:
+            exception_msg = 'Missing system id, cannot load file info.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        if self.path is None:
+            exception_msg = 'Missing file path, cannot load file info.'
+            logger.exception(exception_msg)
+            raise Exception(exception_msg)
+
+        if self.system is None:
+            try:
+                self.system = System(api_client=self._api_client, system_id=self.system_id)
+            except Exception as e:
+                exception_msg = 'Unable to access system with system_id=%s.' % self.system_id
+                logger.error(exception_msg)
+                raise Exception(exception_msg)
+
+        try:
+            listing = self.system.listing(self.path)
+            file_info = next(iter(listing), None)
+        except Exception as e:
+            exception_msg = 'The path=%s could not be listed on system=%s. %s' \
+                            % (self.path, self.system_id, e)
+            logger.error(exception_msg)
+            raise Exception(exception_msg)
+
+        try:
+            last_mod = file_info['lastModified']
+            file_info['lastModified'] = last_mod.strftime('%b %-d %I:%M')
+        except:
+            warning_msg = 'Listing response does not contain lastModified.'
+            logger.warning(warning_msg)
+
+        self.value = file_info
+
+    def _share(self, username, permission):
+        body=json.dumps({ 'username': username,
+                          'permission': permission,
+                          'recursive': False })
+        self._api_client.files.updatePermissions(
+                systemId=self.system_id,
+                filePath=self.value['path'],
+                body=body )
+
+    def save(self):
+        result = super(Data, self).save()
+
+        logger.debug('Sharing data with portal user...')
+        self._share(username='idsvc_user', permission='READ')
+
+        return result
 
     def calculate_checksum(self):
         name = "checksum"
@@ -563,7 +640,7 @@ class Dataset(BaseMetadata):
         self.add_association_from(identifier)
 
 
-class identifier(BaseMetadata):
+class Identifier(BaseMetadata):
     name ='idsvc.identifier'
 
     def __init__(self, *args, **kwargs):

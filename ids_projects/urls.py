@@ -7,7 +7,7 @@ from django.conf.urls import patterns, include, url
 urlpatterns = patterns(
     'ids_projects.views.data',
     # itermediate step between adding and sra or a file
-    url(r'^data/type_select?$', 'type_select', name='data-type'),
+    url(r'^data/type_select/?$', 'type_select', name='data-type'),
     # create a file metadata object associated with an SRA
     url(r'^data/add_sra/(?P<relationship>.+?)$', 'add_sra', name='add-sra'),
     # create a file metadata object associated with a process
@@ -48,7 +48,7 @@ urlpatterns += patterns(
     # make dataset private
     url(r'^project/make_private/(?P<dataset_uuid>.+?)$', 'make_private', name='dataset-make-private'),
     # request doi for public dataset
-    url(r'^project/request_doi/(?P<dataset_uuid>.+?)$', 'request-doi', name='dataset-request-doi'),
+    url(r'^project/request_doi/(?P<dataset_uuid>.+?)$', 'request_doi', name='dataset-request-doi'),
     # view a process
     url(r'^dataset/(?P<dataset_uuid>.+?)$', 'view', name='dataset-view'),
 )
