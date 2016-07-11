@@ -1,565 +1,507 @@
-from __future__ import unicode_literals
-
-from django.db import models
-from django.conf import settings
-from django.utils.functional import SimpleLazyObject
-from agavepy.agave import Agave
-import json, logging
+import json, datetime, logging
 
 logger = logging.getLogger(__name__)
 
 
-class BaseClient(object):
-    def __init__(self, user=None, *args, **kwargs):
-        self.system_ag = None
-        self.user_ag = None
-        self.user = None
-
-        if user is not None:
-            if type(user) is not SimpleLazyObject:
-                exception_msg = 'User parameter type is incorrect.'
-                logging.error(exception_msg)
-                raise TypeError(exception_msg)
-
-            self.user = user
-            if not user.is_anonymous():
-                self.user_ag = self.get_client(user=user)
-
-        try:
-            self.system_ag = self.get_client()
-        except Exception as e:
-            exception_msg = 'Unable to connect to Agave as IDS system user. %s' % e
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
-
-    def get_client(self, user=None):
-        if user is not None:
-            if type(user) is not SimpleLazyObject:
-                exception_msg = 'User parameter type is incorrect.'
-                logging.error(exception_msg)
-                raise TypeError(exception_msg)
-
-            # user client
-            return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
-                         token=self.user.agave_oauth.access_token)
-        else:
-            # system client
-            return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
-                         token=settings.AGAVE_SUPER_TOKEN)
+class BaseAgaveObject(object):
+    """Anything that we want in all our Agave objects, contains only the api
+    client at the moment."""
+    def __init__(self, api_client, *args, **kwargs):
+        # TODO: if type(api_client) is not agavepy.agave.Agave: raise Exception()
+        self._api_client = api_client
 
 
-class BaseMetadata(BaseClient):
+class BaseMetadata(BaseAgaveObject):
+    """Base class for IDS Metadata (Project, Specimen, Process, Data)"""
+    name = "idsvc.basemetadata"
 
-    name = 'idsvc.object'
-
-    def __init__(self, uuid=None, initial_data=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        """Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
         super(BaseMetadata, self).__init__(*args, **kwargs)
 
-        self._associated_meta = None
-        self._contributors = None
-
-        # this is a workaround until i figure out how to authenticate user through webhook
-        self.public = kwargs.get('public', True)
-
+        # create these instance variables for later
+        self.uuid = None
+        self.value = {}
+        self.owner = None
+        self.schemaId = None
+        self.internalUsername = None
         self.associationIds = None
-        self.created = None
-        self.lastUpdated = None
-        self.links = None
-        self.value = None
-        self.uuid = uuid
+        self._links = None
+        self._my_associations = None
+        self._associations_to_me = None
 
+        # get 'meta' and 'uuid' arguments
+        meta = kwargs.get('meta')
+        uuid = kwargs.get('uuid')
+
+        # if uuid is provided explicitly and meta is not, load object from
+        # agave and return
+        if meta is None:
+            meta = { 'uuid': None, 'value': {} }
+            if uuid is not None:
+                self.uuid = uuid
+                self.load_from_agave()
+                return
+
+        # get arguments
+        # meta = kwargs.get('meta', { 'uuid': None, 'value': {} })
+        value = kwargs.get('value')
+        # uuid = kwargs.get('uuid')
+
+        # convert 'meta' to dictionary if necessary
+        if type(meta) is str:
+            meta = json.loads(meta)
+
+        # convert 'value' to dictionary if necessary
+        if type(value) is str:
+            value = json.loads(value)
+
+        # explicit constructor parameters take precedence over values found in
+        # meta dictionary, so overwrite 'uuid' in meta if 'uuid' found in kwargs
         if uuid is not None:
-            self.load()
+            meta.update({ 'uuid': uuid })
 
-        if initial_data is not None:
-            self.set_initial(initial_data)
+        # explicit constructor parameters take precedence over values found in
+        # meta dictionary, so overwrite 'value' in meta if 'value' found in kwargs
+        if value is not None:
+            meta.update({ 'value': value })
 
-    def set_initial(self, initial_data):
-        if 'uuid' in initial_data:
-            self.uuid = initial_data['uuid']
-            # self.load_contributors()
-        if 'associationIds' in initial_data:
-            self.associationIds = initial_data['associationIds']
-        if 'created' in initial_data:
-            self.created = initial_data['created']
-        if 'lastUpdated' in initial_data:
-            self.lastUpdated = initial_data['lastUpdated']
-        if '_links' in initial_data:
-            self.links = initial_data['_links']
-        if 'value' in initial_data:
+        # set instance variables
+        self.load_from_meta(meta)
 
-            if self.value is None:
-                self.value = initial_data['value']
-            else:
-                # i don't want to clear values that might not be contained in a form (like 'public':'True')
-                for key, value in initial_data['value'].items():
-                    self.value[key] = value
 
-    def load(self):
-        logger.debug('Calling meta.getMetdata(uuid=%s)...', self.uuid)
+    def add_association_to(self, related_object):
+        """
+        Add the related object to this instance's my_associations list, and
+        add the related object's uuid to this instance's associationIds list.
+        Must save this instance to persist this association in Agave.
+        """
+
+        # check for uuid
+
+        if 'uuid' not in dir(related_object) or related_object.uuid is None:
+            exception_msg = "Related object must have a UUID to add "\
+                            "association to this instance."
+            raise Exception(exception_msg)
+
+        # create a list of associated objects, include the related object
+        # all all objects to which the related object is associated
+
+        associated_objects = [related_object] + related_object.my_associations
+
+        for associated_object in associated_objects:
+
+            # skip if the object is already in the appropriate lists
+
+            if associated_object in self.my_associations \
+                and associated_object.uuid in self.associationIds:
+                continue # skip, go on to next association
+
+            # add object if not already in the list
+
+            if associated_object not in self.my_associations:
+                self.my_associations.append(associated_object)
+
+            # add object's uuid if not already in the list
+
+            if associated_object.uuid not in self.associationIds:
+                self.associationIds.append(associated_object.uuid)
+
+            # call the object's add_association_from method, which will
+            # add this instance only if it is not present the realted object's
+            # associations_to_me list
+
+            associated_object.add_association_from(self)
+
+    def add_association_from(self, related_object):
+        """
+        Add this instance's UUID to a remote metadata object's associationIds list
+        """
+
+        # return if the object is already in the list
+
+        if related_object in self.associations_to_me:
+            return # already in the list
+
+        # check for uuid
 
         if self.uuid is None:
-            exception_msg = 'No UUID provided, Agave meta object not found.'
-            logger.exception(exception_msg)
+            exception_msg = "This instance must have a UUID to add "\
+                            "association from a related object."
             raise Exception(exception_msg)
 
-        meta_result = None
+        # add the related object if not already in the associations list
 
-        if self.user_ag is not None:
-            # query meta owned by logged in user
-            try:
-                meta_result = self.user_ag.meta.getMetadata(uuid=self.uuid)
-            except Exception as e:
-                debug_msg = 'Agave meta object not owned by logged in user.'
-                logger.debug(debug_msg)
+        self._associations_to_me.append(related_object)
 
-        if meta_result is None:
-            # query public meta owned by system user
-            try:
-                # this is a workaround until i figure out how to authenticate user through webhook
-                if self.public:
-                    query = { 'uuid': self.uuid, 'value.public': 'True' }
-                    meta_results = self.system_ag.meta.listMetadata(q=json.dumps(query))
-                    meta_result = next(iter(meta_results), None)
-                else:
-                    meta_result = self.system_ag.meta.getMetadata(uuid=self.uuid)
+        # call the object's add_association_to method, which will add this instance
+        # only if it is not present the realted object's my_associations list
 
-            except Exception as e:
-                exception_msg = 'Agave meta object not owned by system user. %s' % e
-                logger.debug(exception_msg)
+        related_object.add_association_to(self)
 
-        if meta_result is None:
-            # i want to remove the uuid if the meta doesn't load, to avoid
-            # potentially editing and losing data. this is probably an unlikely
-            # scenario, so i might chage my mind on this.
-            self.uuid = None
-            exception_msg = 'Agave meta object not found.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
+    @property
+    def my_associations(self):
+        """Retrieves all metadata objects corresponding to this instance's associationIds"""
 
-        self.set_initial(meta_result)
-        # self.load_contributors()
+        if self._my_associations is None:
+
+            self._my_associations = []
+
+            query = { 'uuid': { '$in': self.associationIds } }
+            results = self._api_client.meta.listMetadata(q=json.dumps(query))
+
+            for assoc_meta in results:
+
+                if assoc_meta.name == 'idsvc.project':
+                    assoc_object = Project(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.specimen':
+                    assoc_object = Specimen(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.process':
+                    assoc_object = Process(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.data':
+                    assoc_object = Data(meta=assoc_meta, api_client=self._api_client)
+
+                self._my_associations.append(assoc_object)
+
+        return self._my_associations
+
+    @property
+    def associations_to_me(self):
+        """Retrieves all metadata objects that have this instance's UUID in their associationIds"""
+
+        if self._associations_to_me is None:
+
+            self._associations_to_me = []
+
+            query = { 'associationIds': self.uuid }
+            results = self._api_client.meta.listMetadata(q=json.dumps(query))
+
+            for assoc_meta in results:
+
+                if assoc_meta.name == 'idsvc.project':
+                    assoc_object = Project(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.specimen':
+                    assoc_object = Specimen(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.process':
+                    assoc_object = Process(meta=assoc_meta, api_client=self._api_client)
+
+                if assoc_meta.name == 'idsvc.data':
+                    assoc_object = Data(meta=assoc_meta, api_client=self._api_client)
+
+                self._associations_to_me.append(assoc_object)
+
+        return self._associations_to_me
+
+    def load_from_meta(self, meta):
+        """Set instance variables from dictionary or json"""
+        if type(meta) is str:
+            meta = json.loads(meta)
+
+        self.uuid = meta.get('uuid', None)
+        self.value = meta.get('value', None)
+        self.owner = meta.get('owner', None)
+        self.schemaId = meta.get('schemaId', None)
+        self.internalUsername = meta.get('internalUsername', None)
+        self.associationIds = meta.get('associationIds', None)
+        self._links = meta.get('_links', None)
+
+        # TODO: instance variable for name is mixed up with list being an
+        # instance method, make list a class method, pass in api_client
+        if meta.get('name', None):
+            self.name = meta.get('name', None)
+
+        lastUpdated = meta.get('lastUpdated', None)
+        if type(lastUpdated) is datetime.datetime:
+            lastUpdated = lastUpdated.isoformat()
+        self.lastUpdated = lastUpdated
+
+        created = meta.get('created', None)
+        if type(created) is datetime.datetime:
+            created = created.isoformat()
+        self.created = created
+
+    def load_from_agave(self):
+        """Load metadata from tenant, if UUID is not None"""
+        meta = self._api_client.meta.getMetadata(uuid=self.uuid)
+
+        created = meta.get('created').isoformat()
+        lastUpdated = meta.get('lastUpdated').isoformat()
+
+        # isoformat always same length, remove zeros in microsecond
+        meta['created'] = created[:23] + created[26:]
+        meta['lastUpdated'] = lastUpdated[:23] + lastUpdated[26:]
+
+        self.load_from_meta(meta)
 
     @classmethod
-    def make(cls, uuid=None, initial_data=None, user=None, *args, **kwargs):
-        return cls(uuid, initial_data, user, *args, **kwargs)
+    def list(cls, api_client):
+        """List idsvc objects accessible to the client"""
+        query = {'name': cls.name}
+        results = api_client.meta.listMetadata(q=json.dumps(query))
 
-    def list(self, public=False):
-        results = None
-
-        if public is True:
-            try:
-                query = {'name': self.name, 'value.public': 'True'}
-                results = self.system_ag.meta.listMetadata(q=json.dumps(query))
-            except Exception as e:
-                exception_msg = 'Fatal exception: %s' % e
-                logger.exception(exception_msg)
-                raise e
-        else:
-            try:
-                query = {'name': self.name}
-                results = self.user_ag.meta.listMetadata(q=json.dumps(query))
-            except Exception as e:
-                exception_msg = 'Unable to list metadata, user may not be logged in: %s' % e
-                logger.debug(exception_msg)
         if results is not None:
-            return [self.make(initial_data = r, user=self.user) for r in results]
-        else:
-            return None
-
-    def _list_associated_meta(self, name, relationship):
-        logger.debug('Loading associated metadata for uuid=%s: %s (%s)',
-                     self.uuid, name, relationship)
-
-        if relationship == 'parent':
-            query = { 'uuid': { '$in': self.associationIds } }
-        elif relationship == 'child':
-            query = { 'associationIds': self.uuid }
-        else:
-            warning_msg = 'Cannot list associated meta, missing relationship type. Must be either parent or child.'
-            logger.warning(warning_msg)
-            return None
-
-        if name is not None:
-            query['name'] = name
-
-        meta_results = None
-
-        if self.user_ag is not None:
-            try:
-                # query meta owned by logged in user
-                meta_results = self.user_ag.meta.listMetadata(q=json.dumps(query))
-            except Exception as e:
-                debug_msg = 'Unable to list meta objects as logged in user. %s' % e
-                logger.debug(debug_msg)
-
-        if not meta_results:
-            try:
-                query['value.public'] = 'True'
-                # query public meta owned by system user
-                meta_results = self.system_ag.meta.listMetadata(q=json.dumps(query))
-            except Exception as e:
-                debug_msg = 'Unable to list meta objects as system user. %s' % e
-                logger.debug(debug_msg)
-
-        return meta_results
+            return [cls(meta=r, api_client=api_client) for r in results]
 
     def save(self):
-        # if no uuid, we are creating a new object (as the system user)
+        """Add or update metadata object on tenant"""
+
         if self.uuid is None:
-            if self.user is None:
-                exception_msg = 'Missing user information, cannot create object.'
-                logger.exception(exception_msg)
-                raise Exception(exception_msg)
-
-            # check to see if parent is public
-            if not self.name == 'idsvc.project':
-                meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
-                for meta in meta_results:
-                    public = meta.value.get('public', False)
-                    # if parent is public, new meta should be public
-                    if public:
-                        self.value['public'] = 'True'
-
-            try:
-                # always create objects with the system user
-                response = self.system_ag.meta.addMetadata(body=self.body)
-                self.set_initial(response)
-            except Exception as e:
-                exception_msg = 'Unable to save object. %s' % e
-                logger.exception(exception_msg)
-                raise Exception(exception_msg)
-
-            try:
-                # then grant permissions to the logged in user
-                perm_result = self.system_ag.meta.updateMetadataPermissions(
-                    uuid=self.uuid,
-                    body={
-                        'username': self.user.username,
-                        'permission': 'READ_WRITE'
-                    })
-
-                self.set_initial(response)
-            except Exception as e:
-                # rollback
-                self.system_ag.meta.deleteMetadata(uuid=self.uuid)
-                exception_msg = 'Unable to update permissions, rolling back. %s' % e
-                logger.exception(exception_msg)
-                raise Exception(exception_msg)
-
-        # if we have a uuid, we are probably editing an existing object
+            response = self._api_client.meta.addMetadata(body=self.meta)
         else:
-
-            # in most cases we want to do this as the logged in user,
-            # but a bug (#?) in the agave api prevents us from doing that
-            # for now. so we'll use the system user, but we want to make
-            # sure that the logged in user has privs
-
-            if not self.user_is_contributor:
-                if self.public:
-                    exception_msg = 'Unable update object.'
-                    logger.exception(exception_msg)
-                    raise Exception(exception_msg)
-                else:
-                    # this is annoying workaround until agave permissions bug is fixed
-                    pass
-            try:
-                response = self.system_ag.meta.updateMetadata(uuid=self.uuid, body=self.body)
-                self.set_initial(response)
-            except Exception as e:
-                exception_msg = 'Unable update object. %s' % e
-                logger.exception(exception_msg)
-                raise Exception(exception_msg)
+            response = self._api_client.meta.updateMetadata(uuid=self.uuid, body=self.meta)
+        self.load_from_meta(response)
 
         return response
 
     def delete(self):
+        """Delete metadata object, and all metadata associated to this object"""
         if self.uuid is None:
-            exception_msg = 'No UUID provided, no meta to delete.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
+            raise Exception('Cannot delete without UUID.')
 
-        if self.user_ag is None:
-            exception_msg = 'User must be logged in to delete meta objects.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
+        # delete all objects that have this object's uuid in their associationIds
+        for item in self.associations_to_me:
+            item.delete()
 
-        try:
-            # we use the logged in user to delete the meta object
-            self.user_ag.meta.deleteMetadata(uuid=self.uuid)
-            self.uuid = None
-        except Exception as e:
-            exception_msg = 'Unable to delete meta object. %s' % e
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
-
-    def load_contributors(self):
-        logger.debug('Calling meta.listMetadataPermissions(uuid=%s)...', self.uuid)
-        contributor_list = []
-        try:
-            permissions_list = self.system_ag.meta.listMetadataPermissions(uuid=self.uuid)
-            for entry in permissions_list:
-                if entry['permission']['write'] is True:
-                    contributor_list.append(entry['username'])
-        except Exception as e:
-            exception_msg = 'Unable to list permissions on object. %s' % e
-            logger.exception(exception_msg)
-        return contributor_list
+        response = self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        self.uuid = None
+        return response
 
     @property
-    def contributors(self):
-        if self._contributors is None:
-            self._contributors = self.load_contributors()
-        return self._contributors
+    def meta(self):
+        """Dictionary containing all relevant data and metadata. Fields may include:
 
-    @property
-    def user_is_contributor(self):
-        if not self.public == False:
-            try:
-                return self.user.username in self.contributors
-            except Exception as e:
-                exception_msg = "Missing user client. %s" % e
-                logger.exception(exception_msg)
-                return False
-        else: # permissions bug workaround
-            return True
+            uuid, owner, schemaId, internalUsername, associationIds, lastUpdated,
+            name, created, value (may contain an embedded dictionary), _links
+        """
+        # TODO: I'm not sure if it makes sense to strip out null values
+        return { 'uuid': self.uuid,
+                 'owner': self.owner,
+                 'schemaId': self.schemaId,
+                 'internalUsername': self.internalUsername,
+                 'associationIds': self.associationIds,
+                 'lastUpdated': self.lastUpdated,
+                 'name': self.name,
+                 'created': self.created,
+                 'value': self.value,
+                 '_links': self._links }
 
-    @property
-    def body(self):
-        return {
-            'uuid': self.uuid,
-            'associationIds': self.associationIds,
-            'name': self.name,
-            'value': self.value
-        }
+    def to_json(self):
+        """The meta property, formatted as json string"""
+        return json.dumps(self.meta)
 
 
 class Project(BaseMetadata):
-
+    """ """
     name = 'idsvc.project'
 
     def __init__(self, *args, **kwargs):
-
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
         super(Project, self).__init__(*args, **kwargs)
-        self._specimens = None
-        self._processes = None
-        self._data = None
-
-    @property
-    def specimens(self, reset=False):
-        if self._specimens is None or reset:
-            meta_results = self._list_associated_meta(name=Specimen.name, relationship='child')
-            self._specimens = [Specimen(initial_data=r, user=self.user) for r in meta_results]
-
-        return self._specimens
-
-    @property
-    def processes(self, reset=False):
-        if self._processes is None or reset:
-
-            meta_results = self._list_associated_meta(name=Process.name, relationship='child')
-            self._processes = [Process(initial_data=r, user=self.user) for r in meta_results]
-
-        return self._processes
-
-    @property
-    def data(self, reset=False):
-        if self._data is None or reset:
-
-            meta_results = self._list_associated_meta(name=Data.name, relationship='child')
-            self._data = [Data(initial_data=r, user=self.user) for r in meta_results]
-
-        return self._data
 
     @property
     def title(self):
-        return self.value['title']
+        return self.value.get('title')
 
-    @title.setter
-    def title(self, new_title):
-        self.value['title'] = new_title
+    @property
+    def specimens(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.specimen']
 
-    def _modify_access(self, public=True):
-        if self.user_ag is None:
-            exception_msg = 'Missing user client, cannot update object.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
+    @property
+    def processes(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.process']
 
-        if self.uuid is None:
-            exception_msg = 'Missing UUID, cannot update object.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
+    @property
+    def data(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.data']
 
-        try:
-            self.value['public'] = 'True' if public else 'False'
-            self.save()
-        except Exception as e:
-            exception_msg = 'Unable update project. %s' % e
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
-
-        for item in self.specimens + self.processes + self.data:
-
-            try:
-                item.value['public'] = 'True' if public else 'False'
-                item.save()
-            except Exception as e:
-                exception_msg = 'Unable update %s. %s' % (item.name, e)
-                logger.exception(exception_msg)
-                raise Exception(exception_msg)
-
-    def make_public(self):
-        self._modify_access(public=True)
-
-    def make_private(self):
-        self._modify_access(public=False)
+    @property
+    def datasets(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.dataset']
 
 
 class Specimen(BaseMetadata):
-
+    """ """
     name = 'idsvc.specimen'
 
     def __init__(self, *args, **kwargs):
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
         super(Specimen, self).__init__(*args, **kwargs)
-        self._project = None
-        self._processes = None
-        self._data = None
 
     @property
-    def project(self, reset=False):
-        if self._project is None or reset:
-
-            meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
-            self._project = Project(initial_data = next(iter(meta_results), None), user=self.user)
-
-        return self._project
+    def project(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
 
     @property
-    def processes(self, reset=False):
-        if self._processes is None or reset:
-
-            meta_results = self._list_associated_meta(name=Process.name, relationship='child')
-            self._processes = [Process(initial_data=r, user=self.user) for r in meta_results]
-
-        return self._processes
+    def process(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.process']
 
     @property
-    def data(self, reset=False):
-        if self._data is None or reset:
-
-            meta_results = self._list_associated_meta(name=Data.name, relationship='child')
-            self._data = [Data(initial_data=r, user=self.user) for r in meta_results]
-
-        return self._data
+    def data(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.data']
 
 
 class Process(BaseMetadata):
-    """
-    Sample value:
-    {
-        "assembly_method": "testing 789",
-        "process_type": "sequencing",
-        "reference_sequence": "testing asdf",
-        "sequence_hardware": "testing 456",
-        "sequence_method": "testing 123",
-        "_inputs": ["<idsvc.data.uuid>", "<idsvc.data.uuid>"],
-        "_outputs": ["<idsvc.data.uuid>"],
-    }
-
-    Where _inputs and _outpus are lists of metadata uuids for metadata objects
-    name="idsvc.data".
-    """
-
+    """ """
     name = 'idsvc.process'
 
     def __init__(self, *args, **kwargs):
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
         super(Process, self).__init__(*args, **kwargs)
-        self._project = None
-        self._specimen = None
-        self._data = None
-        if self.value is None:
-            self.value = {}
-        if not '_inputs' in self.value:
-            self.value['_inputs'] = []
-        if not '_outputs' in self.value:
-            self.value['_outputs'] = []
+
+        inputs = self.value.get('_inputs', [])
+        outputs = self.value.get('_outputs', [])
+
+        # creates input output items if they didn't exist
+        self.value.update({ '_inputs': inputs })
+        self.value.update({ '_outputs': outputs })
 
     @property
-    def project(self, reset=False):
-        if self._project is None or reset:
-
-            meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
-            self._project = Project(initial_data = next(iter(meta_results), None), user=self.user)
-
-        return self._project
+    def project(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
 
     @property
-    def specimen(self, reset=False):
-        if self._specimen is None or reset:
-
-            meta_results = self._list_associated_meta(name=Specimen.name, relationship='parent')
-            self._specimen = Specimen(initial_data = next(iter(meta_results), None), user=self.user)
-
-        return self._specimen
+    def specimen(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.specimen']))
 
     @property
-    def data(self, reset=False):
-        if self._data is None or reset:
-            meta_results = self._list_associated_meta(Data.name, relationship='child')
-            self._data = [Data(initial_data=r, user=self.user) for r in meta_results]
-        return self._data
+    def data(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.data']
 
     @property
     def inputs(self):
-        inputs = [d for d in self.data if d.uuid in self.value['_inputs']]
-        logger.debug(inputs)
-        return inputs
+        return [x for x in self.data if x.uuid in self.value['_inputs']]
 
     @property
     def outputs(self):
-        outputs = [d for d in self.data if d.uuid in self.value['_outputs']]
-        logger.debug(outputs)
-        return outputs
+        return [x for x in self.data if x.uuid in self.value['_outputs']]
+
+    def add_input(self, data):
+        associations_to_me = self.associations_to_me
+        associations_to_me.append(data)
+        # necessary?
+        self.associations_to_me = associations_to_me
+        #
+        inputs = self.inputs
+        inputs.append(data)
+        # necessary?
+        self.inputs = inputs
+        #
+        self.add_association_from(data)
+
+    def add_input(self, data):
+        associations_to_me = self.associations_to_me
+        associations_to_me.append(data)
+        # necessary?
+        self.associations_to_me = associations_to_me
+        #
+        outputs = self.outputs
+        outputs.append(data)
+        # necessary?
+        self.outputs = outputs
+        #
+        self.add_association_from(data)
 
 
 class Data(BaseMetadata):
-
+    """ """
     name = 'idsvc.data'
 
-    def __init__(self, system_id=None, path=None, sra_id=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
         super(Data, self).__init__(*args, **kwargs)
 
-        self._project = None
-        self._specimen = None
-        self._process = None
         self.system = None
+        system_id = kwargs.get('system_id')
+        path = kwargs.get('path')
 
-        if not self.value:
-            self.value = {}
-
-        if system_id is None:
-            system_id = self.value.get('system', None)
-
-        self.system_id = system_id
-
-        if path is None:
-            path = self.value.get('path', None)
-
-        self.path = path
-
-        if sra_id is None:
-            sra_id = self.value.get('sra_id', None)
+        if system_id is not None:
+            self.system_id = system_id
+            self.value.update({ 'system_id': system_id })
         else:
-            self.value['sra_id'] = sra_id
+            self.system_id = self.value.get('system_id')
 
-        self.sra_id = sra_id
+        if path is not None:
+            self.path = path
+            self.value.update({ 'path': path })
+        else:
+            self.path = self.value.get('path')
+
+    @property
+    def project(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+
+    @property
+    def specimen(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.specimen']))
+
+    @property
+    def process(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.process']))
+
+    @property
+    def datasets(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.datasets']
 
     def load_file_info(self):
-        if self.user_ag is None:
-            exception_msg = 'Missing user client, cannot load file info.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
-
         if self.system_id is None:
             exception_msg = 'Missing system id, cannot load file info.'
             logger.exception(exception_msg)
@@ -572,7 +514,7 @@ class Data(BaseMetadata):
 
         if self.system is None:
             try:
-                self.system = System(system_id=self.system_id, user=self.user)
+                self.system = System(api_client=self._api_client, system_id=self.system_id)
             except Exception as e:
                 exception_msg = 'Unable to access system with system_id=%s.' % self.system_id
                 logger.error(exception_msg)
@@ -594,44 +536,24 @@ class Data(BaseMetadata):
             warning_msg = 'Listing response does not contain lastModified.'
             logger.warning(warning_msg)
 
-        self.set_initial({ 'value': file_info })
+        self.value = file_info
 
-    def share(self, username, permission):
-        try:
-            self.user_ag.files.updatePermissions(systemId=self.system_id,
-                                                 filePath=self.value['path'],
-                                                 body=json.dumps({'username': username,
-                                                                  'permission': permission,
-                                                                  'recursive': False}))
-        except:
-            logger.exception('Unable to share file')
+    def _share(self, username, permission):
+        body=json.dumps({ 'username': username,
+                          'permission': permission,
+                          'recursive': False })
+        self._api_client.files.updatePermissions(
+                systemId=self.system_id,
+                filePath=self.value['path'],
+                body=body )
 
-    @property
-    def project(self, reset=False):
-        if self._project is None or reset:
+    def save(self):
+        result = super(Data, self).save()
 
-            meta_results = self._list_associated_meta(name=Project.name, relationship='parent')
-            self._project = Project(initial_data = next(iter(meta_results), None), user=self.user)
+        logger.debug('Sharing data with portal user...')
+        self._share(username='idsvc_user', permission='READ')
 
-        return self._project
-
-    @property
-    def specimen(self, reset=False):
-        if self._specimen is None or reset:
-
-            meta_results = self._list_associated_meta(name=Specimen.name, relationship='parent')
-            self._specimen = Specimen(initial_data = next(iter(meta_results), None), user=self.user)
-
-        return self._specimen
-
-    @property
-    def process(self, reset=False):
-        if self._process is None or reset:
-
-            meta_results = self._list_associated_meta(name=Process.name, relationship='parent')
-            self._process = Process(initial_data = next(iter(meta_results), None), user=self.user)
-
-        return self._process
+        return result
 
     def calculate_checksum(self):
         name = "checksum"
@@ -648,11 +570,11 @@ class Data(BaseMetadata):
             body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters}
 
         try:
-            values = { 'checksum': None,
-                       'lastChecksumUpdated': None,
-                       'checksumConflict': None,
-                       'checkStatus': None }
-            self.set_initial(values)
+            self.meta['value'].update(
+                 { 'checksum': None,
+                   'lastChecksumUpdated': None,
+                   'checksumConflict': None,
+                   'checkStatus': None })
             self.save()
         except Exception as e:
             exception_msg = 'Unable to initiate job. %s' % e
@@ -661,7 +583,7 @@ class Data(BaseMetadata):
 
         try:
             logger.debug("Job submission body: %s" % body)
-            response = self.system_ag.jobs.submit(body=body)
+            response = self._api_client.jobs.submit(body=body)
             logger.debug("Job submission response: %s" % response['id'])
         except Exception as e:
             exception_msg = 'Unable to initiate job. %s' % e
@@ -671,9 +593,99 @@ class Data(BaseMetadata):
         return response
 
 
-class System(BaseClient):
+class Dataset(BaseMetadata):
+    name ='idsvc.dataset'
 
-    def __init__(self, system_id=None, initial_data=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
+        super(Data, self).__init__(*args, **kwargs)
+
+    @property
+    def dataset_name(self):
+        return self.value.get('dataset_name')
+
+    @property
+    def project(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+
+    @property
+    def data(self):
+        return [x for x in self.my_associations if x.name == 'idsvc.data']
+
+    def add_data(self, data):
+        datas = self.data
+        datas.append(data)
+        self.data = datas
+        self.add_association_to(data)
+
+    @property
+    def identifiers(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.identifier']
+
+    def add_identifier(self, identifier):
+        identifiers = self.identifiers
+        identifiers.append(identifier)
+        self.identifiers = identifier
+        self.add_association_from(identifier)
+
+
+class Identifier(BaseMetadata):
+    name ='idsvc.identifier'
+
+    def __init__(self, *args, **kwargs):
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+            id_type         # type of identifier ('DOI','SRA', etc.)
+            uid             # unique external identifer (e.g. doi:10.1000/182)
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
+        super(Data, self).__init__(*args, **kwargs)
+
+        self.id_type = kwargs.get('type')
+        self.uid = kwargs.get('uid')
+        self.dataset = kwargs.get('dataset')
+
+        if self.id_type is not None:
+            self.value.update({ 'id_type': self.id_type })
+
+        if self.uid is not None:
+            self.value.update({ 'uid': self.uid })
+
+        if self.dataset is not None:
+            self.add_association_to(dataset)
+
+    @property
+    def project(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+
+    @property
+    def dataset(self):
+        """Return the project for which this identifier was created"""
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.dataset']))
+
+
+class System(BaseAgaveObject):
+
+    def __init__(self, *args, **kwargs):
 
         super(System, self).__init__(*args, **kwargs)
         self.id = None
@@ -685,155 +697,67 @@ class System(BaseClient):
         self.default = None
         self._links = None
 
+        # get 'meta' and 'uuid' arguments
+        system_id = kwargs.get('system_id')
+        meta = kwargs.get('meta')
+
+        if meta is not None:
+            self.load_from_meta(meta)
+
         if system_id is not None:
             self.id = system_id
-            self.load()
+            self.load_from_agave()
 
-        if initial_data is not None:
-            self.set_initial(initial_data)
+    def load_from_meta(self, meta):
+        """Set instance variables from dictionary or json"""
+        if type(meta) is str:
+            meta = json.loads(meta)
+        self.id = meta.get('id')
+        self.name = meta.get('name')
+        self.type = meta.get('type')
+        self.description = meta.get('description')
+        self.status = meta.get('status')
+        self.public = meta.get('public')
+        self.default = meta.get('default')
+        self._links = meta.get('_links')
 
-    def set_initial(self, initial_data):
-        if 'id' in initial_data:
-            self.id = initial_data['id']
-        if 'name' in initial_data:
-            self.name = initial_data['name']
-        if 'type' in initial_data:
-            self.type = initial_data['type']
-        if 'description' in initial_data:
-            self.description = initial_data['description']
-        if 'status' in initial_data:
-            self.status = initial_data['status']
-        if 'public' in initial_data:
-            self.public = initial_data['public']
-        if 'default' in initial_data:
-            self.default = initial_data['default']
-        if '_links' in initial_data:
-            self._links = initial_data['_links']
-
-    def list(self, system_type="STORAGE"):
-        if self.user_ag is None:
-            exception_msg = 'Missing user client, cannot list systems.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
-
+    @classmethod
+    def list(cls, api_client, system_type="STORAGE"):
+        """List systems available to the client.
+        Required Parameter:
+            api_client - AgavePy client object
+        Optional parameter:
+            system_type - ["STORAGE"(default)|"EXECUTION"]"""
         try:
-            results = self.user_ag.systems.list(type=system_type)
+            results = api_client.systems.list(type=system_type)
         except Exception as e:
             exception_msg = 'Unable to list systems. %s' % e
             logger.debug(exception_msg)
             raise e
 
-        return [System(initial_data = r) for r in results]
+        return [System(api_client=api_client, meta=meta) for meta in results]
 
     def listing(self, path):
-
+        """List directory contents"""
         if not self.id:
             exception_msg = 'Missing system id, cannot list files.'
             logger.exception(exception_msg)
             raise Exception(exception_msg)
 
-        if not self.user_ag:
-            exception_msg = 'Missing user client, cannot list files.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
-
         try:
-            results = self.user_ag.files.list(systemId=self.id, filePath=path)
+            results = self._api_client.files.list(systemId=self.id, filePath=path)
             return results
         except Exception as e:
             exception_msg = 'Unable to list files. %s' % e
             logger.debug(exception_msg)
             raise e
 
-    def load(self):
-        meta = self.user_ag.systems.get(systemId=self.id)
-        self.set_initial(meta)
-
-    def save(self):
-        # {
-        # 	"id": "demo.execute.example.com",
-        # 	"name": "Demo SGE + GSISSH demo vm",
-        # 	"status": "UP",
-        # 	"type": "EXECUTION",
-        # 	"description": "My example system using gsissh and gridftp to submit jobs used for testing.",
-        # 	"site": "example.com",
-        # 	"executionType": "HPC",
-        # 	"queues": [
-        # 		{
-        # 			"name": "debug",
-        # 			"maxJobs": 100,
-        # 			"maxUserJobs": 10,
-        # 			"maxNodes": 128,
-        # 			"maxMemoryPerNode": "2GB",
-        # 			"maxProcessorsPerNode": 128,
-        # 			"maxRequestedTime": "24:00:00",
-        # 			"customDirectives": "",
-        # 			"default": true
-        # 		}
-        # 	],
-        # 	"login": {
-        # 		"host": "gsissh.example.com",
-        # 		"port": 2222,
-        # 		"protocol": "GSISSH",
-        # 		"scratchDir": "/scratch",
-        # 		"workDir": "/work",
-        # 		"auth": {
-        # 			"username": "demo",
-        # 			"password": "demo",
-        # 			"credential": "",
-        # 			"type": "X509",
-        # 			"server": {
-        # 				"id": "myproxy.teragrid.org",
-        # 				"name": "XSEDE MyProxy Server",
-        # 				"site": "ncsa.uiuc.edu",
-        # 				"endpoint": "myproxy.teragrid.org",
-        # 				"port": 7512,
-        # 				"protocol": "MYPROXY"
-        # 			}
-        # 		}
-        # 	},
-        # 	"storage": {
-        # 		"host": "gridftp.example.com",
-        # 		"port": 2811,
-        # 		"protocol": "GRIDFTP",
-        # 		"rootDir": "/home/demo",
-        # 		"homeDir": "/",
-        # 		"auth": {
-        # 			"username": "demo",
-        # 			"password": "demo",
-        # 			"credential": "",
-        # 			"type": "X509",
-        # 			"server": {
-        # 				"id": "myproxy.teragrid.org",
-        # 				"name": "XSEDE MyProxy Server",
-        # 				"site": "ncsa.uiuc.edu",
-        # 				"endpoint": "myproxy.teragrid.org",
-        # 				"port": 7512,
-        # 				"protocol": "MYPROXY"
-        # 			}
-        # 		}
-        # 	},
-        # 	"maxSystemJobs": 100,
-        # 	"maxSystemJobsPerUser": 10,
-        # 	"scheduler": "SGE",
-        # 	"environment": "",
-        # 	"startupScript": "./bashrc"
-        # }
-        #TODO: implement system save
-        raise(NotImplementedError)
-
-        # if self.id is None:
-        #     return self.user_ag.systems.add(fileToUpload=None)
-        # else:
-        #     return self.user_ag.systems.update(systemId=self.id, body=None)
-
-    def delete(self):
-        #TODO: see if this works
-        raise(NotImplemented)
-        # return self.user_ag.systems.delete(systemId=self.id)
+    def load_from_agave(self):
+        meta = self._api_client.systems.get(systemId=self.id)
+        self.load_from_meta(meta)
 
     @property
-    def body(self):
+    def meta(self):
         return {
             'id' : self.id,
             'name' : self.name,
@@ -844,3 +768,52 @@ class System(BaseClient):
             'default' : self.default,
             '_links' : self._links,
         }
+
+
+# TODO: make list a class method, and pass in api_client
+
+# Notes 6/28:
+# create any object with logged in user's client
+# share with idsvc_user
+# webhook will update using system
+# when user publishes...
+# tree will become public through flag
+# ! no delete for public project !
+# each view we check permission of logged in user for that thing only
+
+# questions:
+#   * create all objects with user client (particular client determined in the view)?
+#   * share with system agave user to make public? - maybe share with ids user to begin with
+#       - remember, all project objects need to be shared, including future objects after a project is made public
+#   * webhook? not initiated by user... that's fine, we're going to update checksum as system client
+#       - the bug we found will need to be fixed... and it is
+#   * no public flag? - if we share everything with the system user, we will need a public flag
+#       - maybe silly question but is there any sense in doing this: name=idsv.project.public? No, that's silly
+#       - published better than public
+#       - additional flags at project level:
+#           '_published' t/f
+#           '_has_unpublished' t/f
+#           don't automatically publish new stuff
+#           show new stuff that could be published project detail view
+#   * scenerio, we have a new view for public projects (we also have a view for private projects)
+#     the user clicks 'view' on a public project (that the user doesn't own). the app routes the user to /project/uuid
+#       - how does the project-detail view know that the project is a public project not owned by the user?
+#           try user client first? if not, try system client? see table below
+#
+#       - should we have separate views for public projects? /project/public/uuid? No, don't like it
+#   * how do we list Specimens, Processes, Data, if there is no heirarchy (other than everything a child of Project)?
+#       - is there actually a 'dynamic' heirarchy? dependent on the type of project?
+#       - how would that work?
+
+# need to go to view to edit
+# put delete button in the edit view
+
+#           which client to use?
+#                   portal  |   user
+# list public           X   |
+# my projects               |   X
+# view any models       X   |   ?        // read first with portal, fallback to user
+# add/update                |   X
+# webhook callback      X   |            // only write that we do as the portal client
+# list systems              |   X
+# list files                |   X

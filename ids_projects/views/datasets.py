@@ -12,7 +12,7 @@ from django.http import (HttpResponse,
 from django.shortcuts import render
 import json, logging
 from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
-from ..more_efficient_models import Project, Data, Dataset
+from ..models import Project, Data, Dataset
 from ids.utils import get_portal_api_client
 from requests import HTTPError
 

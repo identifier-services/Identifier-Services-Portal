@@ -12,7 +12,7 @@ from django.shortcuts import render
 from django.core.urlresolvers import reverse
 from ids.utils import get_portal_api_client
 from ..forms.projects import ProjectForm
-from ..more_efficient_models import Project
+from ..models import Project
 from helper import client, collapse_meta
 import json, logging
 

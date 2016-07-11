@@ -1,6 +1,6 @@
 from django.test import TestCase
 from agavepy.agave import Agave
-from more_efficient_models import (BaseAgaveObject, BaseMetadata, Project,
+from models import (BaseAgaveObject, BaseMetadata, Project,
                                    Specimen, Process, Data, System)
 import os, logging
 

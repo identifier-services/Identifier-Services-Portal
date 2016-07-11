@@ -13,7 +13,7 @@ from django.http import (JsonResponse,
 from django.shortcuts import render
 import json, logging, urllib
 from ..forms.data import DataTypeForm, SRAForm
-from ..more_efficient_models import Project, Specimen, Process, System, Data
+from ..models import Project, Specimen, Process, System, Data
 from ids.utils import get_portal_api_client
 from helper import client, collapse_meta
 
