@@ -22,14 +22,14 @@
                 </li>
                 {% if user.is_authenticated %}
                 <li class="">
-                    <a href="/projects/public">Public Projects</a>
+                    <a href="/datasets/public">Public Datasets</a>
                 </li>
                 <li class="">
                     <a href="/projects/private">{{ user.first_name }}'s Projects</a>
                 </li>
                 {% else %}
                 <li class="">
-                    <a href="/projects/public">Browse Public Projects</a>
+                    <a href="/datasets/public">Browse Public Datasets</a>
                 </li>
                 {% endif %}
             </ul>

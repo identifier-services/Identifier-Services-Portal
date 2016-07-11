@@ -250,6 +250,7 @@ class BaseMetadata(BaseAgaveObject):
 
     @classmethod
     def list(cls, api_client):
+        """List idsvc objects accessible to the client"""
         query = {'name': cls.name}
         results = api_client.meta.listMetadata(q=json.dumps(query))
 
@@ -309,8 +310,23 @@ class Project(BaseMetadata):
     name = 'idsvc.project'
 
     def __init__(self, *args, **kwargs):
-        """ """
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
         super(Project, self).__init__(*args, **kwargs)
+
+    @property
+    def title(self):
+        return self.value.get('title')
 
     @property
     def specimens(self):
@@ -324,13 +340,28 @@ class Project(BaseMetadata):
     def data(self):
         return [x for x in self.associations_to_me if x.name == 'idsvc.data']
 
+    @property
+    def datasets(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.dataset']
+
 
 class Specimen(BaseMetadata):
     """ """
     name = 'idsvc.specimen'
 
     def __init__(self, *args, **kwargs):
-        """ """
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
         super(Specimen, self).__init__(*args, **kwargs)
 
     @property
@@ -351,7 +382,18 @@ class Process(BaseMetadata):
     name = 'idsvc.process'
 
     def __init__(self, *args, **kwargs):
-        """ """
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
         super(Process, self).__init__(*args, **kwargs)
 
     @property
@@ -374,13 +416,50 @@ class Process(BaseMetadata):
     def outputs(self):
         return [x for x in self.data if x.uuid in self.value['_outputs']]
 
+    def add_input(self, data):
+        associations_to_me = self.associations_to_me
+        associations_to_me.append(data)
+        # necessary?
+        self.associations_to_me = associations_to_me
+        #
+        inputs = self.inputs
+        inputs.append(data)
+        # necessary?
+        self.inputs = inputs
+        #
+        self.add_association_from(data)
+
+    def add_input(self, data):
+        associations_to_me = self.associations_to_me
+        associations_to_me.append(data)
+        # necessary?
+        self.associations_to_me = associations_to_me
+        #
+        outputs = self.outputs
+        outputs.append(data)
+        # necessary?
+        self.outputs = outputs
+        #
+        self.add_association_from(data)
+
 
 class Data(BaseMetadata):
     """ """
     name = 'idsvc.data'
 
     def __init__(self, *args, **kwargs):
-        """ """
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
         super(Data, self).__init__(*args, **kwargs)
 
     @property
@@ -394,6 +473,10 @@ class Data(BaseMetadata):
     @property
     def process(self):
         return next(iter([x for x in self.my_associations if x.name == 'idsvc.process']))
+
+    @property
+    def datasets(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.datasets']
 
     def calculate_checksum(self):
         name = "checksum"
@@ -433,6 +516,96 @@ class Data(BaseMetadata):
         return response
 
 
+class Dataset(BaseMetadata):
+    name ='idsvc.dataset'
+
+    def __init__(self, *args, **kwargs):
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
+        super(Data, self).__init__(*args, **kwargs)
+
+    @property
+    def dataset_name(self):
+        return self.value.get('dataset_name')
+
+    @property
+    def project(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+
+    @property
+    def data(self):
+        return [x for x in self.my_associations if x.name == 'idsvc.data']
+
+    def add_data(self, data):
+        datas = self.data
+        datas.append(data)
+        self.data = datas
+        self.add_association_to(data)
+
+    @property
+    def identifiers(self):
+        return [x for x in self.associations_to_me if x.name == 'idsvc.identifier']
+
+    def add_identifier(self, identifier):
+        identifiers = self.identifiers
+        identifiers.append(identifier)
+        self.identifiers = identifier
+        self.add_association_from(identifier)
+
+
+class identifier(BaseMetadata):
+    name ='idsvc.identifier'
+
+    def __init__(self, *args, **kwargs):
+        """
+        Required Parameter:
+            api_client      # AgavePy client
+        Optional Parameters:
+            uuid            # unique identifier for existing metadata object
+            body            # information held in metadata 'value' field
+            meta            # json or dictionary, values may include:
+                            #   uuid, owner, schemaId, internalUsername,
+                            #   associationIds, lastUpdated, name, value,
+                            #   created, _links
+            id_type         # type of identifier ('DOI','SRA', etc.)
+            uid             # unique external identifer (e.g. doi:10.1000/182)
+        Explicit parameters take precedence over values found in the meta dictionary
+        """
+        super(Data, self).__init__(*args, **kwargs)
+
+        self.id_type = kwargs.get('type')
+        self.uid = kwargs.get('uid')
+        self.dataset = kwargs.get('dataset')
+
+        if self.id_type is not None:
+            self.value.update({ 'id_type': self.id_type })
+
+        if self.uid is not None:
+            self.value.update({ 'uid': self.uid })
+
+        if self.dataset is not None:
+            self.add_association_to(dataset)
+
+    @property
+    def project(self):
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+
+    @property
+    def dataset(self):
+        """Return the project for which this identifier was created"""
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.dataset']))
+
+
 class System(BaseAgaveObject):
 
     def __init__(self, *args, **kwargs):
@@ -459,47 +632,38 @@ class System(BaseAgaveObject):
             self.load_from_agave()
 
     def load_from_meta(self, meta):
-        if 'id' in meta:
-            self.id = meta['id']
-        if 'name' in meta:
-            self.name = meta['name']
-        if 'type' in meta:
-            self.type = meta['type']
-        if 'description' in meta:
-            self.description = meta['description']
-        if 'status' in meta:
-            self.status = meta['status']
-        if 'public' in meta:
-            self.public = meta['public']
-        if 'default' in meta:
-            self.default = meta['default']
-        if '_links' in meta:
-            self._links = meta['_links']
+        """Set instance variables from dictionary or json"""
+        if type(meta) is str:
+            meta = json.loads(meta)
+        self.id = meta.get('id')
+        self.name = meta.get('name')
+        self.type = meta.get('type')
+        self.description = meta.get('description')
+        self.status = meta.get('status')
+        self.public = meta.get('public')
+        self.default = meta.get('default')
+        self._links = meta.get('_links')
 
-    def list(self, system_type="STORAGE"):
-        if self._api_client is None:
-            exception_msg = 'Missing user client, cannot list systems.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
-
+    @classmethod
+    def list(cls, api_client, system_type="STORAGE"):
+        """List systems available to the client.
+        Required Parameter:
+            api_client - AgavePy client object
+        Optional parameter:
+            system_type - ["STORAGE"(default)|"EXECUTION"]"""
         try:
-            results = self._api_client.systems.list(type=system_type)
+            results = api_client.systems.list(type=system_type)
         except Exception as e:
             exception_msg = 'Unable to list systems. %s' % e
             logger.debug(exception_msg)
             raise e
 
-        return [System(initial_data = r) for r in results]
+        return [System(api_client=api_client, meta=meta) for meta in results]
 
     def listing(self, path):
-
+        """List directory contents"""
         if not self.id:
             exception_msg = 'Missing system id, cannot list files.'
-            logger.exception(exception_msg)
-            raise Exception(exception_msg)
-
-        if not self.user_ag:
-            exception_msg = 'Missing user client, cannot list files.'
             logger.exception(exception_msg)
             raise Exception(exception_msg)
 
@@ -516,7 +680,7 @@ class System(BaseAgaveObject):
         self.load_from_meta(meta)
 
     @property
-    def body(self):
+    def meta(self):
         return {
             'id' : self.id,
             'name' : self.name,

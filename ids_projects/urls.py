@@ -24,6 +24,35 @@ urlpatterns = patterns(
     url(r'^data/(?P<data_uuid>.+?)$', 'view', name='data-view'),
 )
 
+############
+# Datasets #
+############
+urlpatterns += patterns(
+    'ids_projects.views.datasets',
+    # list all datasets related to a specimen
+    url(r'^datasets/public?$', 'list_public', name='dataset-list-public'),
+    # list all datasets related to a specimen
+    url(r'^datasets/private?$', 'list_private', name='dataset-list-private'),
+    # create a datasets related to a specimen
+    url(r'^dataset/create/?$', 'create', name='dataset-create'),
+    # edit a dataset
+    url(r'^dataset/edit/(?P<dataset_uuid>.+?)$', 'edit', name='dataset-edit'),
+    # delete a dataset
+    url(r'^dataset/delete/(?P<dataset_uuid>.+?)$', 'delete', name='dataset-delete'),
+    # add data to dataset
+    url(r'^dataset/add_data/(?P<dataset_uuid>.+?)$', 'add_data', name='dataset-add-data'),
+    # remove data from dataset
+    url(r'^dataset/remove_data/(?P<dataset_uuid>.+?)$', 'remove_data', name='dataset-remove-data'),
+    # make dataset public
+    url(r'^project/make_public/(?P<dataset_uuid>.+?)$', 'make_public', name='dataset-make-public'),
+    # make dataset private
+    url(r'^project/make_private/(?P<dataset_uuid>.+?)$', 'make_private', name='dataset-make-private'),
+    # request doi for public dataset
+    url(r'^project/request_doi/(?P<dataset_uuid>.+?)$', 'request-doi', name='dataset-request-doi'),
+    # view a process
+    url(r'^dataset/(?P<dataset_uuid>.+?)$', 'view', name='dataset-view'),
+)
+
 
 ###########
 # Systems #
@@ -86,8 +115,8 @@ urlpatterns += patterns(
 ############
 urlpatterns += patterns(
     'ids_projects.views.projects',
-    # list public projects
-    url(r'^projects/public/?$', 'list_public', name='project-list-public'),
+    # # list public projects
+    # url(r'^projects/public/?$', 'list_public', name='project-list-public'),
     # list private projects
     url(r'^projects/private/?$', 'list_private', name='project-list-private'),
     # # list all projects
@@ -96,10 +125,10 @@ urlpatterns += patterns(
     url(r'^project/create/?$', 'create', name='project-create'),
     # edit project
     url(r'^project/edit/(?P<project_uuid>.+?)$', 'edit', name='project-edit'),
-    # edit project
-    url(r'^project/make_public/(?P<project_uuid>.+?)$', 'make_public', name='project-make-public'),
-    # edit project
-    url(r'^project/make_private/(?P<project_uuid>.+?)$', 'make_private', name='project-make-private'),
+    # # make project public
+    # url(r'^project/make_public/(?P<project_uuid>.+?)$', 'make_public', name='project-make-public'),
+    # # make project private
+    # url(r'^project/make_private/(?P<project_uuid>.+?)$', 'make_private', name='project-make-private'),
     # delete project
     url(r'^project/delete/(?P<project_uuid>.+?)$', 'delete', name='project-delete'),
     # view a specific project

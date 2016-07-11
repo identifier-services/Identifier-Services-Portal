@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}Datasets{% endblock %}
+
+{% block create_button %}
+    {% if user.is_anonymous %}
+        <a href="{% url 'login' %}" class="btn btn-success pull-right">Login</a>
+    {% else %}
+        <a href="{% url 'ids_projects:dataset-create' %}" class="btn btn-primary pull-right">Create Dataset</a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+{% if type == 'private' %}
+<div class="row">
+    <div class="container">
+        <h3>{{ user.first_name }}'s Datasets</h3>
+        {% if not private_datasets %}
+        <h4>You don't have any datasets.</h4>
+        <a href="{% url 'ids_projects:dataset-create' %}" class="btn btn-primary">Create Dataset</a>
+        {% endif %}
+    </div>
+{% for dataset in private_datasets %}
+    <div class="col-xs-6 col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                <p><b>Dataset name: </b> dataset.dataset_name </p>
+                <p>Dataset contains {{ dataset.data|length }} items.</p>
+                <div class="row">
+                    <div class="col-xs-3">
+                        <a href="{% url 'ids_projects:dataset-view' dataset_uuid=dataset.uuid %}" class="btn btn-primary">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% else %}
+<div class="row">
+    <div class="container">
+      <h3>Public Datasets</h3>
+      {% if not public_datasets %}
+      <h4>There currently are no public datasets.</h4>
+      {% endif %}
+    </div>
+{% for dataset in public_datasets %}
+    <div class="col-xs-6 col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                <p><b>Dataset name: </b> dataset.dataset_name </p>
+                <p>Dataset contains {{ dataset.data|length }} items.</p>
+                <div class="row">
+                    <div class="col-xs-3">
+                        <a href="{% url 'ids_projects:dataset-view' dataset_uuid=dataset.uuid %}" class="btn btn-primary">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+{% endif %}
+</div>
+{% endblock %}
