@@ -93,16 +93,16 @@
     var do_listing = function do_listing() {
         var system_id = $('#id_system_id').val();
         var file_path = $('#id_file_path').val();
+
         if (system_id && file_path) {
             $('#files_listing tbody').html(
                         '<tr><td colspan="4"><p class="alert">' +
                         '<i class="glyphicon glyphicon-refresh"></i> Loading files...' +
                         '</p></td></tr>');
 
-            // $.getJSON('/data/listing/' + system_id + '/' + file_path)
-            // $.getJSON('/system/' + system_id + '/listing/' + file_path)
-            $.getJSON('/dir/list/' + system_id + '/' + file_path)
+            listing_uri = encodeURI('/dir/list/' + system_id + '/' + file_path)
 
+            $.getJSON(listing_uri)
 
             .then(function(listing) {
                 var file_rows = [];

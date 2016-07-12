@@ -49,11 +49,7 @@
         <div class="object-header dark">
             <div>
                 Input data for {{ process.value.process_type }}
-                {% if project.user_is_contributor %}
-                    <a href="{% url 'ids_projects:data-type'%}?relationship=input&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
-                {% else %}
-                    <a href="#" class="btn btn-primary btn-sm pull-right fix-me" disabled>Add</a>
-                {% endif %}
+                <a href="{% url 'ids_projects:data-type'%}?relationship=input&process_uuid={{process.uuid}}" class="btn btn-primary btn-sm pull-right fix-me">Add</a>
             </div>
         </div>
 

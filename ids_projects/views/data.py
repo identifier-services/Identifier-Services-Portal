@@ -30,7 +30,7 @@ def dir_list(request, system_id, file_path=None):
         api_client = request.user.agave_oauth.api_client
 
         if file_path is None:
-            file_path = '/'
+            file_path = '.'
 
         try:
             system = System(api_client=api_client, system_id=system_id)
