@@ -77,7 +77,9 @@ def view(request, specimen_uuid):
             messages.warning(request, exception_msg)
             return HttpResponseRedirect('/projects/private')
 
-        context = { 'specimen': specimen, 'project': specimen.project }
+        context = { 'project': specimen.project,
+                    'specimen': specimen,
+                    'processes': specimen.processes }
 
         return render(request, 'ids_projects/specimens/detail.html', context)
 

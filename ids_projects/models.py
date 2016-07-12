@@ -369,7 +369,7 @@ class Specimen(BaseMetadata):
         return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
 
     @property
-    def process(self):
+    def processes(self):
         return [x for x in self.associations_to_me if x.name == 'idsvc.process']
 
     @property
