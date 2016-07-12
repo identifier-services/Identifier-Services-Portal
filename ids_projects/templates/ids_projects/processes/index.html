@@ -68,21 +68,24 @@
         </div>
         <div class="panel-body">
             <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-            <p><b>Process Type</b> {{ process.value.process_type }}</p>
-            <p><b>Sequence Method</b> {{ process.value.sequence_method }}</p>
-            <p><b>Sequence Hardware</b> {{ process.svalue.equence_hardware }}</p>
-            <p><b>Assembly Method</b> {{ process.value.assembly_method }}</p>
-            <p><b>Reference Sequence</b> {{ process.value.reference_sequence }}</p>
+            {% for key, value in process.value.items %}
+                {% if "_" not in key and key != "process_type" %}
+                <p><b>{{ key }}</b> {{ value }}</p>
+                {% endif %}
+            {% endfor %}
             <div class="row">
-                <div class="col-xs-1">
-                    <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
+                <div class="col-xs-3">
+                    <a href="{% url 'ids_projects:process-view' process_uuid=process.uuid %}" class="btn btn-primary">View</a>
                 </div>
-                <div class="col-xs-1 pull-right col-xs-pull-2 col-sm-pull-3 col-md-pull-2">
-                    <a href="{% url 'ids_projects:process-delete' process_uuid=process.uuid %}" class="btn btn-danger">Delete</a>
+                <div class="col-xs-3">
+                    <a href="{% url 'ids_projects:process-edit' process_uuid=process.uuid %}" class="btn btn-primary">Edit</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endfor %}
+
+
+
 {% endblock %}

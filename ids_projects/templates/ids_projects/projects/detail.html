@@ -36,7 +36,7 @@
 
         <div class="row">
             <div class="col-xs-6">
-                <h4>Specimens: {{ specimen_count }}</h4>
+                <h4><a href="{% url 'ids_projects:specimen-list' %}?project_uuid={{project.uuid}}" class="">Specimens: {{ project.specimens|length }}</a></h4>
             </div>
             <div class="col-xs-3 col-xs-offset-2">
                 <!-- <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a> -->
@@ -44,7 +44,23 @@
         </div><hr>
         <div class="row">
             <div class="col-xs-6">
-                <h4>Processes: {{ process_count }}</h4>
+                <h4><a href="{% url 'ids_projects:process-list' %}?project_uuid={{project.uuid}}" class="">Processes: {{ project.processes|length }}</a></h4>
+            </div>
+            <div class="col-xs-3 col-xs-offset-2">
+                <!-- <a href="{% url 'ids_projects:process-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a> -->
+            </div>
+        </div><hr>
+        <div class="row">
+            <div class="col-xs-6">
+                <h4><a href="{% url 'ids_projects:data-list' %}?project_uuid={{project.uuid}}" class="">Data: {{ project.data|length }}</a></h4>
+            </div>
+            <div class="col-xs-3 col-xs-offset-2">
+                <!-- <a href="{% url 'ids_projects:process-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a> -->
+            </div>
+        </div><hr>
+        <div class="row">
+            <div class="col-xs-6">
+                <h4><a href="{% url 'ids_projects:dataset-list-private' %}?project_uuid={{project.uuid}}" class="">Dataset: {{ project.dataset|length }}</a></h4>
             </div>
             <div class="col-xs-3 col-xs-offset-2">
                 <!-- <a href="{% url 'ids_projects:process-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a> -->

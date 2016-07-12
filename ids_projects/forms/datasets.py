@@ -6,5 +6,5 @@ import six, logging
 logger = logging.getLogger(__name__)
 
 
-class ProcessFieldsForm(DynamicForm):
+class DatasetForm(DynamicForm):
     metadata_model = Dataset

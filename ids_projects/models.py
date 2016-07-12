@@ -103,18 +103,21 @@ class BaseMetadata(BaseAgaveObject):
 
             # skip if the object is already in the appropriate lists
 
-            if associated_object in self.my_associations \
-                and associated_object.uuid in self.associationIds:
+            my_associations = self.my_associations
+            associationIds  = self.associationIds
+
+            if associated_object in my_associations \
+                and associated_object.uuid in associationIds:
                 continue # skip, go on to next association
 
             # add object if not already in the list
 
-            if associated_object not in self.my_associations:
-                self.my_associations.append(associated_object)
+            if associated_object not in my_associations:
+                self._my_associations.append(associated_object)
 
             # add object's uuid if not already in the list
 
-            if associated_object.uuid not in self.associationIds:
+            if associated_object.uuid not in associationIds:
                 self.associationIds.append(associated_object.uuid)
 
             # call the object's add_association_from method, which will
@@ -609,7 +612,11 @@ class Dataset(BaseMetadata):
                             #   created, _links
         Explicit parameters take precedence over values found in the meta dictionary
         """
-        super(Data, self).__init__(*args, **kwargs)
+        super(Dataset, self).__init__(*args, **kwargs)
+
+        self._project = None
+        self._data = None
+        self._identifiers = None
 
     @property
     def dataset_name(self):
@@ -617,26 +624,44 @@ class Dataset(BaseMetadata):
 
     @property
     def project(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+        """Returns the project to which this dataset is assoicated"""
+        if self._project is None:
+            project = next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+            self._project = project
+        return self._project
 
     @property
     def data(self):
-        return [x for x in self.my_associations if x.name == 'idsvc.data']
+        """Returns the data grouped by this dataset"""
+        if self._data is None:
+            data = [x for x in self.my_associations if x.name == 'idsvc.data']
+            self._data = data
+        return self._data
+
+    def add_to_project(self, project):
+        """
+        Add this dataset to an existing project, which should be passed as a parameter
+        """
+        self._project = project
+        self.add_association_to(project)
 
     def add_data(self, data):
         datas = self.data
         datas.append(data)
-        self.data = datas
+        self._data = datas
         self.add_association_to(data)
 
     @property
     def identifiers(self):
-        return [x for x in self.associations_to_me if x.name == 'idsvc.identifier']
+        if self._identifiers is None:
+            identifiers = [x for x in self.associations_to_me if x.name == 'idsvc.identifier']
+            self._identifiers = identifiers
+        return self._identifiers
 
     def add_identifier(self, identifier):
         identifiers = self.identifiers
         identifiers.append(identifier)
-        self.identifiers = identifier
+        self._identifiers = identifiers
         self.add_association_from(identifier)
 
 

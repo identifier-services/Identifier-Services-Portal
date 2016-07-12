@@ -2,7 +2,7 @@
 
 {% load bootstrap3 %}
 
-{% block title %}Dataset{% endblock %}
+{% block title %}Data{% endblock %}
 
 {% block content %}
 
@@ -84,7 +84,7 @@
 </div>
 {% endif %}
 
-{% for dataset in datasets %}
+{% for data in datas %}
 <div class="col-xs-6 col-md-4">
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -92,7 +92,7 @@
         </div>
         <div class="panel-body">
             <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
-            {% for key, value in dataset.value.items %}
+            {% for key, value in data.value.items %}
                 {% if "_" not in key and key != "process_type" %}
                 <p><b>{{ key }}</b> {{ value }}</p>
                 {% endif %}

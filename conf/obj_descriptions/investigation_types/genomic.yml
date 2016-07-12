@@ -212,3 +212,25 @@ data:
               - ARK - Archival Resource id
               - DOI - Digital Object Identifier
           display: True
+dataset:
+    fields:
+        - id: name
+          label: Name
+        - id: description
+          label: Description
+        - id: existing id type
+          label: Existing ID Type
+          choices:
+              - None
+              - UUID Universally Unique Identifier
+              - ARK Archival Resource id
+              - DOI Digital Object Identifier
+              - URL/URI
+              - NCBI SRA
+              - NCBI BioProject
+              - NCBI BioSample
+              - Local identifier
+        - id: existing id
+          label: Existing ID
+        - id: doi
+          label: DOI

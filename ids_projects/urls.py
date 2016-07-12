@@ -21,6 +21,8 @@ urlpatterns = patterns(
     # request identifier
     url(r'^data/request/(?P<id_type>.+?)/(?P<data_uuid>.+?)$', 'request_id', name='data-request-id'),
     # view data info
+    url(r'^data/list/?$', 'list', name='data-list'),
+    # view data info
     url(r'^data/(?P<data_uuid>.+?)$', 'view', name='data-view'),
 )
 
@@ -52,7 +54,6 @@ urlpatterns += patterns(
     # view a process
     url(r'^dataset/(?P<dataset_uuid>.+?)$', 'view', name='dataset-view'),
 )
-
 
 ###########
 # Systems #

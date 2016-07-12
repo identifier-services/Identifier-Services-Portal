@@ -49,6 +49,62 @@ def dir_list(request, system_id, file_path=None):
             return JsonResponse({'message': error_msg}, status=404)
 
 @login_required
+def list(request):
+    """ """
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+
+        project_uuid = request.GET.get('project_uuid', None)
+        specimen_uuid = request.GET.get('specimen_uuid', None)
+        process_uuid = request.GET.get('process_uuid', None)
+
+        if request.user.is_anonymous():
+            api_client = get_portal_api_client()
+        else:
+            api_client = request.user.agave_oauth.api_client
+
+        project = None;
+        specimen = None;
+        process = None;
+        datas = None;
+
+        try:
+            if project_uuid:
+                project = Project(api_client=api_client, uuid=project_uuid)
+                datas = project.data
+            elif specimen_uuid:
+                specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
+                datas = specimen.data
+                project = specimen.project
+            elif process_uuid:
+                process = Process(api_client=api_client, uuid=process_uuid)
+                datas = process.data
+                specimen = process.specimen
+                project = process.project
+            else:
+                datas = Data.list(api_client=api_client)
+        except Exception as e:
+            exception_msg = 'Unable to load data. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
+
+        context = { 'project' : project,
+                    'specimen': specimen,
+                    'process' : process,
+                    'data'    : data }
+
+        return render(request, 'ids_projects/data/index.html', context)
+
+    #########
+    # OTHER #
+    #########
+    else:
+        django.http.HttpResponseNotAllowed("Method not allowed")
+
+@login_required
 def view(request, data_uuid):
     """ """
     #######
@@ -83,6 +139,9 @@ def view(request, data_uuid):
         django.http.HttpResponseNotAllowed("Method not allowed")
 
 def type_select(request):
+    """ """
+    project_uuid = request.GET.get('project_uuid', None)
+    specimen_uuid = request.GET.get('specimen_uuid', None)
     process_uuid = request.GET.get('process_uuid', None)
     relationship = request.GET.get('relationship', None)
 
