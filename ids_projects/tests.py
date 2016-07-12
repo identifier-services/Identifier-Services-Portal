@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 # instantiating these clients outside of the test suite setup method might be
 # frowned upon, but I only want to create the clients once. it's time consuming.
 
+DEBUG = False
 
 AGAVE_TENANT_BASEURL = os.environ.get('AGAVE_TENANT_BASEURL')
 IDS_SYS_SUPER_TOKEN = os.environ.get('IDS_SYS_SUPER_TOKEN')
@@ -291,10 +292,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
     def delete_base_metadata(self):
         """Delete all metadata with name = 'idsvc.basemeta'"""
 
-        # get a list of metadata objects with name = 'idsvc.basemeta'
-
-        name = 'idsvc.basemeta'
-        meta = { 'name': name }
+        # get a list of basemetadata objects
 
         response = BaseMetadata.list(IDS_SYS_CLEINT)
 
@@ -335,10 +333,16 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         oj = {}
 
+        if DEBUG:
+            print "Create A"
+
         # create a
         a = self.save_base_metadata()
 
         oj[a.uuid] = 'A'
+
+        if DEBUG:
+            print "Create B, point B to A"
 
         # create b, point b to a
         b = self.save_base_metadata()
@@ -351,12 +355,16 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         b.save()
         a.save()
 
-        # self.printy(oj, a, b, None, None, None)
+        if DEBUG:
+            self.printy(oj, a, b, None, None, None)
 
         # test b pointing to a
         self.assertIn(a, b.my_associations)
         # test to see if a is aware of association from b
         # self.assertIn(b, a.associations_to_me)
+
+        if DEBUG:
+            print "Create C, point C to B"
 
         # create c, point c to b
         c = self.save_base_metadata()
@@ -371,7 +379,8 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         c.save()
         b.save()
 
-        # self.printy(oj, a, b, c, None, None)
+        if DEBUG:
+            self.printy(oj, a, b, c, None, None)
 
         # test c pointing to a
         self.assertIn(a, c.my_associations)
@@ -382,6 +391,9 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         self.assertIn(b, c.my_associations)
         # test b aware of association from c
         self.assertIn(c, b.associations_to_me)
+
+        if DEBUG:
+            print "create D, point to B"
 
         # create d, point to b
         d = self.save_base_metadata()
@@ -396,7 +408,8 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         d.save()
         b.save()
 
-        # self.printy(oj, a, b, c, d, None)
+        if DEBUG:
+            self.printy(oj, a, b, c, d, None)
 
         # test d pointing to a
         self.assertIn(a, d.my_associations)
@@ -407,6 +420,9 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         self.assertIn(b, d.my_associations)
         # test b aware of association from d
         self.assertIn(d, b.associations_to_me)
+
+        if DEBUG:
+            print "Create E, point to A"
 
         # create e, point to a
         e = self.save_base_metadata()
@@ -419,7 +435,8 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         e.save()
         a.save()
 
-        # self.printy(oj, a, b, c, d, e)
+        if DEBUG:
+            self.printy(oj, a, b, c, d, e)
 
         # test e pointing to a
         self.assertIn(a, e.my_associations)
@@ -495,22 +512,26 @@ class SystemTests(TestCase, BaseClientTests):
 
     def test_instantiate_specific_system(self):
         """Attempt to create a system object with call to Agave"""
-        system = System(api_client=IDS_SYS_CLEINT, system_id='data.tacc.utexas.edu')
+        system_id = 'foobar-corral'
+
+        system = System(api_client=IDS_SYS_CLEINT, system_id=system_id)
 
         self.assertIsNotNone(system)
-        self.assertTrue(system.id == 'data.tacc.utexas.edu')
+        self.assertTrue(system.id == system_id)
 
     def test_directory_listing(self):
         """Test listing directory contents"""
-        system = System(api_client=IDS_SYS_CLEINT, system_id='stampede.tacc.utexas.edu')
+        system_id = 'foobar-corral'
 
-        path = ''
+        system = System(api_client=IDS_SYS_CLEINT, system_id=system_id)
+
+        path = '/'
 
         listing = system.listing(path)
 
         self.assertIsNotNone(listing)
 
-        import pprint
-        pprint.pprint(listing)
+        # import pprint
+        # pprint.pprint(listing)
 
         # self.assertTrue(any([sys.id == 'lonestar5.tacc.utexas.edu' for sys in system_list]))

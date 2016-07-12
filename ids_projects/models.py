@@ -15,6 +15,19 @@ class BaseMetadata(BaseAgaveObject):
     """Base class for IDS Metadata (Project, Specimen, Process, Data)"""
     name = "idsvc.basemetadata"
 
+    @classmethod
+    def get_class_by_name(cls, name):
+        mapping = {
+            'idsvc.basemetadata': BaseMetadata,
+            'idsvc.project': Project,
+            'idsvc.specimen': Specimen,
+            'idsvc.process': Process,
+            'idsvc.data': Data,
+            'idsvc.dataset': Dataset,
+            'idsvc.identifier': Identifier,
+        }
+        return mapping[name]
+
     def __init__(self, *args, **kwargs):
         """Required Parameter:
             api_client      # AgavePy client
@@ -35,8 +48,8 @@ class BaseMetadata(BaseAgaveObject):
         self.owner = None
         self.schemaId = None
         self.internalUsername = None
-        self.associationIds = None
-        self._links = None
+        self.associationIds = []
+        self._links = []
         self._my_associations = None
         self._associations_to_me = None
 
@@ -165,17 +178,10 @@ class BaseMetadata(BaseAgaveObject):
 
             for assoc_meta in results:
 
-                if assoc_meta.name == 'idsvc.project':
-                    assoc_object = Project(meta=assoc_meta, api_client=self._api_client)
+                assoc_object = self.get_class_by_name(assoc_meta.name)\
+                                (meta=assoc_meta, api_client=self._api_client)
 
-                if assoc_meta.name == 'idsvc.specimen':
-                    assoc_object = Specimen(meta=assoc_meta, api_client=self._api_client)
-
-                if assoc_meta.name == 'idsvc.process':
-                    assoc_object = Process(meta=assoc_meta, api_client=self._api_client)
-
-                if assoc_meta.name == 'idsvc.data':
-                    assoc_object = Data(meta=assoc_meta, api_client=self._api_client)
+                print "yoyo"
 
                 self._my_associations.append(assoc_object)
 
@@ -194,17 +200,10 @@ class BaseMetadata(BaseAgaveObject):
 
             for assoc_meta in results:
 
-                if assoc_meta.name == 'idsvc.project':
-                    assoc_object = Project(meta=assoc_meta, api_client=self._api_client)
+                assoc_object = self.get_class_by_name(assoc_meta.name)\
+                                (meta=assoc_meta, api_client=self._api_client)
 
-                if assoc_meta.name == 'idsvc.specimen':
-                    assoc_object = Specimen(meta=assoc_meta, api_client=self._api_client)
-
-                if assoc_meta.name == 'idsvc.process':
-                    assoc_object = Process(meta=assoc_meta, api_client=self._api_client)
-
-                if assoc_meta.name == 'idsvc.data':
-                    assoc_object = Data(meta=assoc_meta, api_client=self._api_client)
+                print "yo"
 
                 self._associations_to_me.append(assoc_object)
 
@@ -220,8 +219,8 @@ class BaseMetadata(BaseAgaveObject):
         self.owner = meta.get('owner', None)
         self.schemaId = meta.get('schemaId', None)
         self.internalUsername = meta.get('internalUsername', None)
-        self.associationIds = meta.get('associationIds', None)
-        self._links = meta.get('_links', None)
+        self.associationIds = meta.get('associationIds', [])
+        self._links = meta.get('_links', [])
 
         # TODO: instance variable for name is mixed up with list being an
         # instance method, make list a class method, pass in api_client
@@ -720,7 +719,7 @@ class System(BaseAgaveObject):
         self.status = None
         self.public = None
         self.default = None
-        self._links = None
+        self._links = []
 
         # get 'meta' and 'uuid' arguments
         system_id = kwargs.get('system_id')
@@ -744,7 +743,7 @@ class System(BaseAgaveObject):
         self.status = meta.get('status')
         self.public = meta.get('public')
         self.default = meta.get('default')
-        self._links = meta.get('_links')
+        self._links = meta.get('_links', [])
 
     @classmethod
     def list(cls, api_client, system_type="STORAGE"):

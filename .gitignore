@@ -15,3 +15,6 @@ definitions/
 *.ignore
 *.retry
 logfile*
+
+pystuff.py
+conf/agave
