@@ -13,7 +13,7 @@ from django.shortcuts import render
 import json, logging
 from ..forms.datasets import DatasetForm
 from ..models import Project, Data, Dataset
-from ids.utils import get_portal_api_client
+from ids.utils import get_portal_api_client, get_dataset_fields
 from requests import HTTPError
 
 logger = logging.getLogger(__name__)
@@ -138,14 +138,7 @@ def create(request):
         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
     try:
-        investigation_type = project.value['investigation_type'].lower()
-
-        object_descriptions = getattr(settings, 'OBJ_DESCR')
-        investigation_types = object_descriptions['investigation_types']
-
-        project_description = investigation_types[investigation_type]
-        dataset_description = project_description['dataset']
-        dataset_fields = dataset_description['fields']
+        dataset_fields = get_dataset_fields(project)
     except Exception as e:
         exception_msg = 'Missing project type information, cannot create dataset. %s' % e
         logger.error(exception_msg)
@@ -225,14 +218,7 @@ def edit(request, dataset_uuid):
         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
     try:
-        investigation_type = project.value['investigation_type'].lower()
-
-        object_descriptions = getattr(settings, 'OBJ_DESCR')
-        investigation_types = object_descriptions['investigation_types']
-
-        project_description = investigation_types[investigation_type]
-        dataset_description = project_description['dataset']
-        dataset_fields = dataset_description['fields']
+        dataset_fields = get_dataset_fields(project)
     except Exception as e:
         exception_msg = 'Missing project type information, cannot create dataset. %s' % e
         logger.error(exception_msg)

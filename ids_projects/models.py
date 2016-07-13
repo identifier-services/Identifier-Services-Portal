@@ -181,8 +181,6 @@ class BaseMetadata(BaseAgaveObject):
                 assoc_object = self.get_class_by_name(assoc_meta.name)\
                                 (meta=assoc_meta, api_client=self._api_client)
 
-                print "yoyo"
-
                 self._my_associations.append(assoc_object)
 
         return self._my_associations
@@ -202,8 +200,6 @@ class BaseMetadata(BaseAgaveObject):
 
                 assoc_object = self.get_class_by_name(assoc_meta.name)\
                                 (meta=assoc_meta, api_client=self._api_client)
-
-                print "yo"
 
                 self._associations_to_me.append(assoc_object)
 

@@ -13,7 +13,9 @@ from django.shortcuts import render
 import json, logging
 from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
 from ..models import Project, Specimen, Process
-from ids.utils import get_portal_api_client
+from ids.utils import (get_portal_api_client,
+                       get_process_choices,
+                       get_process_fields)
 from helper import client, collapse_meta
 from requests import HTTPError
 
@@ -134,16 +136,7 @@ def create(request):
         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
     try:
-        investigation_type = project.value['investigation_type'].lower()
-
-        object_descriptions = getattr(settings, 'OBJ_DESCR')
-        investigation_types = object_descriptions['investigation_types']
-
-        project_description = investigation_types[investigation_type]
-        project_processes = project_description['processes']
-
-        process_type_choices = [('', 'Choose one'),] + \
-                                [(x,x.title()) for x in project_processes.keys()]
+        process_type_choices = get_process_choices(project)
     except Exception as e:
         exception_msg = 'Missing project type information, cannot create process. %s' % e
         logger.error(exception_msg)
@@ -168,7 +161,7 @@ def create(request):
     elif request.method == 'POST':
 
         process_type = request.POST.get('process_type')
-        process_fields = project_processes[process_type]['fields']
+        process_fields = get_process_fields(project, process_type)
 
         form_process_type = ProcessTypeForm(process_type_choices, request.POST)
         form_process_type.fields['process_type'].widget.attrs['disabled'] = True
@@ -255,14 +248,7 @@ def edit(request, process_uuid):
         messages.warning(request, 'Process not found.')
         return HttpResponseRedirect('/projects/private/')
 
-    object_descriptions = getattr(settings, 'OBJ_DESCR')
-    investigation_types = object_descriptions['investigation_types']
-    investigation_type = process.project.value['investigation_type'].lower()
-
-    project_description = investigation_types[investigation_type]
-    project_processes = project_description['processes']
-    process_type = process.value['process_type']
-    process_fields = project_processes[process_type]['fields']
+    process_fields = get_process_fields(project)
 
     #######
     # GET #
