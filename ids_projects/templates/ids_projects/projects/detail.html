@@ -21,14 +21,10 @@
                 <!-- <p><b>Access: </b> {% if project.value.public == 'True' %}Public{% else %}Private{% endif %}</p> -->
                 <div class="visible-xs">
                     <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
-                    <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
                 </div>
                 <div class="row hidden-xs">
                     <div class="col-sm-3">
                         <a href="{% url 'ids_projects:project-edit' project_uuid=project.uuid %}" class="btn btn-primary">Edit</a>
-                    </div>
-                    <div class="col-sm-1">
-                        <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
                     </div>
                 </div>
             </div>

@@ -17,7 +17,8 @@
     <div>
         <button type="submit" class="btn btn-primary">Save</button>
         {% if project %} {# project exists if we're editing #}
-            <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+            <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-warning">Cancel</a>
+            <a href="{% url 'ids_projects:project-delete' project_uuid=project.uuid %}" class="btn btn-danger pull-right">Delete</a>
         {% else %}
             <a href="{% url 'ids_projects:project-list-private' %}" class="btn btn-warning pull-right">Cancel</a>
         {% endif %}
