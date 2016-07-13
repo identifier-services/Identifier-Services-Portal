@@ -19,34 +19,6 @@ import json, logging
 logger = logging.getLogger(__name__)
 
 
-# def list_public(request):
-#     """List public projects"""
-#     #######
-#     # GET #
-#     #######
-#     if request.method == 'GET':
-#
-#         api_client = get_portal_api_client()
-#
-#         try:
-#             projects = Project.list(api_client=api_client)
-#         except Exception as e:
-#             exception_msg = 'Unable to load projects. %s' % e
-#             logger.error(exception_msg)
-#             messages.warning(request, exception_msg)
-#             return HttpResponseRedirect('/')
-#
-#         context = { 'type': 'public', 'public_projects':projects, 'create_button':True }
-#
-#         return render(request, 'ids_projects/projects/index.html', context)
-#
-#     #########
-#     # OTHER #
-#     #########
-#     else:
-#         return HttpResponseBadRequest("Method not allowed")
-
-
 @login_required
 def list_private(request):
     """List private projects"""
@@ -101,10 +73,7 @@ def view(request, project_uuid):
             messages.warning(request, exception_msg)
             return HttpResponseRedirect('/projects/')
 
-        context = {'project' : project,
-                   'specimen_count' : len(project.specimens),
-                   'process_count' : len(project.processes),
-                   'file_count' : len(project.data)}
+        context = {'project' : project }
 
         return render(request, 'ids_projects/projects/detail.html', context)
 
@@ -143,23 +112,17 @@ def create(request):
 
             try:
                 project = Project(api_client=api_client, value=body)
-                result = project.save()
-            except Exception as e:
-                exception_msg = 'Unable to create new project. %s' % e
-                logger.error(exception_msg)
-                messages.warning(request, exception_msg)
-                return HttpResponseRedirect('/projects/private/')
+                project.save()
 
-            if 'uuid' in result:
                 messages.info(request, 'New project created.')
                 return HttpResponseRedirect(
                             reverse('ids_projects:project-view',
                                     kwargs={'project_uuid': project.uuid}))
-
-        warning_msg = 'Invalid API response. %s' % result
-        logger.warning(warning_msg)
-        messages.warning(request, warning_msg)
-        return HttpResponseRedirect('/projects/private/')
+            except Exception as e:
+                exception_msg = 'Unable to create new project. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect('/projects/private/')
 
     #########
     # OTHER #
@@ -201,27 +164,19 @@ def edit(request, project_uuid):
 
             try:
                 project.value.update(form.cleaned_data)
-                result = project.save()
-            except Exception as e:
-                exception_msg = 'Unable to create new project. %s' % e
-                logger.error(exception_msg)
-                messages.warning(request, exception_msg)
-                return HttpResponseRedirect(
-                            reverse('ids_projects:project-view',
-                                    kwargs={ 'project_uuid': project.uuid }))
-
-            if 'uuid' in result:
+                project.save()
+                
                 messages.info(request, 'Project successfully edited.')
                 return HttpResponseRedirect(
                             reverse('ids_projects:project-view',
                                     kwargs={ 'project_uuid': project.uuid }))
-
-        warning_msg = 'Invalid API response. %s' % result
-        logger.warning(warning_msg)
-        messages.warning(request, warning_msg)
-        return HttpResponseRedirect(
-                    reverse('ids_projects:project-view',
-                            kwargs={ 'project_uuid': project.uuid }))
+            except Exception as e:
+                exception_msg = 'Unable to create new project. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:project-view',
+                                    kwargs={ 'project_uuid': project.uuid }))
 
     #########
     # OTHER #

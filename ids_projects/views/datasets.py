@@ -170,32 +170,22 @@ def create(request):
             try:
                 dataset = Dataset(api_client=api_client)
                 dataset.value = form_dataset.cleaned_data
-                result = dataset.save()
-                dataset.add_to_project(project)
-                result = dataset.save()
-            except HTTPError as e:
-                exception_msg = 'Unable to create new dataset. %s' % e
-                logger.error(exception_msg)
-                messages.warning(request, exception_msg)
-                return HttpResponseRedirect(
-                            reverse('ids_projects:project-view',
-                                    kwargs={'project_uuid': project.uuid}))
+                dataset.associationIds = [project.uuid]
+                dataset.save()
 
-            if 'uuid' in result:
                 success_msg = 'Successfully created dataset.'
                 logger.info(success_msg)
                 messages.success(request, success_msg)
                 return HttpResponseRedirect(
                             reverse('ids_projects:dataset-view',
                                     kwargs={'dataset_uuid': dataset.uuid}))
-
-        warning_msg = 'Invalid API response. %s' % result
-        logger.warning(warning_msg)
-        messages.warning(request, warning_msg)
-        return HttpResponseRedirect(
-                    reverse('ids_projects:specimen-view',
-                            kwargs={'specimen_uuid': specimen.uuid}))
-
+            except HTTPError as e:
+                exception_msg = 'Unable to create new dataset. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:project-view',
+                                    kwargs={'project_uuid': project.uuid}))
 
 @login_required
 def edit(request, dataset_uuid):
@@ -250,9 +240,15 @@ def edit(request, dataset_uuid):
             try:
                 dataset = Dataset(api_client=api_client)
                 dataset.value = form_dataset.cleaned_data
-                result = dataset.save()
-                dataset.add_to_project(project)
-                result = dataset.save()
+                dataset.associationIds = [project.uuid]
+                dataset.save()
+
+                success_msg = 'Successfully created dataset.'
+                logger.info(success_msg)
+                messages.success(request, success_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:dataset-view',
+                                    kwargs={'dataset_uuid': dataset.uuid}))
             except HTTPError as e:
                 exception_msg = 'Unable to create new dataset. %s' % e
                 logger.error(exception_msg)
@@ -260,21 +256,6 @@ def edit(request, dataset_uuid):
                 return HttpResponseRedirect(
                             reverse('ids_projects:project-view',
                                     kwargs={'project_uuid': project.uuid}))
-
-            if 'uuid' in result:
-                success_msg = 'Successfully created dataset.'
-                logger.info(success_msg)
-                messages.success(request, success_msg)
-                return HttpResponseRedirect(
-                            reverse('ids_projects:dataset-view',
-                                    kwargs={'dataset_uuid': dataset.uuid}))
-
-        warning_msg = 'Invalid API response. %s' % result
-        logger.warning(warning_msg)
-        messages.warning(request, warning_msg)
-        return HttpResponseRedirect(
-                    reverse('ids_projects:specimen-view',
-                            kwargs={'specimen_uuid': specimen.uuid}))
 
 @login_required
 def add_data(self, dataset_uuid):

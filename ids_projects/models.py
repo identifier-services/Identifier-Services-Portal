@@ -92,7 +92,6 @@ class BaseMetadata(BaseAgaveObject):
         # set instance variables
         self.load_from_meta(meta)
 
-
     def add_association_to(self, related_object):
         """
         Add the related object to this instance's my_associations list, and
@@ -263,8 +262,6 @@ class BaseMetadata(BaseAgaveObject):
         else:
             response = self._api_client.meta.updateMetadata(uuid=self.uuid, body=self.meta)
         self.load_from_meta(response)
-
-        return response
 
     def delete(self):
         """Delete metadata object, and all metadata associated to this object"""
@@ -546,12 +543,10 @@ class Data(BaseMetadata):
                 body=body )
 
     def save(self):
-        result = super(Data, self).save()
+        super(Data, self).save()
 
         logger.debug('Sharing data with portal user...')
         self._share(username='idsvc_user', permission='READ')
-
-        return result
 
     def calculate_checksum(self):
         name = "checksum"

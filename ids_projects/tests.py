@@ -264,11 +264,11 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         # then save
 
-        result = base_meta_object_a.save()
+        base_meta_object_a.save()
 
-        # check to make sure we get the newly saved metadata objects in the result
+        # check to make sure we have a uuid, means save was succeeded
 
-        self.assertIn('uuid', result)
+        self.assertIsNotNone(base_meta_object_a.uuid)
 
         # now check to make sure that a != b
 

@@ -258,19 +258,11 @@ def add_sra(request, relationship):
                 associationIds = process.associationIds
                 associationIds.append(process.uuid)
                 data.associationIds = associationIds
-                result = data.save()
+                data.save()
             except Exception as e:
                 exception_msg = 'Unable to save sra metadata. %s.' % e
                 logger.error(exception_msg)
-                messages.warning(request, exception_msg)
-                return HttpResponseRedirect(
-                            reverse('ids_projects:process-view',
-                                    kwargs={'process_uuid': process_uuid}))
-
-            if not 'uuid' in result:
-                warning_msg = 'Invalid API response. %s' % result
-                logger.warning(warning_msg)
-                messages.warning(request, warning_msg)
+                messages.error(request, exception_msg)
                 return HttpResponseRedirect(
                             reverse('ids_projects:process-view',
                                     kwargs={'process_uuid': process_uuid}))
@@ -281,19 +273,11 @@ def add_sra(request, relationship):
                 process.value['_outputs'].append(result['uuid'])
 
             try:
-                result = process.save()
+                process.save()
             except Exception as e:
                 exception_msg = 'Unable to add SRA to process. %s.' % e
                 logger.error(exception_msg)
-                messages.warning(request, exception_msg)
-                return HttpResponseRedirect(
-                            reverse('ids_projects:process-view',
-                                    kwargs={'process_uuid': process_uuid}))
-
-            if not 'uuid' in result:
-                warning_msg = 'Invalid API response. %s' % result
-                logger.warning(warning_msg)
-                messages.warning(request, warning_msg)
+                messages.error(request, exception_msg)
                 return HttpResponseRedirect(
                             reverse('ids_projects:process-view',
                                     kwargs={'process_uuid': process_uuid}))
@@ -399,19 +383,11 @@ def file_select(request, relationship):
             associationIds = process.associationIds
             associationIds.append(process.uuid)
             data.associationIds = associationIds
-            result = data.save()
+            data.save()
         except Exception as e:
             exception_msg = 'Unable to save file info as metadata. %s.' % e
             logger.error(exception_msg)
-            messages.warning(request, exception_msg)
-            return HttpResponseRedirect(
-                        reverse('ids_projects:process-view',
-                                kwargs={'process_uuid': process_uuid}))
-
-        if not 'uuid' in result:
-            warning_msg = 'Invalid API response. %s' % result
-            logger.warning(warning_msg)
-            messages.warning(request, warning_msg)
+            messages.error(request, exception_msg)
             return HttpResponseRedirect(
                         reverse('ids_projects:process-view',
                                 kwargs={'process_uuid': process_uuid}))
@@ -422,19 +398,11 @@ def file_select(request, relationship):
             process.value['_outputs'].append(result['uuid'])
 
         try:
-            result = process.save()
+            process.save()
         except Exception as e:
             exception_msg = 'Unable to add file to process. %s.' % e
             logger.error(exception_msg)
-            messages.warning(request, exception_msg)
-            return HttpResponseRedirect(
-                        reverse('ids_projects:process-view',
-                                kwargs={'process_uuid': process_uuid}))
-
-        if not 'uuid' in result:
-            warning_msg = 'Invalid API response. %s' % result
-            logger.warning(warning_msg)
-            messages.warning(request, warning_msg)
+            messages.error(request, exception_msg)
             return HttpResponseRedirect(
                         reverse('ids_projects:process-view',
                                 kwargs={'process_uuid': process_uuid}))

@@ -113,6 +113,7 @@ def create(request):
 
     project_uuid = request.GET.get('project_uuid', None)
     specimen_uuid = request.GET.get('specimen_uuid', None)
+    process_type = request.GET.get('process_type', None)
 
     if not specimen_uuid and not project_uuid:
         messages.warning(request, 'Missing project or specimen UUID, cannot find processes.')
@@ -151,22 +152,21 @@ def create(request):
     #######
     # GET #
     #######
-    if request.method == 'GET':
+    if request.method == 'GET' and process_type is None:
         context['form_process_type'] = form_process_type = ProcessTypeForm(process_type_choices)
         context['form_process_fields'] = None
 
     ########
     # POST #
     ########
-    elif request.method == 'POST':
+    elif request.method == 'POST' or process_type is not None:
 
-        process_type = request.POST.get('process_type')
+        process_type = request.GET.get('process_type', request.POST.get('process_type'))
         process_fields = get_process_fields(project, process_type)
 
-        form_process_type = ProcessTypeForm(process_type_choices, request.POST)
+        form_process_type = ProcessTypeForm(process_type_choices, initial={ 'process_type': process_type })
         form_process_type.fields['process_type'].widget.attrs['disabled'] = True
         form_process_type.fields['process_type'].widget.attrs['readonly'] = True
-
 
         #################################################
         # POST includes 'form_process_type' fields only #
@@ -201,29 +201,21 @@ def create(request):
 
                 try:
                     process = Process(api_client=api_client, meta=meta)
-                    result = process.save()
-                except HTTPError as e:
-                    exception_msg = 'Unable to create new process. %s' % e
-                    logger.error(exception_msg)
-                    messages.warning(request, exception_msg)
-                    return HttpResponseRedirect(
-                                reverse('ids_projects:specimen-view',
-                                        kwargs={'specimen_uuid': specimen.uuid}))
+                    process.save()
 
-                if 'uuid' in result:
                     success_msg = 'Successfully created process.'
                     logger.info(success_msg)
                     messages.success(request, success_msg)
                     return HttpResponseRedirect(
                                 reverse('ids_projects:process-view',
                                         kwargs={'process_uuid': process.uuid}))
-
-            warning_msg = 'Invalid API response. %s' % result
-            logger.warning(warning_msg)
-            messages.warning(request, warning_msg)
-            return HttpResponseRedirect(
-                        reverse('ids_projects:specimen-view',
-                                kwargs={'specimen_uuid': specimen.uuid}))
+                except HTTPError as e:
+                    exception_msg = 'Unable to create new process. %s' % e
+                    logger.error(exception_msg)
+                    messages.error(request, exception_msg)
+                    return HttpResponseRedirect(
+                                reverse('ids_projects:specimen-view',
+                                        kwargs={'specimen_uuid': specimen.uuid}))
 
     if request.is_ajax():
         return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
@@ -271,28 +263,19 @@ def edit(request, process_uuid):
 
             try:
                 process.value.update(form.cleaned_data)
-                result = process.save()
-            except Exception as e:
-                exception_msg = 'Unable to edit process. %s' % e
-                logger.error(exception_msg)
-                messages.warning(request, exception_msg)
-                return HttpResponseRedirect(
-                            reverse('ids_projects:process-view',
-                                    kwargs={'process_uuid': process.uuid}))
+                process.save()
 
-            if 'uuid' in result:
                 messages.info(request, 'Process successfully edited.')
                 return HttpResponseRedirect(
                             reverse('ids_projects:process-view',
                                     kwargs={'process_uuid': process.uuid}))
-
-            warning_msg = 'Invalid API response. %s' % result
-            logger.warning(warning_msg)
-            messages.warning(request, warning_msg)
-            return HttpResponseRedirect(
-                        reverse('ids_projects:process-view',
-                                kwargs={'process_uuid': process.uuid}))
-
+            except Exception as e:
+                exception_msg = 'Unable to edit process. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:process-view',
+                                    kwargs={'process_uuid': process.uuid}))
 
 @login_required
 def delete(request, process_uuid):

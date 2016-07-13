@@ -134,29 +134,21 @@ def create(request):
 
             try:
                 specimen = Specimen(api_client=api_client, meta=meta)
-                result = specimen.save()
-            except Exception as e:
-                exception_msg = 'Unable to create new specimen. %s' % e
-                logger.error(exception_msg)
-                messages.warning(request, exception_msg)
-                return HttpResponseRedirect(
-                            reverse('ids_projects:project-view',
-                                    kwargs={'project_uuid': project_uuid}))
+                specimen.save()
 
-            if 'uuid' in result:
                 success_msg = 'Successfully created specimen.'
                 logger.info(success_msg)
                 messages.success(request, success_msg)
                 return HttpResponseRedirect(
                             reverse('ids_projects:specimen-view',
                                     kwargs={'specimen_uuid': specimen.uuid}))
-
-        warning_msg = 'Invalid API response. %s' % result
-        logger.warning(warning_msg)
-        messages.warning(request, warning_msg)
-        return HttpResponseRedirect(
-                        reverse('ids_projects:project-view',
-                            kwargs={'project_uuid': project_uuid}))
+            except Exception as e:
+                exception_msg = 'Unable to create new specimen. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:project-view',
+                                    kwargs={'project_uuid': project_uuid}))
 
     #########
     # OTHER #
@@ -201,27 +193,19 @@ def edit(request, specimen_uuid):
 
             try:
                 specimen.value.update(form.cleaned_data)
-                result = specimen.save()
-            except Exception as e:
-                exception_msg = 'Unable to edit specimen. %s' % e
-                logger.error(exception_msg)
-                messages.warning(request, exception_msg)
-                return HttpResponseRedirect(
-                            reverse('ids_projects:specimen-view',
-                                    kwargs={'specimen_uuid': specimen.uuid}))
+                specimen.save()
 
-            if 'uuid' in result:
                 messages.info(request, 'Specimen successfully edited.')
                 return HttpResponseRedirect(
                             reverse('ids_projects:specimen-view',
                                     kwargs={'specimen_uuid': specimen.uuid}))
-
-            warning_msg = 'Invalid API response. %s' % result
-            logger.warning(warning_msg)
-            messages.warning(request, warning_msg)
-            return HttpResponseRedirect(
-                        reverse('ids_projects:specimen-view',
-                                kwargs={ 'specimen_uuid': specimen.uuid }))
+            except Exception as e:
+                exception_msg = 'Unable to edit specimen. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect(
+                            reverse('ids_projects:specimen-view',
+                                    kwargs={'specimen_uuid': specimen.uuid}))
 
     #########
     # OTHER #
