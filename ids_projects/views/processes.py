@@ -111,21 +111,29 @@ def view(request, process_uuid):
 def create(request):
     """Create a new process related to a specimen"""
 
+    # get parent uuid (project or specimen), and process type, if inlcuded in
+    # the query string
+
     project_uuid = request.GET.get('project_uuid', None)
     specimen_uuid = request.GET.get('specimen_uuid', None)
     process_type = request.GET.get('process_type', None)
+
+    # check to make sure we have at least one parent uuid (project or specimen)
 
     if not specimen_uuid and not project_uuid:
         messages.warning(request, 'Missing project or specimen UUID, cannot find processes.')
         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
+    # get the api_client to pass to the model for communication with agave
+
     api_client = request.user.agave_oauth.api_client
 
-    project = None
-    specimen = None
+    # instatiate either a project and a specimen, or just a project (specimen
+    # objects always have a parent project)
 
     try:
         if not specimen_uuid:
+            specimen = None
             project = Project(api_client=api_client, uuid=project_uuid)
         else:
             specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
@@ -135,6 +143,13 @@ def create(request):
         logger.error(exception_msg)
         messages.warning(request, exception_msg)
         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
+
+    # add project, specimen to the form context
+
+    context = { 'project': project,
+                'specimen': specimen }
+
+    # get the different types of processes we can create for this project type
 
     try:
         process_type_choices = get_process_choices(project)
@@ -146,25 +161,40 @@ def create(request):
                     reverse('ids_projects:specimen-view',
                             kwargs={'specimen_uuid': specimen.uuid}))
 
-    context = { 'project':project,
-                'specimen':specimen }
-
     #######
     # GET #
     #######
-    if request.method == 'GET' and process_type is None:
-        context['form_process_type'] = form_process_type = ProcessTypeForm(process_type_choices)
-        context['form_process_fields'] = None
+    if request.method == 'GET':
+        if process_type is None:
+            context['form_process_type'] = ProcessTypeForm(process_type_choices)
+            context['form_process_fields'] = None
+        else:
+            process_type = request.GET.get('process_type')
+            process_fields = get_process_fields(project, process_type)
+
+            form_process_type = ProcessTypeForm(process_type_choices, initial={ 'process_type': process_type })
+            form_process_type.fields['process_type'].widget.attrs['disabled'] = True
+            form_process_type.fields['process_type'].widget.attrs['readonly'] = True
+
+            form_process_fields = ProcessFieldsForm(process_fields)
+            context['form_process_type'] = form_process_type
+            context['form_process_fields'] = form_process_fields
+            context['process_type'] = process_type
+
+        if request.is_ajax():
+            return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
+        else:
+            return render(request, 'ids_projects/processes/create.html', context)
 
     ########
     # POST #
     ########
-    elif request.method == 'POST' or process_type is not None:
+    elif request.method == 'POST':
 
-        process_type = request.GET.get('process_type', request.POST.get('process_type'))
+        process_type = request.POST.get('process_type')
         process_fields = get_process_fields(project, process_type)
 
-        form_process_type = ProcessTypeForm(process_type_choices, initial={ 'process_type': process_type })
+        form_process_type = ProcessTypeForm(process_type_choices, request.POST)
         form_process_type.fields['process_type'].widget.attrs['disabled'] = True
         form_process_type.fields['process_type'].widget.attrs['readonly'] = True
 
@@ -184,6 +214,7 @@ def create(request):
             form_process_fields = ProcessFieldsForm(process_fields, request.POST)
 
             if form_process_type.is_valid() and form_process_fields.is_valid():
+
                 logger.debug('Process form is valid')
 
                 data = {'process_type':process_type}
@@ -216,12 +247,6 @@ def create(request):
                     return HttpResponseRedirect(
                                 reverse('ids_projects:specimen-view',
                                         kwargs={'specimen_uuid': specimen.uuid}))
-
-    if request.is_ajax():
-        return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
-    else:
-        return render(request, 'ids_projects/processes/create.html', context)
-
 
 @login_required
 def edit(request, process_uuid):

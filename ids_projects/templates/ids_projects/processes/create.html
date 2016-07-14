@@ -7,6 +7,12 @@
 {% block content %}
 <form method="post">
     {% csrf_token %}
+
+    <h4>Add data to a previously defined {{ process_type }} process:</h4>
+    List of {{ process_type }} processes go here?
+    <h4>Or, describe and add data to a new {{ process_type }} process:</h4>
+    <hr>
+
     <fieldset id="id_form_process_type">
         {% bootstrap_form form_process_type %}
         <input type="hidden" id="id_specimen_uuid" name="specimen_uuid" value="{{specimen.uuid}}">
@@ -15,11 +21,15 @@
 
     <fieldset id="id_form_process_fields">
         {% if form_process_fields %}
-            {% include "ids_projects/processes/get_fields_ajax.html" %}            
+            {% include "ids_projects/processes/get_fields_ajax.html" %}
         {% else %}
             <div>
                 <button type="submit" class="btn btn-primary">Next</button>
-                <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+                {% if specimen %}
+                    <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+                {% else %}
+                    <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+                {% endif %}
             </div>
         {% endif %}
     </fieldset>

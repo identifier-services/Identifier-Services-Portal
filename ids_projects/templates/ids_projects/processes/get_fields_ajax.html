@@ -4,6 +4,11 @@
 <input type="hidden" id="id_process_type" name="process_type" value="{{process_type}}">
 <div>
     <button type="submit" class="btn btn-primary">Save</button>
-    <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-default">Change Process Type</a>
-    <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+    {% if specimen %}
+        <a href="{% url 'ids_projects:process-create' %}?specimen_uuid={{specimen.uuid}}" class="btn btn-default">Change Process Type</a>
+        <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+    {% elif project %}
+        <a href="{% url 'ids_projects:process-create' %}?project_uuid={{porject.uuid}}" class="btn btn-default">Change Process Type</a>
+        <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+    {% endif%}
 </div>

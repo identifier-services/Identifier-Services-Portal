@@ -10,7 +10,9 @@ from django.http import (HttpResponse,
                          HttpResponseServerError)
 from django.shortcuts import render
 from django.core.urlresolvers import reverse
-from ids.utils import get_portal_api_client
+from ids.utils import (get_portal_api_client,
+                       get_process_type_titles,
+                       get_process_type_keys)
 from ..forms.projects import ProjectForm
 from ..models import Project
 from helper import client, collapse_meta
@@ -73,7 +75,10 @@ def view(request, project_uuid):
             messages.warning(request, exception_msg)
             return HttpResponseRedirect('/projects/')
 
-        context = {'project' : project }
+        process_types = get_process_type_keys(project)
+
+        context = { 'project' : project,
+                    'process_types' : process_types }
 
         return render(request, 'ids_projects/projects/detail.html', context)
 
@@ -165,7 +170,7 @@ def edit(request, project_uuid):
             try:
                 project.value.update(form.cleaned_data)
                 project.save()
-                
+
                 messages.info(request, 'Project successfully edited.')
                 return HttpResponseRedirect(
                             reverse('ids_projects:project-view',

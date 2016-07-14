@@ -8,6 +8,11 @@
 <form method="post">
     {% csrf_token %}
 
+    <h4>Add data to a previously defined specimen:</h4>
+    List of specimens go here?
+    <h4>Or, describe and add data to a new specimen:</h4>
+    <hr>
+
     {% if form_specimen_create %}
         {% bootstrap_form form_specimen_create %}
     {% elif form_specimen_edit %}

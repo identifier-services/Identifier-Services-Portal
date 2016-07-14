@@ -66,10 +66,24 @@
     </div>
 
     <!-- Middle/Right Column - Project Basic Info -->
-    <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">
-        <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add Specimen Data</a>
-        <a href="{% url 'ids_projects:process-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add Process Data</a>
-        <!-- <a href="{% url 'ids_projects:process-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary">Add </a> -->
+    <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-6">
+        <div class="row">
+            <p>
+                <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{project.uuid}}" class="btn btn-primary btn-block">Add Specimen Data</a>
+            </p>
+        </div>
+        {% for process_type in process_types %}
+        <div class="row">
+            <p>
+                <a href="{% url 'ids_projects:process-create' %}?project_uuid={{project.uuid}}&process_type={{process_type}}" class="btn btn-primary btn-block">Add {{ process_type|title }} Data</a>
+            </p>
+        </div>
+        {% endfor %}
+        <div class="row">
+            <p>
+                <a href="{% url 'ids_projects:data-type' %}?relationship=input&project_uuid={{project.uuid}}" class="btn btn-primary btn-block">Add Any Data</a>
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}
