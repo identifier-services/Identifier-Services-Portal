@@ -361,7 +361,7 @@ class Specimen(BaseMetadata):
 
     @property
     def project(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
 
     @property
     def processes(self):
@@ -400,11 +400,11 @@ class Process(BaseMetadata):
 
     @property
     def project(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
 
     @property
     def specimen(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.specimen']))
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.specimen']), None)
 
     @property
     def data(self):
@@ -482,15 +482,15 @@ class Data(BaseMetadata):
 
     @property
     def project(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
 
     @property
     def specimen(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.specimen']))
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.specimen']), None)
 
     @property
     def process(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.process']))
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.process']), None)
 
     @property
     def datasets(self):
@@ -616,7 +616,7 @@ class Dataset(BaseMetadata):
     def project(self):
         """Returns the project to which this dataset is assoicated"""
         if self._project is None:
-            project = next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+            project = next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
             self._project = project
         return self._project
 
@@ -690,12 +690,12 @@ class Identifier(BaseMetadata):
 
     @property
     def project(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']))
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
 
     @property
     def dataset(self):
         """Return the project for which this identifier was created"""
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.dataset']))
+        return next(iter([x for x in self.my_associations if x.name == 'idsvc.dataset']), None)
 
 
 class System(BaseAgaveObject):
