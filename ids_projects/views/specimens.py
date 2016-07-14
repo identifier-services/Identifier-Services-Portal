@@ -139,11 +139,9 @@ def create(request):
                 success_msg = 'Successfully created specimen.'
                 logger.info(success_msg)
                 messages.success(request, success_msg)
-                # return HttpResponseRedirect(
-                #             reverse('ids_projects:specimen-view',
-                #                     kwargs={'specimen_uuid': specimen.uuid}))
-                # TODO: Don't leave me like this!
-                return HttpResponseRedirect("http://localhost:8000/data/type_select?relationship=input&process_uuid=2347004808787005926-242ac11f-0001-012")
+                return HttpResponseRedirect(
+                            reverse('ids_projects:specimen-view',
+                                    kwargs={'specimen_uuid': specimen.uuid}))
             except Exception as e:
                 exception_msg = 'Unable to create new specimen. %s' % e
                 logger.error(exception_msg)
