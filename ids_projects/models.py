@@ -276,6 +276,11 @@ class BaseMetadata(BaseAgaveObject):
         self.uuid = None
         return response
 
+
+    @property
+    def title(self):
+        return self.value.get('name')
+
     @property
     def meta(self):
         """Dictionary containing all relevant data and metadata. Fields may include:
@@ -360,6 +365,28 @@ class Specimen(BaseMetadata):
         super(Specimen, self).__init__(*args, **kwargs)
 
     @property
+    def title(self):
+        not_applicable = ('NA','N/A','NOT APPLICABLE','NONE','NULL')
+
+        specimen_id = self.value.get('specimen_id')
+        if specimen_id.upper() in not_applicable:
+            specimen_id = None
+
+        taxon_name = self.value.get('taxon_name')
+        if taxon_name.upper() in not_applicable:
+            taxon_name = None
+
+        organ_or_tissue = self.value.get('organ_or_tissue')
+        if organ_or_tissue.upper() in not_applicable:
+            organ_or_tissue = None
+
+        title = specimen_id if specimen_id else ''
+        title += ' ' + taxon_name if taxon_name and taxon_name != specimen_id else ''
+        title += ' ' + organ_or_tissue if organ_or_tissue and organ_or_tissue not in (specimen_id, taxon_name) else ''
+
+        return title
+
+    @property
     def project(self):
         return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
 
@@ -397,6 +424,24 @@ class Process(BaseMetadata):
         # creates input output items if they didn't exist
         self.value.update({ '_inputs': inputs })
         self.value.update({ '_outputs': outputs })
+
+    @property
+    def title(self):
+        not_applicable = ('NA','N/A','NOT APPLICABLE','NONE','NULL')
+
+        process_type = self.value.get('process_type')
+
+        method = self.value.get('assembly_method',
+                    self.value.get('sequencing_method',
+                        self.value.get('analysis_method',None)))
+
+        if method in not_applicable:
+            method = None
+
+        title = process_type
+        title += ' ' + method if method and method != process_type else ''
+
+        return title
 
     @property
     def project(self):
@@ -687,6 +732,14 @@ class Identifier(BaseMetadata):
 
         if self.dataset is not None:
             self.add_association_to(dataset)
+
+    @property
+    def title(self):
+        return self.value.get('id_type')
+
+    @property
+    def uid(self):
+        return self.value.get('uid')
 
     @property
     def project(self):
