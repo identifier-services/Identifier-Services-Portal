@@ -276,7 +276,6 @@ class BaseMetadata(BaseAgaveObject):
         self.uuid = None
         return response
 
-
     @property
     def title(self):
         return self.value.get('name')
