@@ -1,0 +1,45 @@
+relationships:
+    - None: None
+
+fields:
+    - id: title
+      label: Title
+      field_class: CharField
+      widget: TextInput
+      required: True
+
+    - id: investigation type
+      label: Investigation Type
+      field_class: ChoiceField
+      widget: Select
+      choices:
+          - Genomic
+      required: True
+
+    - id: description
+      label: Description
+      field_class: CharField
+      widget: TextArea
+      required: False
+
+    - id: existing id type
+      label: Existing ID Type
+      field_class: ChoiceField
+      widget: Select
+      choices:
+          - None
+          - UUID Universally Unique Identifier
+          - ARK Archival Resource id
+          - DOI Digital Object Identifier
+          - URL/URI
+          - NCBI SRA
+          - NCBI BioProject
+          - NCBI BioSample
+          - Local identifier
+      required: False
+
+    - id: existing id
+      label: Existing ID
+      field_class: CharField
+      widget: TextInput
+      required: False

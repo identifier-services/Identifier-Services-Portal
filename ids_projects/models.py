@@ -38,6 +38,7 @@ class BaseMetadata(BaseAgaveObject):
                             #   uuid, owner, schemaId, internalUsername,
                             #   associationIds, lastUpdated, name, value,
                             #   created, _links
+            fields          # form fields for the object
         Explicit parameters take precedence over values found in the meta dictionary
         """
         super(BaseMetadata, self).__init__(*args, **kwargs)
@@ -52,10 +53,24 @@ class BaseMetadata(BaseAgaveObject):
         self._links = []
         self._my_associations = None
         self._associations_to_me = None
+        self._fields = None
+        self._rels = None
 
         # get 'meta' and 'uuid' arguments
         meta = kwargs.get('meta')
         uuid = kwargs.get('uuid')
+        fields = kwargs.get('fields')
+        relationships = kwargs.get('rels')
+
+        # set fields that are displayed in forms and detail view
+        if fields is not None:
+            self.set_fields(fields)
+
+        # relationships describe how this object is
+        # related to other classes of objects
+        #TODO: relationships
+        if relationships is not None:
+            self.set_relationships(relationships)
 
         # if uuid is provided explicitly and meta is not, load object from
         # agave and return
@@ -244,6 +259,40 @@ class BaseMetadata(BaseAgaveObject):
         meta['lastUpdated'] = lastUpdated[:23] + lastUpdated[26:]
 
         self.load_from_meta(meta)
+
+    def set_fields(self, fields):
+        field_dict = {}
+        for field in fields:
+            key = field.get('id').replace(' ', '_')
+            label = field.get('label')
+            field_class = fields.get('field_class')
+            widget = field.get('widget')
+            required = field.get('required')
+            choices = field.get('choices')
+            field_dict[key] = {
+                'label': label,
+                'field_class':field_class,
+                'widget': widget,
+                'required': required,
+                'choices': choices,
+            }
+        self._fields = field_dict
+
+    @property
+    def relationships(self):
+        #TODO: relationships
+        return self._rels
+
+    def set_relationships(self, rels):
+        #TODO: relationships
+        rel_dict = {}
+        for rel in rels:
+            pass
+        self._rels = rel_dict
+
+    @property
+    def fields(self):
+        return self._fields
 
     @classmethod
     def list(cls, api_client):

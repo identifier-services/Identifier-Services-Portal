@@ -7,15 +7,22 @@ BASE_DIR = dirname(dirname(abspath(__file__)))
 DESCRIPTIONS_DIR = join(BASE_DIR, 'conf/obj_descriptions')
 
 
-def process(path):
+def process_file(path, conf_file):
+    """ """
+    with open(join(path, conf_file)) as f:
+        data = yaml.safe_load(f)
+    key = conf_file.split('.')[0]
+    return { key : data }
+
+
+def process_dir(path):
     """ """
     files = [f for f in listdir(path) if isfile(join(path, f))]
+
     descriptions = {}
-    for description in files:
-        with open(join(path, description)) as f:
-            data = yaml.safe_load(f)
-        description = description.split('.')[0]
-        descriptions[description] = data
+    for conf_file in files:
+        descriptions.update(process_file(path, conf_file))
+
     return descriptions
 
 
@@ -29,7 +36,12 @@ def read(location=None):
     descriptions = {}
 
     for directory in dirs:
-        descriptions[directory] = process(join(join(location, directory)))
+        descriptions[directory] = process_dir(join(join(location, directory)))
+
+    files = [f for f in listdir(location) if isfile(join(location, f))]
+
+    for conf_file in files:
+        descriptions.update(process_file(location, conf_file))
 
     return descriptions
 

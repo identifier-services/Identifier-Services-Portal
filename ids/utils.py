@@ -7,7 +7,7 @@ def get_portal_api_client():
                  token=settings.AGAVE_SUPER_TOKEN)
 
 
-def get_project_description(project):
+def get_investigation_type_description(project):
     """Returns full project description, as read from yaml config."""
     investigation_type = project.value['investigation_type'].lower()
     object_descriptions = getattr(settings, 'OBJ_DESCR')
@@ -16,37 +16,28 @@ def get_project_description(project):
     return project_description
 
 
-def get_project_fields(project):
+def get_project_description(project):
+    """Returns project fields."""
+    object_descriptions = getattr(settings, 'OBJ_DESCR')
+    project_description = object_descriptions['project']
+    return project_description
+
+
+def get_project_form_fields(project):
     """Returns project fields."""
     project_description = get_project_description(project)
-    project_fields = project_description['fields']
-    return project_fields
+    return project_description['fields']
+
+
+def get_project_fields(project):
+    return get_project_form_fields(project)
 
 
 def get_process_descriptions(project):
     """Returns full process descriptions, as read from yaml config."""
-    project_description = get_project_description(project)
-    project_processes = project_description['processes']
-    return project_processes
-
-
-def get_process_description(project, process_type):
-    """Returns full process description, as read from yaml config,
-    given project and process type."""
-    project_processes = get_process_descriptions(project)
-    process_description = project_processes[process_type]
+    investigation_type_description = get_investigation_type_description(project)
+    process_description = investigation_type_description['processes']
     return process_description
-
-
-def get_process_choices(project):
-    """
-    Returns a list of tuples containing process types and process type
-    titles.  Intended for use in a form (includes 'choose one' tuple).
-    """
-    project_processes = get_process_descriptions(project)
-    process_type_choices = [('', 'Choose one'),] + \
-                            [(x,x.title()) for x in project_processes.keys()]
-    return process_type_choices
 
 
 def get_process_type_keys(project):
@@ -63,6 +54,25 @@ def get_process_type_titles(project):
     return process_titles
 
 
+def get_process_choices(project):
+    """
+    Returns a list of tuples containing process types and process type
+    titles.  Intended for use in a form (includes 'choose one' tuple).
+    """
+    project_processes = get_process_descriptions(project)
+    process_type_choices = [('', 'Choose one'),] + \
+                            [(x,x.title()) for x in project_processes.keys()]
+    return process_type_choices
+
+
+def get_process_description(project, process_type):
+    """Returns full process description, as read from yaml config,
+    given project and process type."""
+    project_processes = get_process_descriptions(project)
+    process_description = project_processes[process_type]
+    return process_description
+
+
 def get_process_fields(project, process_type):
     """Returns process fields for a given process type."""
     project_processes = get_process_descriptions(project)
@@ -73,8 +83,8 @@ def get_process_fields(project, process_type):
 
 def get_specimen_description(project):
     """Returns full specimen descriptions, as read from yaml config."""
-    project_description = get_project_description(project)
-    specimen_description = project_description['specimen']
+    investigation_type_description = get_investigation_type_description(project)
+    specimen_description = investigation_type_description['specimen']
     return specimen_description
 
 
@@ -87,8 +97,8 @@ def get_specimen_fields(project):
 
 def get_dataset_description(project):
     """Returns full dataset descriptions, as read from yaml config."""
-    project_description = get_project_description(project)
-    dataset_description = project_description['dataset']
+    investigation_type_description = get_investigation_type_description(project)
+    dataset_description = investigation_type_description['dataset']
     return dataset_description
 
 
