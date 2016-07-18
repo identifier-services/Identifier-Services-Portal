@@ -261,11 +261,12 @@ class BaseMetadata(BaseAgaveObject):
         self.load_from_meta(meta)
 
     def set_fields(self, fields):
+
         field_dict = {}
         for field in fields:
             key = field.get('id').replace(' ', '_')
             label = field.get('label')
-            field_class = fields.get('field_class')
+            field_class = field.get('field_class')
             widget = field.get('widget')
             required = field.get('required')
             choices = field.get('choices')
