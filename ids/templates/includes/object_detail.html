@@ -1,7 +1,7 @@
 {% load custom_filters %}
 
 {% with object.name|slice:"6:" as object_type %}
-    {% with 'ids_projects:'|add:object_type|add:'-view' as route %}
+    {% with 'ids_projects:'|add:object_type|add:'-edit' as route %}
         {% with object_type|add:'_uuid='|add:object.uuid as param %}
 
             <h1>
