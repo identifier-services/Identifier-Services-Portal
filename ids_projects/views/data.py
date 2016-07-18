@@ -121,16 +121,26 @@ def view(request, data_uuid):
 
         try:
             data = Data(api_client=api_client, uuid=data_uuid)
+            project = data.project
         except Exception as e:
             exception_msg = 'Unable to load data. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
+        try:
+            process_types = get_process_type_keys(project)
+            data_fields = get_data_fields(project)
+            data.set_fields(dataset_fields)
+        except Exception as e:
+            exception_msg = 'Unable to load config values. %s' % e
+            logger.warning(exception_msg)
+
         context = {'process' : data.process,
                    'project' : data.project,
                    'specimen' : data.specimen,
-                   'data' : data}
+                   'data' : data,
+                   'process_types' : process_types }
 
         return render(request, 'ids_projects/data/detail.html', context)
 

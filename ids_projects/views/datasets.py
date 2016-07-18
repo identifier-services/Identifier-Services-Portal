@@ -100,15 +100,25 @@ def view(request, dataset_uuid):
 
         try:
             dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
+            project = dataset.project
         except Exception as e:
             exception_msg = 'Unable to load process. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
+        try:
+            process_types = get_process_type_keys(project)
+            dataset_fields = get_dataset_fields(project)
+            dataset.set_fields(dataset_fields)
+        except Exception as e:
+            exception_msg = 'Unable to load config values. %s' % e
+            logger.warning(exception_msg)
+
         context = { 'project' : dataset.project,
                     'dataset' : dataset,
-                    'datas' : dataset.data }
+                    'datas' : dataset.data,
+                    'process_types' : process_types }
 
         return render(request, 'ids_projects/processes/detail.html', context)
 
