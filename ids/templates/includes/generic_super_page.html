@@ -1,0 +1,75 @@
+{% with object.name|slice:"6:" as object_type %}
+
+    {% block content %}
+
+        {% include 'includes/object_detail.html' %}
+
+        <div class="row">
+            <div class="col-sm-2">
+            {% if object_type != 'data' %}
+                <a href="{% url 'ids_projects:data-type' %}?relationship=output&{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Data</a>
+            {% else %}
+                {% if object_type == 'dataset' %}
+                    {# href="{% url 'ids_projects:data-select' %}?dataset_uuid={{ object.uuid }} #}
+                    <a href="#" class="btn btn-primary btn-block">Select Data</a>
+                {% else %}
+                    <a href="{% url 'ids_projects:data-type' %}?relationship=output&project_uuid={{ object.project.uuid }}" class="btn btn-primary btn-block">Add Data</a>
+                {% endif %}
+            {% endif %}
+
+            {% if object_type == 'project' %}
+                <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Define Specimen</a>
+            {% else %}
+                <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{ object.project.uuid }}" class="btn btn-default btn-block">Define Specimen</a>
+            {% endif %}
+
+            {% for process_type in process_types %}
+                {% if object_type == 'project' or object_type == 'specimen' %}
+                    <a href="{% url 'ids_projects:process-create' %}?{{ object_type }}_uuid={{ object.uuid }}&process_type={{process_type}}" class="btn btn-default btn-block">Define {{ process_type|title }}</a>
+                {% else %}
+                    <a href="{% url 'ids_projects:process-create' %}?project_uuid={{ object.project.uuid }}&process_type={{process_type}}" class="btn btn-default btn-block">Define {{ process_type|title }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if object_type == 'process' %}
+                {# href="{% url 'ids_projects:process-select' %}?{{ object_type }}_uuid={{ object.uuid }}&process_type={{process_type}}" #}
+                <a href="#" class="btn btn-default btn-block">Select Input</a>
+            {% endif %}
+
+            {% if object_type == 'project' %}
+                <a href="{% url 'ids_projects:dataset-create' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Create Dataset</a>
+            {% else %}
+                <a href="{% url 'ids_projects:dataset-create' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-default btn-block">Create Dataset</a>
+            {% endif %}
+
+            </div>
+            <div class="col-sm-10">
+                <div class="jumbotron">
+
+                    <h4>{{object_type|title}} Related Objects</h4>
+
+                    <ul>
+                    {% for assoc in object.associations_to_me %}
+                        {% with assoc.name|slice:"6:" as name %}
+                        {% with 'ids_projects:'|add:name|add:'-view' as route %}
+                        {% with name|add:'_uuid='|add:assoc.uuid as param %}
+
+                        <li>
+                            <a href="{% url route assoc.uuid %}">
+                                <b>{{ name }}</b>: {{ assoc.title }}
+                            </a>
+                        </li>
+
+                        {% endwith %}
+                        {% endwith %}
+                        {% endwith %}
+                    {% endfor %}
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+    {% endblock %}
+
+{% endwith %} <!-- object_type -->

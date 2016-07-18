@@ -14,7 +14,9 @@ from django.shortcuts import render
 import json, logging, urllib
 from ..forms.data import DataTypeForm, SRAForm
 from ..models import Project, Specimen, Process, System, Data
-from ids.utils import get_portal_api_client
+from ids.utils import (get_portal_api_client,
+                       get_process_type_keys,
+                       get_data_fields)
 from helper import client, collapse_meta
 
 logger = logging.getLogger(__name__)
@@ -488,9 +490,9 @@ def file_select(request, relationship):
         #TODO: what about adding data to specimen or project?
         if process is not None:
             if relationship == 'input':
-                process.value['_inputs'].append(result['uuid'])
+                process.value['_inputs'].append(data.uuid)
             elif relationship == 'output':
-                process.value['_outputs'].append(result['uuid'])
+                process.value['_outputs'].append(data.uuid)
 
             try:
                 process.save()

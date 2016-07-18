@@ -13,7 +13,9 @@ from django.shortcuts import render
 import json, logging
 from ..forms.specimens import SpecimenForm
 from ..models import Project, Specimen
-from ids.utils import get_portal_api_client
+from ids.utils import (get_portal_api_client,
+                       get_process_type_keys,
+                       get_specimen_fields)
 from helper import client, collapse_meta
 from requests import HTTPError
 
@@ -71,15 +73,26 @@ def view(request, specimen_uuid):
 
         try:
             specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
+            project = specimen.project
+            processes = specimen.processes
         except Exception as e:
             exception_msg = 'Unable to load specimen. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
             return HttpResponseRedirect('/projects/private')
 
-        context = { 'project': specimen.project,
+        try:
+            process_types = get_process_type_keys(project)
+            specimen_fields = get_specimen_fields(project)
+            specimen.set_fields(specimen_fields)
+        except Exception as e:
+            exception_msg = 'Unable to load config values. %s' % e
+            logger.warning(exception_msg)
+
+        context = { 'project': project,
                     'specimen': specimen,
-                    'processes': specimen.processes }
+                    'processes': processes,
+                    'process_types' : process_types }
 
         return render(request, 'ids_projects/specimens/detail.html', context)
 

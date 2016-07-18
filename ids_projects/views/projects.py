@@ -12,7 +12,8 @@ from django.shortcuts import render
 from django.core.urlresolvers import reverse
 from ids.utils import (get_portal_api_client,
                        get_process_type_titles,
-                       get_process_type_keys)
+                       get_process_type_keys,
+                       get_project_fields)
 from ..forms.projects import ProjectForm
 from ..models import Project
 from helper import client, collapse_meta
@@ -68,14 +69,19 @@ def view(request, project_uuid):
 
         try:
             project = Project(api_client=api_client, uuid=project_uuid)
-
         except Exception as e:
             exception_msg = 'Unable to load project. %s' % e
             logger.error(exception_msg)
-            messages.warning(request, exception_msg)
+            messages.error(request, exception_msg)
             return HttpResponseRedirect('/projects/')
 
-        process_types = get_process_type_keys(project)
+        try:
+            process_types = get_process_type_keys(project)
+            project_fields = get_project_fields(project)
+            project.set_fields(project_fields)
+        except Exception as e:
+            exception_msg = 'Unable to load config values. %s' % e
+            logger.warning(exception_msg)
 
         context = { 'project' : project,
                     'process_types' : process_types }

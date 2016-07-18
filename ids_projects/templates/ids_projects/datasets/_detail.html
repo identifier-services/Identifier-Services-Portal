@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}Dataset{% endblock %}
+
+{% block create_button %}
+    <a href="{% url 'ids_projects:dataset-add-data' dataset_uuid=dataset.uuid %}" class="btn btn-primary pull-right">Add Data</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+
+    <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-5">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1 class="panel-title">{{ dataset.dataset_name }}</h1>
+            </div>
+            <div class="panel-body">
+                <p><img class="img-responsive" src="/static/images/img2.jpg"></p>
+                {% for key, value in dataset.value.items %}
+                    {% if "_" not in key and key != "dataset_type" %}
+                    <p><b>{{ key }}</b> {{ value }}</p>
+                    {% endif %}
+                {% endfor %}
+                <div class="row">
+                    <div class="col-xs-1">
+                        <a href="{% url 'ids_projects:dataset-edit' dataset_uuid=dataset.uuid %}" class="btn btn-primary">Edit</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xs-10 col-xs-offset-1 col-sm-offset-0 col-sm-7">
+
+        {% if not dataset.data %}
+        <div class="object-header dark">
+            <div>
+                Dataset is currently empty.
+                <a href="{% url 'ids_projects:dataset-add-data' dataset_uuid=dataset.uuid %}" class="btn btn-primary btn-sm pull-right fix-me">Add Data</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="object-header dark">
+            <div>
+                Dataset contents:
+                <a href="{% url 'ids_projects:dataset-add-data' dataset_uuid=dataset.uuid %}" class="btn btn-primary btn-sm pull-right fix-me">Add Data</a>
+            </div>
+        </div>
+
+            <div class="info-panel">
+
+                {% for data in dataset.data %}
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h1 class="panel-title">Data</h1>
+                    </div>
+                    <div class="panel-body">
+                        <dl class="dl-horizontal">
+                          {% if data.value.sra_id %}
+                          <dt>SRA</dt><dd>{{ data.value.sra_id }}</dd>
+                          {% else %}
+                          <dt>System</dt><dd>{{ data.value.system }}</dd>
+                          <dt>Path</dt><dd>{{ data.value.path }}</dd>
+                          <dt>File</dt>
+                          <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="header-link">
+                              <dd>{{ data.value.name }}</dd>
+                          </a>
+                          <dt>Size</dt><dd>{{ data.value.length|filesizeformat }}</dd>
+                          {% endif %}
+                          <dt>Last Checked</dt><dd>{% if data.value.lastChecksumUpdated %}{{ data.value.lastChecksumUpdated|default:"Not yet calculated" }}{% else %}{{ data.value.last_checksum_update|default:"Not yet calculated" }}{% endif %}</dd>
+                          <!-- TODO: Check Status -->
+                        </dl>
+                        <div class="row">
+                            <div class="col-xs-1">
+                                <a href="{% url 'ids_projects:data-view' data_uuid=data.uuid %}" class="btn btn-primary">View</a>
+                            </div>
+                            <div class="col-xs-2 pull-right col-xs-pull-2 col-sm-pull-2 col-md-pull-1">
+                                <a href="{% url 'ids_projects:data-delete' data_uuid=data.uuid %}" class="btn btn-danger">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% endfor %}
+            </div>
+        {% endif %}
+        </div>
+</div>
+{% endblock %}

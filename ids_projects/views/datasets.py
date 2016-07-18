@@ -13,7 +13,9 @@ from django.shortcuts import render
 import json, logging
 from ..forms.datasets import DatasetForm
 from ..models import Project, Data, Dataset
-from ids.utils import get_portal_api_client, get_dataset_fields
+from ids.utils import (get_portal_api_client,
+                       get_process_type_keys,
+                       get_dataset_fields)
 from requests import HTTPError
 
 logger = logging.getLogger(__name__)

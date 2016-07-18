@@ -14,7 +14,7 @@
             {% if object.fields %}
                 {% for key, value in object.value.items %}
                     {% with key|slice:":1" as leading %}
-                        {% if key != '_' and key != "process_type" %}
+                        {% if leading != '_' and key != "process_type" %}
                             {% with object.fields|lookup:key as field %}
                                 <p><b>{{ field.label }}</b> {{ value }}</p>
                             {% endwith %}
@@ -24,7 +24,7 @@
             {% else %}
                 {% for key, value in object.value.items %}
                     {% with key|slice:":1" as leading %}
-                        {% if key != '_' and key != "process_type" %}
+                        {% if leading != '_' and key != "process_type" %}
                             <p><b>{{ key|title }}</b> {{ value }}</p>
                         {% endif %}
                     {% endwith %}

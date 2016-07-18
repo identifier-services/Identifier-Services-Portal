@@ -14,6 +14,7 @@ import json, logging
 from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
 from ..models import Project, Specimen, Process
 from ids.utils import (get_portal_api_client,
+                       get_process_type_keys,
                        get_process_choices,
                        get_process_fields)
 from helper import client, collapse_meta
@@ -85,18 +86,32 @@ def view(request, process_uuid):
 
         try:
             process = Process(api_client=api_client, uuid=process_uuid)
+            project = process.project
+            specimen = process.specimen
+            data = process.data
+            inputs = process.inputs
+            outputs = process.outputs
         except Exception as e:
             exception_msg = 'Unable to load process. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
+        try:
+            process_types = get_process_type_keys(project)
+            process_fields = get_process_fields(process.value['process_type'])
+            process.set_fields(process_fields)
+        except Exception as e:
+            exception_msg = 'Unable to load config values. %s' % e
+            logger.warning(exception_msg)
+
         context = {'process' : process,
-                   'project' : process.project,
-                   'specimen' : process.specimen,
-                   'datas' : process.data,
-                   'inputs': process.inputs,
-                   'outputs': process.outputs, }
+                   'project' : project,
+                   'specimen' : specimen,
+                   'datas' : data,
+                   'inputs' : inputs,
+                   'outputs' : outputs,
+                   'process_types' : process_types }
 
         return render(request, 'ids_projects/processes/detail.html', context)
 

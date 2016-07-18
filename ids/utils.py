@@ -107,3 +107,17 @@ def get_dataset_fields(project):
     dataset_description = get_dataset_description(project)
     dataset_fields = dataset_description['fields']
     return dataset_fields
+
+
+def get_data_description(project):
+    """Returns full dataset descriptions, as read from yaml config."""
+    investigation_type_description = get_investigation_type_description(project)
+    data_description = investigation_type_description['data']
+    return data_description
+
+
+def get_data_fields(project):
+    """Returns dataset fields."""
+    data_description = get_data_description(project)
+    data_fields = data_description['fields']
+    return data_fields
