@@ -261,11 +261,14 @@ def add_sra(request, relationship):
     else:
         api_client = request.user.agave_oauth.api_client
 
+    project = None
+    specimen = None
+    process = None
     try:
         if process_uuid is not None:
             process = Process(api_client=api_client, uuid=process_uuid)
             specimen = process.specimen
-            project = specimen.project
+            project = process.project
         elif specimen_uuid is not None:
             process = None
             specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
