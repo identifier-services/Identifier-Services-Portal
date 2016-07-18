@@ -9,7 +9,8 @@ class DynamicForm(forms.Form):
     def __init__(self, fields, *args, **kwargs):
         super(DynamicForm, self).__init__(*args, **kwargs)
         for f in fields:
-            self.fields[f['id']] = self._construct_form_field(f)
+            if f.get('form_field'):
+                self.fields[f['id']] = self._construct_form_field(f)
         try:
             for key in self.initial['value'].iterkeys():
                 if key in self.fields:

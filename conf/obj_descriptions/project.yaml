@@ -7,6 +7,7 @@ fields:
       field_class: CharField
       widget: TextInput
       required: True
+      form_field: True
 
     - id: investigation type
       label: Investigation Type
@@ -15,12 +16,14 @@ fields:
       choices:
           - Genomic
       required: True
+      form_field: True
 
     - id: description
       label: Description
       field_class: CharField
       widget: TextArea
       required: False
+      form_field: True
 
     - id: existing id type
       label: Existing ID Type
@@ -37,9 +40,15 @@ fields:
           - NCBI BioSample
           - Local identifier
       required: False
+      form_field: True
 
     - id: existing id
       label: Existing ID
       field_class: CharField
       widget: TextInput
       required: False
+      form_field: True
+
+    - id: creator
+      label: Creator
+      form_field: False
