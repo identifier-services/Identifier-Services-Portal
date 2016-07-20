@@ -1,0 +1,7 @@
+from test_client import TestClient
+from test_base_client import BaseClientTests
+from test_base_metadata import BaseMetadataTests
+from test_projects import ProjectTests
+from test_systems import SystemTests
+from test_views import ViewTests
+from test_views_selenium import TestViewsSelenium

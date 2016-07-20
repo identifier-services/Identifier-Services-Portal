@@ -6,3 +6,4 @@ django-bootstrap-breadcrumbs
 python-dateutil
 pyyaml
 mock
+selenium

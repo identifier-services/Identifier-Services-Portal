@@ -1,103 +1,40 @@
 from django.test import TestCase
-from django.core.urlresolvers import reverse
-from django.contrib.auth import get_user_model
-from agavepy.agave import Agave
-from models import (BaseAgaveObject, BaseMetadata, Project,
-                                   Specimen, Process, Data, System)
-import os
-import logging
-import mock
-
-logger = logging.getLogger(__name__)
-
-# import subprocess
-# base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# test_path = os.path.join(base_dir,'test.env')
-# subprocess.call(['/bin/bash',test_path])
-
-# instantiating these clients outside of the test suite setup method might be
-# frowned upon, but I only want to create the clients once. it's time consuming.
-
-DEBUG = False
-
-AGAVE_TENANT_BASEURL = os.environ.get('AGAVE_TENANT_BASEURL')
-IDS_SYS_SUPER_TOKEN = os.environ.get('IDS_SYS_SUPER_TOKEN')
-TEST_USER1_SUPER_TOKEN = os.environ.get('TEST_USER1_SUPER_TOKEN')
-TEST_USER2_SUPER_TOKEN = os.environ.get('TEST_USER2_SUPER_TOKEN')
-
-IDS_SYS_CLEINT = Agave(api_server=AGAVE_TENANT_BASEURL, token=IDS_SYS_SUPER_TOKEN)
-TEST_USER1_CLIENT = Agave(api_server=AGAVE_TENANT_BASEURL, token=TEST_USER1_SUPER_TOKEN)
-TEST_USER2_CLIENT = Agave(api_server=AGAVE_TENANT_BASEURL, token=TEST_USER2_SUPER_TOKEN)
+from ..models import BaseAgaveObject, BaseMetadata
+from test_client import TestClient
 
 
-class BaseClientTests(object):
-    """Test class is inteded to be inherited"""
-
-    # make sure we got the env variables
-
-    def test_environ_tenant_baseurl(self):
-        """Did we get the baseurl env variable?"""
-        self.assertIsNotNone(AGAVE_TENANT_BASEURL)
-
-    def test_environ_sys_token(self):
-        """Did we get the ids sys super token env variable?"""
-        self.assertIsNotNone(IDS_SYS_SUPER_TOKEN)
-
-    def test_environ_testuser1_token(self):
-        """Did we get the test user 1 env variable?"""
-        self.assertIsNotNone(TEST_USER1_SUPER_TOKEN)
-
-    def test_environ_testuser2_token(self):
-        """Did we get the test user 2 env variable?"""
-        self.assertIsNotNone(TEST_USER2_SUPER_TOKEN)
-
-    # make sure we can use out clients
-
-    def test_sys_client(self):
-        """Test ids sys client, should return dict with username for profiles.listByUsername"""
-        self.assertIsNotNone(IDS_SYS_CLEINT.profiles.listByUsername(username='me'))
-
-    def test_testuser1_client(self):
-        """Test test user 1 client, should return dict with username for profiles.listByUsername"""
-        self.assertIsNotNone(TEST_USER1_CLIENT.profiles.listByUsername(username='me'))
-
-    def test_testuser2_client(self):
-        """Test test user 2 client, should return dict with username for profiles.listByUsername"""
-        self.assertIsNotNone(TEST_USER2_CLIENT.profiles.listByUsername(username='me'))
-
-
-class BaseMetadataTests(TestCase, BaseClientTests):
+class BaseMetadataTests(TestCase, TestClient):
     """Tests for BaseAgaveObject and BaseMetadata in IDS models"""
 
     def test_base_agave_object(self):
         """Test instantiation of base object"""
-        base_object = BaseAgaveObject(api_client=IDS_SYS_CLEINT)
+        base_object = BaseAgaveObject(api_client=self.IDS_SYS_CLIENT)
         self.assertIsNotNone(base_object)
-        self.assertEqual(base_object._api_client, IDS_SYS_CLEINT)
+        self.assertEqual(base_object._api_client, self.IDS_SYS_CLIENT)
 
     def test_base_metadata(self):
         """Test instantiation of base metadata object"""
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT)
+        base_meta = BaseMetadata(api_client=self.IDS_SYS_CLIENT)
         self.assertIsNotNone(base_meta)
-        self.assertEqual(base_meta._api_client, IDS_SYS_CLEINT)
+        self.assertEqual(base_meta._api_client, self.IDS_SYS_CLIENT)
 
     # def test_uuid_base_metadata_param(self):
     #     """Test uuid parameter to base metadata constructor"""
     #     uuid = 'ABC'
-    #     base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, uuid=uuid)
+    #     base_meta = BaseMetadata(api_client=self.IDS_SYS_CLIENT, uuid=uuid)
     #     self.assertEqual(base_meta.uuid, uuid)
 
     def test_value_base_metadata_param(self):
         """Test value parameter to base metadata constructor"""
         value = { 'color': 'blue' }
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, value=value)
+        base_meta = BaseMetadata(api_client=self.IDS_SYS_CLIENT, value=value)
         self.assertEqual(base_meta.value, value)
 
     def test_meta_base_metadata_param(self):
         """Test meta parameter to base metadata constructor"""
         name = 'idsvc.basemeta'
         meta = { 'name': name }
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
+        base_meta = BaseMetadata(api_client=self.IDS_SYS_CLIENT, meta=meta)
         # base_meta.meta will return null values that we did not specifiy
         # so we need to test if meta is a subset of base_meta.meta
         self.assertTrue(all(item in base_meta.meta.items() for item in meta.items()))
@@ -106,7 +43,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         """Test name attribute in base metadata object"""
         name = 'idsvc.basemeta'
         meta = { 'name': name }
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
+        base_meta = BaseMetadata(api_client=self.IDS_SYS_CLIENT, meta=meta)
         self.assertEqual(base_meta.name, meta['name'])
 
     def test_all_attributes_in_base_metadata(self):
@@ -138,24 +75,17 @@ class BaseMetadataTests(TestCase, BaseClientTests):
             '_links': _links
          }
 
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
+        base_meta = BaseMetadata(api_client=self.IDS_SYS_CLIENT, meta=meta)
         self.assertDictEqual(base_meta.meta, meta)
 
     def save_base_metadata(self):
         """Reusable method for saving a base metadata object"""
-
         value = { 'color': 'blue' }
-
         meta = { 'value': value }
-
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, meta=meta)
-
-        response = base_meta.save()
-        self.assertIn('uuid', response)
+        base_meta = BaseMetadata(api_client=self.IDS_SYS_CLIENT, meta=meta)
+        base_meta.save()
         self.assertIsNotNone(base_meta.uuid)
-
         self.assertTrue(all([item in base_meta.meta.items() for item in meta.items()]))
-
         return base_meta
 
     def test_save_base_metadata(self):
@@ -170,10 +100,9 @@ class BaseMetadataTests(TestCase, BaseClientTests):
     def test_save_with_no_meta(self):
         """Test saving without providing metadata"""
 
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT)
+        base_meta = BaseMetadata(api_client=self.IDS_SYS_CLIENT)
 
-        response = base_meta.save()
-        self.assertIn('uuid', response)
+        base_meta.save()
         self.assertIsNotNone(base_meta.uuid)
 
         # cleanup
@@ -185,10 +114,9 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         value = { 'color': 'blue' }
 
-        base_meta = BaseMetadata(api_client=IDS_SYS_CLEINT, value=value)
+        base_meta = BaseMetadata(api_client=self.IDS_SYS_CLIENT, value=value)
 
-        response = base_meta.save()
-        self.assertIn('uuid', response)
+        base_meta.save()
         self.assertIsNotNone(base_meta.uuid)
 
         self.assertTrue(all(item in base_meta.value.items() for item in value.items()))
@@ -206,7 +134,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         # then list metadata with name = 'idsvc.basemeta'
 
-        response = BaseMetadata.list(api_client=IDS_SYS_CLEINT)
+        response = BaseMetadata.list(api_client=self.IDS_SYS_CLIENT)
 
         # we should have at least one in the list, since we just created one
 
@@ -225,7 +153,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         # load the same metadata object again from agave
 
-        base_meta_object_b = BaseMetadata(api_client=IDS_SYS_CLEINT, uuid=base_meta_object_a.uuid)
+        base_meta_object_b = BaseMetadata(api_client=self.IDS_SYS_CLIENT, uuid=base_meta_object_a.uuid)
         base_meta_object_b.load_from_agave()
 
         # compare, make sure we're looking at the same thing (omitting
@@ -250,7 +178,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         # load the same metadata object again from agave
 
-        base_meta_object_b = BaseMetadata(api_client=IDS_SYS_CLEINT, uuid=base_meta_object_a.uuid)
+        base_meta_object_b = BaseMetadata(api_client=self.IDS_SYS_CLIENT, uuid=base_meta_object_a.uuid)
         base_meta_object_b.load_from_agave()
 
         # compare, make sure we're looking at the same thing (omitting
@@ -282,7 +210,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         # load again from agave just to be sure
 
-        base_meta_object_a = BaseMetadata(api_client=IDS_SYS_CLEINT, uuid=base_meta_object_a.uuid)
+        base_meta_object_a = BaseMetadata(api_client=self.IDS_SYS_CLIENT, uuid=base_meta_object_a.uuid)
         base_meta_object_a.load_from_agave()
 
         a = [(k,v) for k, v, in base_meta_object_a.__dict__.items() if k != '_links']
@@ -298,7 +226,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         # get a list of basemetadata objects
 
-        response = BaseMetadata.list(IDS_SYS_CLEINT)
+        response = BaseMetadata.list(self.IDS_SYS_CLIENT)
 
         # we will delete any and all metadata with name = 'idsvc.basemeta'
 
@@ -307,7 +235,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         # check delete, list metadata with name = 'idsvc.basemeta'
 
-        response = BaseMetadata.list(IDS_SYS_CLEINT)
+        response = BaseMetadata.list(self.IDS_SYS_CLIENT)
 
         self.assertEqual(len(response), 0)
 
@@ -337,7 +265,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         oj = {}
 
-        if DEBUG:
+        if self.DEBUG:
             print "Create A"
 
         # create a
@@ -345,7 +273,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
 
         oj[a.uuid] = 'A'
 
-        if DEBUG:
+        if self.DEBUG:
             print "Create B, point B to A"
 
         # create b, point b to a
@@ -359,7 +287,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         b.save()
         a.save()
 
-        if DEBUG:
+        if self.DEBUG:
             self.printy(oj, a, b, None, None, None)
 
         # test b pointing to a
@@ -367,7 +295,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         # test to see if a is aware of association from b
         # self.assertIn(b, a.associations_to_me)
 
-        if DEBUG:
+        if self.DEBUG:
             print "Create C, point C to B"
 
         # create c, point c to b
@@ -383,7 +311,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         c.save()
         b.save()
 
-        if DEBUG:
+        if self.DEBUG:
             self.printy(oj, a, b, c, None, None)
 
         # test c pointing to a
@@ -396,7 +324,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         # test b aware of association from c
         self.assertIn(c, b.associations_to_me)
 
-        if DEBUG:
+        if self.DEBUG:
             print "create D, point to B"
 
         # create d, point to b
@@ -412,7 +340,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         d.save()
         b.save()
 
-        if DEBUG:
+        if self.DEBUG:
             self.printy(oj, a, b, c, d, None)
 
         # test d pointing to a
@@ -425,7 +353,7 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         # test b aware of association from d
         self.assertIn(d, b.associations_to_me)
 
-        if DEBUG:
+        if self.DEBUG:
             print "Create E, point to A"
 
         # create e, point to a
@@ -439,127 +367,10 @@ class BaseMetadataTests(TestCase, BaseClientTests):
         e.save()
         a.save()
 
-        if DEBUG:
+        if self.DEBUG:
             self.printy(oj, a, b, c, d, e)
 
         # test e pointing to a
         self.assertIn(a, e.my_associations)
         # test a aware of association from e
         self.assertIn(b, a.associations_to_me)
-
-
-class ProjectTests(TestCase, BaseClientTests):
-    """Tests for Project in IDS models"""
-
-    def save_project(self):
-        """Reusable method for saving a project object"""
-
-        project = Project(api_client=TEST_USER1_CLIENT)
-        response = project.save()
-        self.assertIn('uuid', response)
-        self.assertIsNotNone(project.uuid)
-        self.assertIsNotNone(project.name)
-
-        return project
-
-    def delete_project(self):
-        """Delete all projects with name = 'idsvc.project'"""
-
-        # get a list of all projects
-
-        response = Project.list(api_client=TEST_USER1_CLIENT)
-
-        # we will delete all projects owned by TEST_USER1_CLIENT
-
-        for mo in response:
-            mo.delete()
-
-        response = Project.list(api_client=TEST_USER1_CLIENT)
-
-        self.assertEqual(len(response), 0)
-
-    def test_save_project(self):
-        """Create a project, save it, and cleanup by deleting all projects"""
-        self.save_project()
-        self.delete_project()
-
-    def test_list_projects(self):
-        """Create a project, save it, list projects, cleanup by deleting all projects"""
-
-        project = self.save_project()
-
-        proj_list = Project.list(project._api_client)
-        self.assertNotEqual(len(proj_list), 0)
-
-        self.delete_project()
-
-
-class SystemTests(TestCase, BaseClientTests):
-    def test_instantiate_system(self):
-        """Create a system object"""
-        system = System(api_client=IDS_SYS_CLEINT)
-        self.assertIsNotNone(system)
-        self.assertIsNotNone(system._api_client)
-        self.assertEqual(system._api_client, IDS_SYS_CLEINT)
-
-    def test_list_systems(self):
-        """List all systems for client"""
-        system_list = System.list(api_client=IDS_SYS_CLEINT, system_type="STORAGE")
-
-        self.assertIsNotNone(system_list)
-        self.assertTrue(any([sys.id == 'data.tacc.utexas.edu' for sys in system_list]))
-
-        system_list = System.list(api_client=IDS_SYS_CLEINT, system_type="EXECUTION")
-
-        self.assertIsNotNone(system_list)
-        self.assertTrue(any([sys.id == 'lonestar5.tacc.utexas.edu' for sys in system_list]))
-
-    def test_instantiate_specific_system(self):
-        """Attempt to create a system object with call to Agave"""
-        system_id = 'foobar-corral'
-
-        system = System(api_client=IDS_SYS_CLEINT, system_id=system_id)
-
-        self.assertIsNotNone(system)
-        self.assertTrue(system.id == system_id)
-
-    def test_directory_listing(self):
-        """Test listing directory contents"""
-        system_id = 'foobar-corral'
-
-        system = System(api_client=IDS_SYS_CLEINT, system_id=system_id)
-
-        path = '/'
-
-        listing = system.listing(path)
-
-        self.assertIsNotNone(listing)
-
-        # import pprint
-        # pprint.pprint(listing)
-
-        # self.assertTrue(any([sys.id == 'lonestar5.tacc.utexas.edu' for sys in system_list]))
-
-
-class ViewTests(TestCase):
-
-    fixtures = ['user_data.json']
-
-    def test_list_datasets_view(self):
-        response = self.client.get(reverse('ids_projects:dataset-list-public'))
-        self.assertContains(response, '<h1>Public Datasets</h1>')
-
-    def test_list_user_projects_anon(self):
-        response = self.client.get(reverse('ids_projects:project-list-private'))
-        self.assertRedirects(response, '/login/?next=/projects/private', status_code=302,
-                             fetch_redirect_response=False)
-
-    @mock.patch('ids_projects.models.Project.list')
-    def test_list_user_projects(self, mock_project_list):
-        self.client.login(username='ids_user_1', password='testing')
-        response = self.client.get(reverse('ids_projects:project-list-private'))
-
-        assert mock_project_list.called
-        self.assertContains(response, "<h3>User's Projects</h3>")
-
-
