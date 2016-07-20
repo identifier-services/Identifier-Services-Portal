@@ -24,6 +24,8 @@ urlpatterns = patterns(
     url(r'^data/list/?$', 'list', name='data-list'),
     # view data info
     url(r'^data/(?P<data_uuid>.+?)$', 'view', name='data-view'),
+    # edit data info
+    url(r'^data/edit/(?P<data_uuid>.+?)$', 'view', name='data-edit'),
 )
 
 ############

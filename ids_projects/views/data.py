@@ -104,7 +104,7 @@ def list(request):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 @login_required
 def view(request, data_uuid):
@@ -148,7 +148,11 @@ def view(request, data_uuid):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
+
+
+def edit(request, data_uuid):
+    return HttpResponseNotFound()
 
 def type_select(request):
     """ """
@@ -407,7 +411,7 @@ def file_select(request, relationship):
         if process_uuid is not None:
             process = Process(api_client=api_client, uuid=process_uuid)
             specimen = process.specimen
-            project = specimen.project
+            project = process.project
         elif specimen_uuid is not None:
             process = None
             specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
@@ -549,7 +553,7 @@ def file_select(request, relationship):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 @login_required
 def do_checksum(request, data_uuid):
@@ -588,7 +592,7 @@ def do_checksum(request, data_uuid):
     # OTHER #
     #########
     else:
-        django.http.HttpResponseNotAllowed("Method not allowed")
+        return HttpResponseBadRequest("Method not allowed")
 
 @login_required
 def request_id(request, data_uuid, id_type):
