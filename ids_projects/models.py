@@ -102,7 +102,21 @@ class MetadataRelationshipMixin(object):
         """
         Get all objects derived from this objects (name of relationship?).
         """
-        pass
+        if not self.uuid:
+            raise Exception('Missing UUID, cannot look up relationships without UUID.')
+
+        # TODO: cache more general query results, filter
+        query = { 'value._relationships': { '$elemMatch': {'@id': self.uuid, '@rel:type': 'DerivedFrom'} } }
+        results = self._api_client.meta.listMetadata(q=json.dumps(query))
+
+        derivations = []
+
+        for related_meta in results:
+            related_object = self.get_class_by_name(related_meta.name)\
+                            (meta=related_meta, api_client=self._api_client)
+            containers.append(related_object)
+
+        return derivations
 
     def add_derivation(self, derived_object):
         """
