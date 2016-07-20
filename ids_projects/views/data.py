@@ -154,6 +154,23 @@ def view(request, data_uuid):
 def edit(request, data_uuid):
     return HttpResponseNotFound()
 
+
+def _get_cancel_url(project_uuid=None, specimen_uuid=None, process_uuid=None):
+    if process_uuid is not None:
+        viewname = 'ids_projects:process-view'
+        args = (process_uuid,)
+    elif specimen_uuid is not None:
+        viewname = 'ids_projects:specimen-view'
+        args = (specimen_uuid,)
+    elif project_uuid is not None:
+        viewname = 'ids_projects:project-view'
+        args = (project_uuid,)
+    else:
+        viewname = 'ids_projects:project-list-private'
+        args = None
+
+    return reverse(viewname, args=args)
+
 def type_select(request):
     """ """
     project_uuid = request.GET.get('project_uuid', None)
@@ -206,7 +223,8 @@ def type_select(request):
             'project': project,
             'specimen': specimen,
             'process': process,
-            'form_data_type': form_data_type
+            'form_data_type': form_data_type,
+            'cancel_url': _get_cancel_url(project_uuid, specimen_uuid, process_uuid)
         }
 
         return render(request, 'ids_projects/data/type_select.html', context)
@@ -251,8 +269,6 @@ def type_select(request):
                         (reverse('ids_projects:file-select', kwargs={'relationship': relationship}), project_uuid)
                     )
 
-    return render(request, 'ids_projects/data/type_select.html', context)
-
 @login_required
 def add_sra(request, relationship):
     """ """
@@ -294,11 +310,15 @@ def add_sra(request, relationship):
 
         form_sra_create = SRAForm()
 
+        cancel_url = _get_cancel_url(project_uuid, specimen_uuid, process_uuid)
+        logger.debug(cancel_url)
+
         context = {
             'project': project,
             'specimen': specimen,
             'process': process,
-            'form_sra_create': form_sra_create
+            'form_sra_create': form_sra_create,
+            'cancel_url': cancel_url
         }
 
         return render(request, 'ids_projects/data/add_sra.html', context)
