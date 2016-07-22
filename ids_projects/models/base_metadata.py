@@ -1,36 +1,8 @@
-import logging
-
-logger = logging.getLogger(__name__)
-
-try:
-    from .project import Project
-except Exception as e:
-    logger.debug(e, exc_info=True)
-
-try:
-    from .specimen import Specimen
-except Exception as e:
-    logger.debug(e, exc_info=True)
-
-try:
-    from .process import Process
-except Exception as e:
-    logger.debug(e, exc_info=True)
-
-try:
-    from .data import Data
-except Exception as e:
-    logger.debug(e, exc_info=True)
-
-try:
-    from .identifier import Identifier
-except Exception as e:
-    logger.debug(e, exc_info=True)
-
 from .base_agave_object import BaseAgaveObject
 from .metadata_relationship_mixin import MetadataRelationshipMixin
 import json
 import datetime
+
 
 class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
     """Base class for IDS Metadata (Project, Specimen, Process, Data)"""
@@ -69,11 +41,11 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
         self._fields = None
         self._relationships = None
 
-        # get 'meta' and 'uuid' arguments
+        # get optional arguments
         meta = kwargs.get('meta')
+        value = kwargs.get('value')
         uuid = kwargs.get('uuid')
         fields = kwargs.get('fields')
-        relationships = kwargs.get('rels')
 
         # set fields that are displayed in forms and detail view
         if fields is not None:
@@ -87,11 +59,6 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
                 self.uuid = uuid
                 self.load_from_agave()
                 return
-
-        # get arguments
-        # meta = kwargs.get('meta', { 'uuid': None, 'value': {} })
-        value = kwargs.get('value')
-        # uuid = kwargs.get('uuid')
 
         # convert 'meta' to dictionary if necessary
         if type(meta) is str:
