@@ -41,25 +41,12 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
         name = name.split('.')[1:]
         return locals()[name]
 
-    # @classmethod
-    # def get_class_by_name(cls, name):
-    #     mapping = {
-    #         'idsvc.basemetadata': BaseMetadata,
-    #         'idsvc.project': Project,
-    #         'idsvc.specimen': Specimen,
-    #         'idsvc.process': Process,
-    #         'idsvc.data': Data,
-    #         'idsvc.dataset': Dataset,
-    #         'idsvc.identifier': Identifier,
-    #     }
-    #     return mapping[name]
-
     def __init__(self, *args, **kwargs):
         """Required Parameter:
             api_client      # AgavePy client
         Optional Parameters:
             uuid            # unique identifier for existing metadata object
-            body            # information held in metadata 'value' field
+            value            # information held in metadata 'value' field
             meta            # json or dictionary, values may include:
                             #   uuid, owner, schemaId, internalUsername,
                             #   associationIds, lastUpdated, name, value,
@@ -91,12 +78,6 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
         # set fields that are displayed in forms and detail view
         if fields is not None:
             self.set_fields(fields)
-
-        # relationships describe how this object is
-        # related to other classes of objects
-        #TODO: relationships
-        if relationships is not None:
-            self.set_relationships(relationships)
 
         # if uuid is provided explicitly and meta is not, load object from
         # agave and return
