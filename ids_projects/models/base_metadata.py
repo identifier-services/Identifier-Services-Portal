@@ -1,7 +1,11 @@
 from .base_agave_object import BaseAgaveObject
 from .metadata_relationship_mixin import MetadataRelationshipMixin
+from ids.utils import get_portal_api_client
 import json
 import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
@@ -10,8 +14,15 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
 
     @classmethod
     def get_class_by_name(cls, name):
-        name = name.split('.')[1:]
-        return locals()[name]
+        """ """
+        module_name = name.replace('idsvc.', '')
+        class_name = module_name.title()
+
+        if name not in locals():
+            module = __import__(module_name, globals(), locals(), [class_name], -1)
+            return getattr(module, class_name)
+        else:
+            return locals()[class_name]
 
     def __init__(self, *args, **kwargs):
         """Required Parameter:
@@ -40,6 +51,7 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
         self._associations_to_me = None
         self._fields = None
         self._relationships = None
+        self._related_objects = None
 
         # get optional arguments
         meta = kwargs.get('meta')
@@ -235,7 +247,7 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
         self.load_from_meta(meta)
 
     def set_fields(self, fields):
-
+        """ """
         field_dict = {}
         for field in fields:
             key = field.get('id').replace(' ', '_')
@@ -266,14 +278,44 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
         if results is not None:
             return [cls(meta=r, api_client=api_client) for r in results]
 
+    def share(self, username=None, permission='READ_WRITE'):
+        """
+        Grant permissions on this metadata object to other users.  This metadata object
+        must have a UUID.
+
+        :param username:    The username of the api user whose permission is to be set.
+                            (Default: portal's user account)
+        :param permission:  ['READ' or 'WRITE' or 'READ_WRITE' or 'ALL' or 'NONE']:
+                            The permission to set. (Default: READ_WRITE)
+        :return: None
+        """
+        if self.uuid is None:
+            raise Exception('Cannot grant permissions, objects does not have a UUID.')
+
+        if not username:
+            username = get_portal_api_client().profiles.get().username
+
+        perm_result = self._api_client.meta.updateMetadataPermissions(
+            uuid=self.uuid,
+            body={
+                'username': username,
+                'permission': permission
+            })
+
+        return perm_result
+
     def save(self):
         """Add or update metadata object on tenant"""
 
         if self.uuid is None:
             response = self._api_client.meta.addMetadata(body=self.meta)
+            self.load_from_meta(response)
+            # TODO: get rid of share result, I just want to see what comes back.
+            share_result = self.share()
+            logger.debug('Sharing result: {}'.format(share_result))
         else:
             response = self._api_client.meta.updateMetadata(uuid=self.uuid, body=self.meta)
-        self.load_from_meta(response)
+            self.load_from_meta(response)
 
     def delete(self):
         """Delete metadata object, and all metadata associated to this object"""
@@ -281,12 +323,13 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
             raise Exception('Cannot delete without UUID.')
 
         # delete all objects that have this object's uuid in their associationIds
+        #TODO: remove this
         for item in self.associations_to_me:
             item.delete()
 
-        response = self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        logger.debug('deleting object: %s - %s' % (self.title, self.uuid))
+        self._api_client.meta.deleteMetadata(uuid=self.uuid)
         self.uuid = None
-        return response
 
     @property
     def title(self):
@@ -300,16 +343,20 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
             name, created, value (may contain an embedded dictionary), _links
         """
         value = self.value
-        rels = self.relationships
+
+        if self.uuid is not None:
+            relationships = self.relationships
+        else:
+            relationships = []
 
         if type(value) is dict:
             value.update({ '@dc:name': self.title })
-            value.update({ '_relationships': self.relationships})
+            value.update({ '_relationships': relationships})
         elif value is None:
             value = { '@dc:name': self.title,
                       '@dc:creator': self.me,
                       '@ids:type': self.name.split('.')[1:],
-                      '_relationships': self.relationships
+                      '_relationships': relationships
                       }
 
         return { 'uuid': self.uuid,

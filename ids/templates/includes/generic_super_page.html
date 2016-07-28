@@ -49,19 +49,19 @@
                     <h4>{{object_type|title}} Related Objects</h4>
 
                     <ul>
-                    {% for assoc in object.associations_to_me %}
+                    {% for assoc in object.related_objects %}
                         {% with assoc.name|slice:"6:" as name %}
-                        {% with 'ids_projects:'|add:name|add:'-view' as route %}
-                        {% with name|add:'_uuid='|add:assoc.uuid as param %}
+                            {% with 'ids_projects:'|add:name|add:'-view' as route %}
+                                {% with name|add:'_uuid='|add:assoc.uuid as param %}
 
-                        <li>
-                            <a href="{% url route assoc.uuid %}">
-                                <b>{{ name }}</b>: {{ assoc.title }}
-                            </a>
-                        </li>
+                                <li>
+                                    <a href="{% url route assoc.uuid %}">
+                                        <b>{{ name|title }}</b>: {{ assoc.title }}
+                                    </a>
+                                </li>
 
-                        {% endwith %}
-                        {% endwith %}
+                                {% endwith %}
+                            {% endwith %}
                         {% endwith %}
                     {% endfor %}
                     </ul>

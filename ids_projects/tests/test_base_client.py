@@ -36,3 +36,22 @@ class BaseClientTests(TestCase, TestClient):
     def test_testuser2_client(self):
         """Test test user 2 client, should return dict with username for profiles.listByUsername"""
         self.assertIsNotNone(self.TEST_USER2_CLIENT.profiles.listByUsername(username='me'))
+
+    # def delete_meta(self):
+    #     """Delete all projects with name = 'idsvc.project'"""
+    #
+    #     results = self.TEST_USER1_CLIENT.meta.listMetadata()
+    #
+    #     import pprint
+    #     pprint.pprint(results)
+    #
+    #     for mo in results:
+    #         try:
+    #             self.TEST_USER1_CLIENT.meta.deleteMetadata(uuid=mo['uuid'])
+    #         except Exception as e:
+    #             print e
+    #             print mo['uuid']
+    #
+    # def test_delete_meta(self):
+    #     """Create a project, save it, and cleanup by deleting all projects"""
+    #     self.delete_meta()

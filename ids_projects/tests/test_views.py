@@ -14,7 +14,7 @@ class ViewTests(TestCase):
 
     def test_list_user_projects_anon(self):
         response = self.client.get(reverse('ids_projects:project-list-private'))
-        self.assertRedirects(response, '/login/?next=/projects/private', status_code=302,
+        self.assertRedirects(response, '/login/?next=/projects', status_code=302,
                              fetch_redirect_response=False)
 
     @mock.patch('ids_projects.models.Project.list')

@@ -1,9 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import HttpResponse
-from ids_projects.models import Data
-from django.conf import settings
-from agavepy.agave import Agave
-import json, logging, datetime
+from models import Data
+import logging, datetime
 
 logger = logging.getLogger(__name__)
 

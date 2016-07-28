@@ -1,4 +1,7 @@
 from base_metadata import BaseMetadata
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Dataset(BaseMetadata):
@@ -24,47 +27,56 @@ class Dataset(BaseMetadata):
         self._identifiers = None
 
     @property
-    def dataset_name(self):
+    def title(self):
         return self.value.get('dataset_name')
 
     @property
     def project(self):
         """Returns the project to which this dataset is assoicated"""
-        if self._project is None:
-            project = next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
-            self._project = project
-        return self._project
+        # if self._project is None:
+        #     project = next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
+        #     self._project = project
+        # return self._project
+        return next(iter([x for x in self.containers if x.name == 'idsvc.project']), None)
 
     @property
     def data(self):
         """Returns the data grouped by this dataset"""
-        if self._data is None:
-            data = [x for x in self.my_associations if x.name == 'idsvc.data']
-            self._data = data
-        return self._data
+        # if self._data is None:
+        #     data = [x for x in self.my_associations if x.name == 'idsvc.data']
+        #     self._data = data
+        # return self._data
+        return [x for x in self.parts if x.name == 'idsvc.data']
 
     def add_to_project(self, project):
         """
         Add this dataset to an existing project, which should be passed as a parameter
         """
-        self._project = project
-        self.add_association_to(project)
+        self.add_container(project)
 
     def add_data(self, data):
-        datas = self.data
-        datas.append(data)
-        self._data = datas
-        self.add_association_to(data)
+        """ """
+        self.add_part(data)
 
     @property
     def identifiers(self):
-        if self._identifiers is None:
-            identifiers = [x for x in self.associations_to_me if x.name == 'idsvc.identifier']
-            self._identifiers = identifiers
-        return self._identifiers
+        return [x for x in self.parts if x.name == 'idsvc.identifiers']
 
     def add_identifier(self, identifier):
-        identifiers = self.identifiers
-        identifiers.append(identifier)
-        self._identifiers = identifiers
-        self.add_association_from(identifier)
+        self.add_part(identifier)
+
+    def delete(self):
+        """ """
+        if self.uuid is None:
+            raise Exception('Cannot delete without UUID.')
+
+        # delete all objects that have this object's uuid in their associationIds
+        for container in self.containers:
+            container.remove_part(self)
+
+        for part in self.parts:
+            part.remove_part()
+
+        logger.debug('deleting dataset: %s - %s' % (self.title, self.uuid))
+        self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        self.uuid = None

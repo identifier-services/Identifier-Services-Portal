@@ -1,4 +1,7 @@
 from base_metadata import BaseMetadata
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Specimen(BaseMetadata):
@@ -44,12 +47,40 @@ class Specimen(BaseMetadata):
 
     @property
     def project(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
+        return next(iter([x for x in self.containers if x.name == 'idsvc.project']), None)
 
     @property
     def processes(self):
-        return [x for x in self.associations_to_me if x.name == 'idsvc.process']
+        return [x for x in self.parts if x.name == 'idsvc.process']
 
     @property
     def data(self):
-        return [x for x in self.associations_to_me if x.name == 'idsvc.data']
+        return [x for x in self.parts if x.name == 'idsvc.data']
+
+    def add_project(self, project):
+        """ """
+        self.add_container(project)
+
+    def add_process(self, process):
+        """ """
+        self.add_part(process)
+
+    def add_data(self, data):
+        """ """
+        self.add_part(data)
+
+    def delete(self):
+        """ """
+        if self.uuid is None:
+            raise Exception('Cannot delete without UUID.')
+
+        # delete all objects that have this object's uuid in their associationIds
+        for container in self.containers:
+            container.remove_part(self)
+
+        for part in self.parts:
+            part.delete()
+
+        logger.debug('deleting specimen: %s - %s' % (self.title, self.uuid))
+        self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        self.uuid = None

@@ -64,14 +64,14 @@ urlpatterns += patterns(
     'ids_projects.views.systems',
     # list all systems available to user
     url(r'^systems/?$', 'list', name='system-list'),
-    # register a system
-    url(r'^system/register/?$', 'create', name='system-create'),
-    # edit a system
-    url(r'^system/edit/(?P<system_id>.+?)$', 'edit', name='system-edit'),
-    # unregister a system
-    url(r'^system/delete/(?P<system_id>.+?)$', 'delete', name='system-delete'),
-    # view a system
-    url(r'^system/(?P<system_id>.+?)$', 'view', name='system-view'),
+    # # register a system
+    # url(r'^system/register/?$', 'create', name='system-create'),
+    # # edit a system
+    # url(r'^system/edit/(?P<system_id>.+?)$', 'edit', name='system-edit'),
+    # # unregister a system
+    # url(r'^system/delete/(?P<system_id>.+?)$', 'delete', name='system-delete'),
+    # # view a system
+    # url(r'^system/(?P<system_id>.+?)$', 'view', name='system-view'),
 )
 
 
@@ -118,20 +118,14 @@ urlpatterns += patterns(
 ############
 urlpatterns += patterns(
     'ids_projects.views.projects',
-    # # list public projects
-    # url(r'^projects/public/?$', 'list_public', name='project-list-public'),
     # list private projects
-    url(r'^projects/private/?$', 'list_private', name='project-list-private'),
+    url(r'^projects/?$', 'list_private', name='project-list-private'),
     # # list all projects
     # url(r'^projects/?$', 'list', name='project-list-private'),
     # create project
     url(r'^project/create/?$', 'create', name='project-create'),
     # edit project
     url(r'^project/edit/(?P<project_uuid>.+?)$', 'edit', name='project-edit'),
-    # # make project public
-    # url(r'^project/make_public/(?P<project_uuid>.+?)$', 'make_public', name='project-make-public'),
-    # # make project private
-    # url(r'^project/make_private/(?P<project_uuid>.+?)$', 'make_private', name='project-make-private'),
     # delete project
     url(r'^project/delete/(?P<project_uuid>.+?)$', 'delete', name='project-delete'),
     # view a specific project

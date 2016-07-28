@@ -50,46 +50,42 @@ class Process(BaseMetadata):
 
     @property
     def project(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
+        return next(iter([x for x in self.containers if x.name == 'idsvc.project']), None)
 
     @property
     def specimen(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.specimen']), None)
+        return next(iter([x for x in self.containers if x.name == 'idsvc.specimen']), None)
 
     @property
     def data(self):
-        return [x for x in self.associations_to_me if x.name == 'idsvc.data']
+        return self.inputs + self.outputs
 
-    @property
-    def inputs(self):
-        return [x for x in self.data if x.uuid in self.value['_inputs']]
+    def add_project(self, project):
+        """ """
+        self.add_container(project)
 
-    @property
-    def outputs(self):
-        return [x for x in self.data if x.uuid in self.value['_outputs']]
+    def add_specimen(self, process):
+        """ """
+        self.add_container(process)
 
-    def add_input(self, data):
-        associations_to_me = self.associations_to_me
-        associations_to_me.append(data)
-        # necessary?
-        self.associations_to_me = associations_to_me
-        #
-        inputs = self.inputs
-        inputs.append(data)
-        # necessary?
-        self.inputs = inputs
-        #
-        self.add_association_from(data)
+    def delete(self):
+        """ """
+        if self.uuid is None:
+            raise Exception('Cannot delete without UUID.')
 
-    def add_input(self, data):
-        associations_to_me = self.associations_to_me
-        associations_to_me.append(data)
-        # necessary?
-        self.associations_to_me = associations_to_me
-        #
-        outputs = self.outputs
-        outputs.append(data)
-        # necessary?
-        self.outputs = outputs
-        #
-        self.add_association_from(data)
+        # delete all objects that have this object's uuid in their associationIds
+        for container in self.containers:
+            container.remove_part(self)
+
+        for part in self.parts:
+            part.delete()
+
+        for _input in self.inputs:
+            _input.delete()
+
+        for output in self.outputs:
+            output.delete()
+
+        logger.debug('deleting process: %s - %s' % (self.title, self.uuid))
+        self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        self.uuid = None

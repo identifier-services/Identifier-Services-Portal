@@ -1,4 +1,7 @@
 from base_metadata import BaseMetadata
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Identifier(BaseMetadata):
@@ -44,9 +47,25 @@ class Identifier(BaseMetadata):
 
     @property
     def project(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
+        return next(iter([x for x in self.containers if x.name == 'idsvc.project']), None)
 
     @property
     def dataset(self):
         """Return the project for which this identifier was created"""
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.dataset']), None)
+        return next(iter([x for x in self.containers if x.name == 'idsvc.dataset']), None)
+
+    def delete(self):
+        """ """
+        if self.uuid is None:
+            raise Exception('Cannot delete without UUID.')
+
+        # delete all objects that have this object's uuid in their associationIds
+        for container in self.containers:
+            container.remove_part(self)
+
+        for part in self.parts:
+            part.remove_part()
+
+        logger.debug('deleting identifier: %s - %s' % (self.title, self.uuid))
+        self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        self.uuid = None

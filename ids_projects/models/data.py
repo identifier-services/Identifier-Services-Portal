@@ -42,19 +42,19 @@ class Data(BaseMetadata):
 
     @property
     def project(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.project']), None)
+        return next(iter([x for x in self.containers if x.name == 'idsvc.project']), None)
 
     @property
     def specimen(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.specimen']), None)
+        return next(iter([x for x in self.containers if x.name == 'idsvc.specimen']), None)
 
     @property
     def process(self):
-        return next(iter([x for x in self.my_associations if x.name == 'idsvc.process']), None)
+        return next(iter([x for x in self.containers if x.name == 'idsvc.process']), None)
 
     @property
     def datasets(self):
-        return [x for x in self.associations_to_me if x.name == 'idsvc.datasets']
+        return [x for x in self.containers if x.name == 'idsvc.datasets']
 
     def load_file_info(self):
         if self.system_id is None:
@@ -109,6 +109,7 @@ class Data(BaseMetadata):
         self._share(username='idsvc_user', permission='READ')
 
     def calculate_checksum(self):
+        """ """
         name = "checksum"
         app_id = "idsvc_checksum-0.1"
         archive = False
@@ -144,3 +145,16 @@ class Data(BaseMetadata):
             raise Exception(exception_msg)
 
         return response
+
+    def delete(self):
+        """Delete a data object, and remove relationships to it"""
+        if self.uuid is None:
+            raise Exception('Cannot delete without UUID.')
+
+        # delete all objects that have this object's uuid in their associationIds
+        for container in self.containers:
+            container.remove_part(self)
+
+        logger.debug('deleting data: %s - %s' % (self.title, self.uuid))
+        self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        self.uuid = None

@@ -1,157 +1,134 @@
-from agavepy.agave import Agave, AgaveException
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import (JsonResponse,
-                         HttpResponse,
                          HttpResponseRedirect,
-                         HttpResponseBadRequest,
-                         HttpResponseForbidden,
-                         HttpResponseNotFound,
-                         HttpResponseServerError)
+                         HttpResponseNotFound)
 from django.shortcuts import render
-import json, logging, urllib
+from django.views.decorators.http import require_http_methods
+import logging, urllib
 from ..forms.data import DataTypeForm, SRAForm
 from ..models import Project, Specimen, Process, System, Data
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
                        get_data_fields)
-from helper import client, collapse_meta
 
 logger = logging.getLogger(__name__)
 
 
 @login_required
+@require_http_methods(['GET'])
 def dir_list(request, system_id, file_path=None):
-    ########
-    # GET #
-    ########
-    if request.method == 'GET':
+    """"""
+    api_client = request.user.agave_oauth.api_client
 
-        api_client = request.user.agave_oauth.api_client
+    if file_path is None:
+        file_path = '.'
 
-        if file_path is None:
-            file_path = '.'
+    try:
+        system = System(api_client=api_client, system_id=system_id)
+    except Exception as e:
+        exception_msg = 'Unable to access system with system_id=%s. %s' % (system_id, e)
+        logger.error(exception_msg)
+        return JsonResponse({'message': exception_msg}, status=404)
 
-        try:
-            system = System(api_client=api_client, system_id=system_id)
-        except:
-            exception_msg = 'Unable to access system with system_id=%s.' % system_id
-            logger.error(exception_msg)
-            return JsonResponse({'message': exception_msg}, status=404)
+    try:
+        dir_contents = system.listing(file_path)
+        return JsonResponse(dir_contents, safe=False)
+    except Exception as e:
+        error_msg = 'The path=%s could not be listed on system=%s. ' \
+                    'Please choose another path or system. %s' \
+                    % (file_path, system_id, e)
+        return JsonResponse({'message': error_msg}, status=404)
 
-        try:
-            dir_contents = system.listing(file_path)
-            return JsonResponse(dir_contents, safe=False)
-        except:
-            error_msg = 'The path=%s could not be listed on system=%s. ' \
-                        'Please choose another path or system.' \
-                        % (file_path, system_id)
-            return JsonResponse({'message': error_msg}, status=404)
 
 @login_required
+@require_http_methods(['GET'])
 def list(request):
     """ """
-    #######
-    # GET #
-    #######
-    if request.method == 'GET':
+    project_uuid = request.GET.get('project_uuid', None)
+    specimen_uuid = request.GET.get('specimen_uuid', None)
+    process_uuid = request.GET.get('process_uuid', None)
 
-        project_uuid = request.GET.get('project_uuid', None)
-        specimen_uuid = request.GET.get('specimen_uuid', None)
-        process_uuid = request.GET.get('process_uuid', None)
-
-        if request.user.is_anonymous():
-            api_client = get_portal_api_client()
-        else:
-            api_client = request.user.agave_oauth.api_client
-
-        project = None;
-        specimen = None;
-        process = None;
-        datas = None;
-
-        try:
-            if project_uuid:
-                project = Project(api_client=api_client, uuid=project_uuid)
-                datas = project.data
-            elif specimen_uuid:
-                specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
-                datas = specimen.data
-                project = specimen.project
-            elif process_uuid:
-                process = Process(api_client=api_client, uuid=process_uuid)
-                datas = process.data
-                specimen = process.specimen
-                project = process.project
-            else:
-                datas = Data.list(api_client=api_client)
-        except Exception as e:
-            exception_msg = 'Unable to load data. %s' % e
-            logger.error(exception_msg)
-            messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
-
-        context = { 'project' : project,
-                    'specimen': specimen,
-                    'process' : process,
-                    'data'    : data }
-
-        return render(request, 'ids_projects/data/index.html', context)
-
-    #########
-    # OTHER #
-    #########
+    if request.user.is_anonymous():
+        api_client = get_portal_api_client()
     else:
-        return HttpResponseBadRequest("Method not allowed")
+        api_client = request.user.agave_oauth.api_client
+
+    project = None
+    specimen = None
+    process = None
+    data = None
+
+    try:
+        if project_uuid:
+            project = Project(api_client=api_client, uuid=project_uuid)
+            data = project.data
+        elif specimen_uuid:
+            specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
+            data = specimen.data
+            project = specimen.project
+        elif process_uuid:
+            process = Process(api_client=api_client, uuid=process_uuid)
+            data = process.data
+            specimen = process.specimen
+            project = process.project
+        else:
+            data = Data.list(api_client=api_client)
+    except Exception as e:
+        exception_msg = 'Unable to load data. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
+
+    context = { 'project' : project,
+                'specimen': specimen,
+                'process' : process,
+                'data'    : data }
+
+    return render(request, 'ids_projects/data/index.html', context)
+
 
 @login_required
+@require_http_methods(['GET'])
 def view(request, data_uuid):
     """ """
-    #######
-    # GET #
-    #######
-    if request.method == 'GET':
-
-        if request.user.is_anonymous():
-            api_client = get_portal_api_client()
-        else:
-            api_client = request.user.agave_oauth.api_client
-
-        try:
-            data = Data(api_client=api_client, uuid=data_uuid)
-            project = data.project
-        except Exception as e:
-            exception_msg = 'Unable to load data. %s' % e
-            logger.error(exception_msg)
-            messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
-
-        try:
-            process_types = get_process_type_keys(project)
-            data_fields = get_data_fields(project)
-            data.set_fields(dataset_fields)
-        except Exception as e:
-            exception_msg = 'Unable to load config values. %s' % e
-            logger.warning(exception_msg)
-
-        context = {'process' : data.process,
-                   'project' : data.project,
-                   'specimen' : data.specimen,
-                   'data' : data,
-                   'process_types' : process_types }
-
-        return render(request, 'ids_projects/data/detail.html', context)
-
-    #########
-    # OTHER #
-    #########
+    if request.user.is_anonymous():
+        api_client = get_portal_api_client()
     else:
-        return HttpResponseBadRequest("Method not allowed")
+        api_client = request.user.agave_oauth.api_client
+
+    try:
+        data = Data(api_client=api_client, uuid=data_uuid)
+        project = data.project
+    except Exception as e:
+        exception_msg = 'Unable to load data. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
+
+    try:
+        process_types = get_process_type_keys(project)
+        data_fields = get_data_fields(project)
+        data.set_fields(data_fields)
+    except Exception as e:
+        exception_msg = 'Unable to load config values. %s' % e
+        logger.warning(exception_msg)
+
+    context = {'process' : data.process,
+               'project' : data.project,
+               'specimen' : data.specimen,
+               'data' : data,
+               'process_types' : process_types }
+
+    return render(request, 'ids_projects/data/detail.html', context)
 
 
+@login_required
+@require_http_methods(['GET', 'POST'])
 def edit(request, data_uuid):
+    # TODO: this is not done
+    logger.warning('Edit Data not implemented, see Data view.')
     return HttpResponseNotFound()
 
 
@@ -171,6 +148,9 @@ def _get_cancel_url(project_uuid=None, specimen_uuid=None, process_uuid=None):
 
     return reverse(viewname, args=args)
 
+
+@login_required
+@require_http_methods(['GET', 'POST'])
 def type_select(request):
     """ """
     project_uuid = request.GET.get('project_uuid', None)
@@ -269,7 +249,9 @@ def type_select(request):
                         (reverse('ids_projects:file-select', kwargs={'relationship': relationship}), project_uuid)
                     )
 
+
 @login_required
+@require_http_methods(['GET', 'POST'])
 def add_sra(request, relationship):
     """ """
     project_uuid = request.GET.get('project_uuid', None)
@@ -338,6 +320,22 @@ def add_sra(request, relationship):
             try:
                 #TODO: creating sra data object is untested with new model
                 data = Data(api_client=api_client, sra_id=sra_id)
+
+                if process is not None:
+                    # create two-way relationship to project
+                    process.add_part(data)
+                    data.add_container(process)
+                elif specimen is not None:
+                    # create two-way relationship specimen project
+                    specimen.add_part(data)
+                    data.add_container(specimen)
+                elif project is not None:
+                    # create two-way relationship to project
+                    project.add_part(data)
+                    data.add_container(project)
+
+                data.save()
+
             except Exception as e:
                 exception_msg = 'Unable to access metadata. %s' % e
                 logger.error(exception_msg)
@@ -346,33 +344,12 @@ def add_sra(request, relationship):
                             reverse('ids_projects:process-view',
                                     kwargs={'process_uuid': process_uuid}))
 
-            try:
-                if process is not None:
-                    associationIds = process.associationIds
-                    associationIds.append(process.uuid)
-                elif specimen is not None:
-                    associationIds = specimen.associationIds
-                    associationIds.append(specimen.uuid)
-                elif project is not None:
-                    associationIds = project.associationIds
-                    associationIds.append(project.uuid)
-
-                data.associationIds = associationIds
-                data.save()
-            except Exception as e:
-                exception_msg = 'Unable to save sra metadata. %s.' % e
-                logger.error(exception_msg)
-                messages.error(request, exception_msg)
-                return HttpResponseRedirect(
-                            reverse('ids_projects:process-view',
-                                    kwargs={'process_uuid': process_uuid}))
-
             #TODO: adding data to specimen or project, what do we do?
             if process is not None:
                 if relationship == 'input':
-                    process.value['_inputs'].append(result['uuid'])
+                    process.value['_inputs'].append(data.uuid)
                 elif relationship == 'output':
-                    process.value['_outputs'].append(result['uuid'])
+                    process.value['_outputs'].append(data.uuid)
 
                 try:
                     process.save()
@@ -411,6 +388,7 @@ def add_sra(request, relationship):
 
 
 @login_required
+@require_http_methods(['GET', 'POST'])
 def file_select(request, relationship):
 
     project_uuid = request.GET.get('project_uuid', None)
@@ -425,7 +403,7 @@ def file_select(request, relationship):
         messages.warning(request, exception_msg)
         return HttpResponseRedirect(
                     reverse('ids_projects:process-view',
-                            kwargs={'process_uuid': process.uuid}))
+                            kwargs={'process_uuid': process_uuid}))
 
     try:
         if process_uuid is not None:
@@ -506,18 +484,29 @@ def file_select(request, relationship):
                                 kwargs={'process_uuid': process_uuid}))
 
         try:
-            if process is not None:
-                associationIds = process.associationIds
-                associationIds.append(process.uuid)
-            elif specimen is not None:
-                associationIds = specimen.associationIds
-                associationIds.append(specimen.uuid)
-            elif project is not None:
-                associationIds = project.associationIds
-                associationIds.append(project.uuid)
-
-            data.associationIds = associationIds
             data.save()
+
+            if process is not None:
+                # create two-way relationship to project
+                project.add_part(data)
+                project.save()
+                data.add_container(project)
+                data.save()
+
+            elif specimen is not None:
+                # create two-way relationship to specimen
+                specimen.add_part(data)
+                specimen.save()
+                data.add_container(specimen)
+                data.save()
+
+            elif project is not None:
+                # create two-way relationship to specimen
+                specimen.add_part(data)
+                specimen.save()
+                data.add_container(specimen)
+                data.save()
+
         except Exception as e:
             exception_msg = 'Unable to save file info as metadata. %s.' % e
             logger.error(exception_msg)
@@ -569,85 +558,75 @@ def file_select(request, relationship):
                         reverse('ids_projects:project-view',
                                 kwargs={'project_uuid': project_uuid}))
 
-    #########
-    # OTHER #
-    #########
-    else:
-        return HttpResponseBadRequest("Method not allowed")
 
 @login_required
+@require_http_methods(['GET'])
 def do_checksum(request, data_uuid):
     """ """
-    #######
-    # GET #
-    #######
-    if request.method == 'GET':
+    # TODO: this is not done
+    logger.warning('Checksum not implemented, see Data view.')
+    return HttpResponseNotFound()
+    #     try:
+    #         data = Data(uuid=data_uuid, user=request.user)
+    #     except Exception as e:
+    #         exception_msg = 'Unable to load data. %s' % e
+    #         logger.error(exception_msg)
+    #         messages.warning(request, exception_msg)
+    #         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
+    #
+    #     try:
+    #         data.calculate_checksum()
+    #     except Exception as e:
+    #         exception_msg = 'Unable to initiate checksum. %s' % e
+    #         logger.error(exception_msg)
+    #         messages.warning(request, exception_msg)
+    #         return HttpResponseRedirect(
+    #                     reverse('ids_projects:data-view',
+    #                             kwargs={'data_uuid': data.uuid}))
+    #
+    #     sucess_msg = 'Initiated checksum job.'
+    #     logger.info(sucess_msg)
+    #     messages.success(request, sucess_msg)
+    #     return HttpResponseRedirect(
+    #                 reverse('ids_projects:data-view',
+    #                         kwargs={'data_uuid': data.uuid}))
 
-        try:
-            data = Data(uuid=data_uuid, user=request.user)
-        except Exception as e:
-            exception_msg = 'Unable to load data. %s' % e
-            logger.error(exception_msg)
-            messages.warning(request, exception_msg)
+
+@login_required
+@require_http_methods(['GET'])
+def request_id(request, data_uuid, id_type):
+    # TODO: this is not done
+    logger.warning('Request ID not implemented, see Data view.')
+    return HttpResponseNotFound()
+
+
+@login_required
+@require_http_methods(['GET'])
+def data_delete(request, data_uuid):
+    """ """
+    next_url = request.GET.get('next_url', None)
+    api_client = request.user.agave_oauth.api_client
+
+    try:
+        data = Data(api_client=api_client, uuid=data_uuid)
+
+        if next_url is None:
+            containers = data.containers
+            container = next(iter(containers), None)
+            if container:
+                name = container.name[6:]
+                next_url = reverse('ids_projects:%s-view' % name,
+                                   kwargs={'%s_uuid' % name: container.uuid})
+
+        data.delete()
+
+        if next_url is not None:
+            return HttpResponseRedirect(next_url)
+        else:
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
-        try:
-            data.calculate_checksum()
-        except Exception as e:
-            exception_msg = 'Unable to initiate checksum. %s' % e
-            logger.error(exception_msg)
-            messages.warning(request, exception_msg)
-            return HttpResponseRedirect(
-                        reverse('ids_projects:data-view',
-                                kwargs={'data_uuid': data.uuid}))
-
-        sucess_msg = 'Initiated checksum job.'
-        logger.info(sucess_msg)
-        messages.success(request, sucess_msg)
-        return HttpResponseRedirect(
-                    reverse('ids_projects:data-view',
-                            kwargs={'data_uuid': data.uuid}))
-
-    #########
-    # OTHER #
-    #########
-    else:
-        return HttpResponseBadRequest("Method not allowed")
-
-@login_required
-def request_id(request, data_uuid, id_type):
-    pass
-
-@login_required
-def data_delete(request, data_uuid):
-
-    json_flag = request.GET.get('json', False)
-    a = client(request)
-
-    data = a.meta.getMetadata(uuid=data_uuid)
-    associationIds = data.associationIds
-
-    # TODO: this is dumb, but about to get replaced anyway
-    try:
-        parent_id = associationIds[0]
-        parent = a.meta.getMetadata(uuid=parent_id)
     except Exception as e:
-        parent_id = ''
-        parent = None
-
-    a.meta.deleteMetadata(uuid=data_uuid)
-
-    if json_flag:
-        return JsonResponse({'status':'success'})
-    else:
-        if parent:
-            if parent.name == 'idsvc.project':
-                return HttpResponseRedirect('/project/{}'.format(parent_id))
-            elif parent.name == 'idsvc.specimen':
-                return HttpResponseRedirect('/specimen/{}'.format(parent_id))
-            elif parent.name == 'idsvc.process':
-                return HttpResponseRedirect('/process/{}'.format(parent_id))
-            else:
-                return HttpResponseRedirect('/projects/private/')
-        else:
-            return HttpResponseRedirect('/projects/private/')
+        exception_msg = 'Unable to load data. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
