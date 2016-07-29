@@ -261,18 +261,27 @@ def _get_containers(request):
     project_uuid = request.GET.get('project_uuid', None)
     specimen_uuid = request.GET.get('specimen_uuid', None)
     process_uuid = request.GET.get('process_uuid', None)
+    data_uuid = request.GET.get('data_uuid', None)
 
     api_client = request.user.agave_oauth.api_client
 
+    if data_uuid is not None:
+        data = Data(api_client=api_client, uuid=data_uuid)
+        process = data.process
+        specimen = data.specimen
+        project = data.project
     if process_uuid is not None:
+        data = None
         process = Process(api_client=api_client, uuid=process_uuid)
         specimen = process.specimen
         project = process.project
     elif specimen_uuid is not None:
+        data = None
         process = None
         specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
         project = specimen.project
     elif project_uuid is not None:
+        data = None
         process = None
         specimen = None
         project = Project(api_client=api_client, uuid=project_uuid)
@@ -282,7 +291,7 @@ def _get_containers(request):
         logger.error(exception_msg)
         raise Exception(exception_msg)
 
-    return project, specimen, process
+    return project, specimen, process, data
 
 
 def _add_to_containers(project, specimen, process, data, relationship):
@@ -330,9 +339,9 @@ def add_sra(request, relationship):
     #     messages.warning(request, exception_msg)
     #     return HttpResponseRedirect(cancel_url)
 
-    project, specimen, process = _get_containers(request)
+    project, specimen, process, data = _get_containers(request)
 
-    api_client = request.user.agave_oauth.api_client()
+    api_client = request.user.agave_oauth.api_client
 
     #######
     # GET #
@@ -364,19 +373,20 @@ def add_sra(request, relationship):
             sra_id = body.get('sra_id')
 
             try:
-                # TODO: creating sra data object is untested with new model
-                data = Data(api_client=api_client, sra_id=sra_id)
-                data.save()
-
-                _add_to_containers(project, specimen, process, data, relationship)
-
+                if not data:
+                    data = Data(api_client=api_client, sra_id=sra_id)
+                    data.save()
+                    _add_to_containers(project, specimen, process, data, relationship)
+                else:
+                    data.sra_id = sra_id
+                    # TODO: this should happen in the model
+                    data.value.update({'sra_id': sra_id})
+                    data.save()
             except Exception as e:
                 exception_msg = 'Unable to access metadata. %s' % e
                 logger.error(exception_msg)
                 messages.warning(request, exception_msg)
-                return HttpResponseRedirect(
-                            reverse('ids_projects:process-view',
-                                    kwargs={'process_uuid': process_uuid}))
+                return HttpResponseRedirect(cancel_url)
 
             try:
                 result = data.calculate_checksum()
@@ -407,7 +417,7 @@ def file_select(request, relationship):
     #     messages.warning(request, exception_msg)
     #     return HttpResponseRedirect(cancel_url)
 
-    project, specimen, process = _get_containers(request)
+    project, specimen, process, data = _get_containers(request)
 
     api_client = request.user.agave_oauth.api_client
 
@@ -455,24 +465,40 @@ def file_select(request, relationship):
             return HttpResponseRedirect(cancel_url)
 
         try:
-            data = Data(api_client=api_client, system_id=system_id, path=file_path)
-            data.load_file_info()
+            if not data:
+                data = Data(api_client=api_client, system_id=system_id, path=file_path)
+                data.load_file_info()
+                data.save()
+                _add_to_containers(project, specimen, process, data, relationship)
+            else:
+                data.system_id = system_id
+                # TODO: this should happen in the model
+                data.value.update({'system_id': system_id})
+                data.path = file_path
+                # TODO: this should happen in the model
+                data.value.update({'path': file_path})
+                data.load_file_info()
+                data.save()
+
+            # data = Data(api_client=api_client, system_id=system_id, path=file_path)
+            # data.load_file_info()
         except Exception as e:
             exception_msg = 'Unable to access system with system_id=%s. %s' % (system_id, e)
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
             return HttpResponseRedirect(cancel_url)
 
-        try:
-            data.save()
-
-            _add_to_containers(project, specimen, process, data, relationship)
-
-        except Exception as e:
-            exception_msg = 'Unable to save file info as metadata. %s.' % e
-            logger.error(exception_msg)
-            messages.error(request, exception_msg)
-            return HttpResponseRedirect(cancel_url)
+        # if relationship != 'identical':
+        #     try:
+        #         data.save()
+        #
+        #         _add_to_containers(project, specimen, process, data, relationship)
+        #
+        #     except Exception as e:
+        #         exception_msg = 'Unable to save file info as metadata. %s.' % e
+        #         logger.error(exception_msg)
+        #         messages.error(request, exception_msg)
+        #         return HttpResponseRedirect(cancel_url)
 
         try:
             result = data.calculate_checksum()

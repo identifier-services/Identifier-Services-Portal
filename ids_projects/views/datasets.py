@@ -92,7 +92,7 @@ def view(request, dataset_uuid):
                 'datas': data,
                 'process_types': process_types }
 
-    return render(request, 'ids_projects/processes/detail.html', context)
+    return render(request, 'ids_projects/datasets/detail.html', context)
 
 
 @login_required
@@ -147,13 +147,14 @@ def create(request):
             logger.debug('Dataset form is valid')
 
             try:
-                dataset = Dataset(api_client=api_client)
-                dataset.value = form_dataset.cleaned_data
+                dataset = Dataset(api_client=api_client, value=form_dataset.cleaned_data)
+                dataset.save()
 
                 # create two-way relationship to project
                 project.add_part(dataset)
-                dataset.add_container(project)
+                project.save()
 
+                dataset.add_container(project)
                 dataset.save()
 
                 success_msg = 'Successfully created dataset.'

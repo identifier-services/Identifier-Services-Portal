@@ -6,7 +6,7 @@ from django.conf.urls import patterns, include, url
 #########
 urlpatterns = patterns(
     'ids_projects.views.data',
-    # itermediate step between adding and sra or a file
+    # intermediate step between adding and sra or a file
     url(r'^data/type_select/?$', 'type_select', name='data-type'),
     # create a file metadata object associated with an SRA
     url(r'^data/add_sra/(?P<relationship>.+?)$', 'add_sra', name='add-sra'),

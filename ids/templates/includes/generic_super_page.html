@@ -11,8 +11,15 @@
                 <a href="{% url 'ids_projects:data-type' %}?relationship=output&process_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Output Data</a>
             {% elif object_type == 'dataset' %}
                 <a href="{% url 'ids_projects:data-type' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Select Data</a>
+                <a href="#" class="btn btn-primary btn-block">Request Identifier</a>
             {% elif object_type != 'data' %}
                 <a href="{% url 'ids_projects:data-type' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Data</a>
+            {% elif object_type == 'data' %}
+                {% if object_type.sra_id %}
+                    <a href="{% url 'ids_projects:file-select' 'identical' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add File</a>
+                {% else %}
+                    <a href="{% url 'ids_projects:add-sra' 'identical' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add SRA</a>
+                {% endif %}
             {% endif %}
 
             {% if object_type == 'project' %}

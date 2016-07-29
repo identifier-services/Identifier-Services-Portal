@@ -27,18 +27,36 @@ class Data(BaseMetadata):
         self.system = None
         system_id = kwargs.get('system_id')
         path = kwargs.get('path')
+        sra_id = kwargs.get('sra_id')
 
         if system_id is not None:
             self.system_id = system_id
-            self.value.update({ 'system_id': system_id })
         else:
             self.system_id = self.value.get('system_id')
 
+        self.value.update({'system_id': self.system_id})
+
         if path is not None:
             self.path = path
-            self.value.update({ 'path': path })
         else:
             self.path = self.value.get('path')
+
+        self.value.update({'path': self.path})
+
+        if sra_id is not None:
+            self.sra_id = sra_id
+        else:
+            self.sra_id = self.value.get('sra_id')
+
+        self.value.update({'sra_id': self.sra_id})
+
+    @property
+    def title(self):
+        file_name = self.value.get('name')
+        if file_name:
+            return file_name
+        else:
+            return self.sra_id
 
     @property
     def project(self):
@@ -94,6 +112,7 @@ class Data(BaseMetadata):
         self.value = file_info
 
     def _share(self, username, permission):
+        """"""
         body=json.dumps({ 'username': username,
                           'permission': permission,
                           'recursive': False })
@@ -105,8 +124,9 @@ class Data(BaseMetadata):
     def save(self):
         super(Data, self).save()
 
-        logger.debug('Sharing data with portal user...')
-        self._share(username='idsvc_user', permission='READ')
+        if self.path and self.system_id:
+            logger.debug('Sharing data with portal user...')
+            self._share(username='idsvc_user', permission='READ')
 
     def calculate_checksum(self):
         """ """
