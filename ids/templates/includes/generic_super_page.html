@@ -48,7 +48,6 @@
 
                 <div class="well">
 
-
                     {% if object.containers %}
                         <p>
                             <b>Containers:</b>
@@ -87,6 +86,28 @@
                             <b>Outputs:</b>
                             <ul>
                             {% for assoc in object.outputs %}
+                                {% include 'includes/related_list_item.html' %}
+                            {% endfor %}
+                            </ul>
+                        </p>
+                    {% endif %}
+
+                    {% if object.is_input_to %}
+                        </p>
+                            <b>Is Input To:</b>
+                            <ul>
+                            {% for assoc in object.is_input_to %}
+                                {% include 'includes/related_list_item.html' %}
+                            {% endfor %}
+                            </ul>
+                        </p>
+                    {% endif %}
+
+                    {% if object.is_output_of %}
+                        </p>
+                            <b>Is Output Of:</b>
+                            <ul>
+                            {% for assoc in object.is_output_of %}
                                 {% include 'includes/related_list_item.html' %}
                             {% endfor %}
                             </ul>

@@ -80,7 +80,7 @@ def view(request, process_uuid):
 
     try:
         process_types = get_process_type_keys(project)
-        process_fields = get_process_fields(process.value['process_type'])
+        process_fields = get_process_fields(project, process.value['process_type'])
         process.set_fields(process_fields)
     except Exception as e:
         exception_msg = 'Unable to load config values. %s' % e

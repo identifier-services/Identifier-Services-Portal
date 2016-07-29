@@ -50,6 +50,7 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
         self._my_associations = None
         self._associations_to_me = None
         self._fields = None
+        self._relationships = None
         self._related_objects = None
 
         # get optional arguments
@@ -305,6 +306,10 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
 
     def save(self):
         """Add or update metadata object on tenant"""
+
+        # if self.name == 'idsvc.data':
+        #     import pdb
+        #     pdb.set_trace()
 
         if self.uuid is None:
             response = self._api_client.meta.addMetadata(body=self.meta)

@@ -285,6 +285,7 @@ class MetadataRelationshipMixin(object):
         Returns List
         """
         # Query related objects that have IsInputTo type relationships to this object.
+
         return self._get_related_objects_by_type('IsInputTo')
 
     def add_input(self, my_input):
@@ -348,7 +349,7 @@ class MetadataRelationshipMixin(object):
         # Query related objects that have IsOutputOf type relationships to this object.
         return self._get_related_objects_by_type('IsOutputOf')
 
-    def add_input(self, my_output):
+    def add_output(self, my_output):
         """
         Add output for this object.
 
@@ -369,7 +370,7 @@ class MetadataRelationshipMixin(object):
 
         self.add_relationship(relationship)
 
-    def remove_input(self, my_output):
+    def remove_outputs(self, my_output):
         """
         Remove output from this objects.
 
@@ -556,9 +557,10 @@ class MetadataRelationshipMixin(object):
                 '@id': <related_object.uuid>
             }
         """
-        relationships = self.value.get('_relationships', [])
+        if self._relationships is None:
+            self._relationships = self.value.get('_relationships', [])
 
-        return relationships
+        return self._relationships
 
     @property
     def related_objects(self):
