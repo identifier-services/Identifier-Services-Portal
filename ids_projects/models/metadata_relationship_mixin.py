@@ -12,7 +12,7 @@ class MetadataRelationshipMixin(object):
 
     def _get_related_objects_by_type(self, rel_type):
         """Helper method, returns objects related to this object with specific relationship type"""
-        if rel_type not in self.parent_relationship_types+ self.child_relationship_types:
+        if rel_type not in self.parent_relationship_types + self.child_relationship_types:
             raise Exception('Invalid relationship type.')
 
         related = []
@@ -516,7 +516,7 @@ class MetadataRelationshipMixin(object):
     # RELATIONSHIPS #
     #################
 
-    def _get_relationships(self):
+    def _get_related_meta(self):
         """Internal method, queries agave tenant for all related objects, returns list."""
         if not self.uuid:
             raise Exception('Missing UUID, cannot look up relationships without UUID.')
@@ -530,9 +530,9 @@ class MetadataRelationshipMixin(object):
     def _get_related_objects(self):
         """Instantiates all related meta into IDS model objects."""
 
-        related_objects= []
+        related_objects = []
 
-        for related_meta in self.relationships:
+        for related_meta in self._get_related_meta():
             try:
                 # instantiate related objects
                 related_object = self.get_class_by_name(related_meta.name)(
@@ -556,10 +556,9 @@ class MetadataRelationshipMixin(object):
                 '@id': <related_object.uuid>
             }
         """
-        if self._relationships is None:
-            self._relationships = self._get_relationships()
+        relationships = self.value.get('_relationships', [])
 
-        return self._relationships
+        return relationships
 
     @property
     def related_objects(self):
@@ -589,8 +588,6 @@ class MetadataRelationshipMixin(object):
         if type(relationship) is not dict or \
                 not all(key in ['@rel:type', '@id'] for key in relationship.keys()):
             raise Exception('Invalid relationship format.')
-
-        import pdb; pdb.set_trace()
 
         self.relationships.append(relationship)
 

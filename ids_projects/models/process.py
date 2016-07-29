@@ -46,7 +46,7 @@ class Process(BaseMetadata):
         title = process_type
         title += ' ' + method if method and method != process_type else ''
 
-        return title
+        return title.title()
 
     @property
     def project(self):

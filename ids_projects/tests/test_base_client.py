@@ -40,14 +40,14 @@ class BaseClientTests(TestCase, TestClient):
     # def delete_meta(self):
     #     """Delete all projects with name = 'idsvc.project'"""
     #
-    #     results = self.TEST_USER1_CLIENT.meta.listMetadata()
+    #     results = self.IDS_SYS_CLIENT.meta.listMetadata()
     #
     #     import pprint
     #     pprint.pprint(results)
     #
     #     for mo in results:
     #         try:
-    #             self.TEST_USER1_CLIENT.meta.deleteMetadata(uuid=mo['uuid'])
+    #             self.IDS_SYS_CLIENT.meta.deleteMetadata(uuid=mo['uuid'])
     #         except Exception as e:
     #             print e
     #             print mo['uuid']

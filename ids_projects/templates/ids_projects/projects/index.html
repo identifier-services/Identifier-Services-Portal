@@ -19,7 +19,7 @@
     <div class="container">
         <h3>{{ user.first_name }}'s Projects</h3>
         {% if not private_projects %}
-        <h4>You don't have any private projects.</h4>
+        <h4>You don't have any projects.</h4>
         <a href="{% url 'ids_projects:project-create' %}" class="btn btn-primary">Create Project</a>
         {% endif %}
     </div>

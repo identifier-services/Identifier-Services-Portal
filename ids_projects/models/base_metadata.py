@@ -50,7 +50,6 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
         self._my_associations = None
         self._associations_to_me = None
         self._fields = None
-        self._relationships = None
         self._related_objects = None
 
         # get optional arguments
@@ -349,13 +348,30 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
         else:
             relationships = []
 
+        for relationship in relationships:
+            if '@id' not in relationship.keys():
+                logger.warning('This is not the right type of relationship! %s' % relationship)
+                raise Exception('Invalid dictionary contained in list of relationship')
+
+        # TODO: implement namespaces throughout the application
+        # if type(value) is dict:
+        #     value.update({ '@dc:name': self.title })
+        #     value.update({ '_relationships': relationships})
+        # elif value is None:
+        #     value = { '@dc:name': self.title,
+        #               '@dc:creator': self.me,
+        #               '@ids:type': self.name.split('.')[1:],
+        #               '_relationships': relationships
+        #               }
+
+        # implementing namespaces will take some work, so I'm leaving them out for the moment
         if type(value) is dict:
-            value.update({ '@dc:name': self.title })
+            value.update({ 'name': self.title })
             value.update({ '_relationships': relationships})
         elif value is None:
-            value = { '@dc:name': self.title,
-                      '@dc:creator': self.me,
-                      '@ids:type': self.name.split('.')[1:],
+            value = { 'name': self.title,
+                      'creator': self.me,
+                      'type': self.name.split('.')[1:],
                       '_relationships': relationships
                       }
 

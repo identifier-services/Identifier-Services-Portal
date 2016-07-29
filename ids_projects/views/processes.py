@@ -67,10 +67,6 @@ def view(request, process_uuid):
 
     try:
         process = Process(api_client=api_client, uuid=process_uuid)
-
-        import pdb
-        pdb.set_trace()
-
         project = process.project
         specimen = process.specimen
         data = process.data
@@ -135,6 +131,12 @@ def create(request):
             project = specimen.project
     except Exception as e:
         exception_msg = 'Unable to load project or specimen, cannot create process. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
+
+    if project is None:
+        exception_msg = 'Missing project, cannot create process.'
         logger.error(exception_msg)
         messages.warning(request, exception_msg)
         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
@@ -212,7 +214,7 @@ def create(request):
 
                 logger.debug('Process form is valid')
 
-                data = {'process_type':process_type}
+                data = {'process_type': process_type}
                 data.update(form_process_type.cleaned_data.copy())
                 data.update(form_process_fields.cleaned_data.copy())
 
@@ -222,27 +224,18 @@ def create(request):
                     process = Process(api_client=api_client, meta=meta)
                     process.save()
 
-                    if project and not specimen:
-                        # create two-way relationship to project
-
-                        # add_part: process
-                        project.add_process(process)
-                        project.save()
-
-                        # add_container: project
-                        process.add_project(project)
-                        process.save()
-
-                    elif specimen:
+                    if specimen:
                         # create two-way relationship to specimen
-
-                        # add_part: process
                         specimen.add_process(process)
                         specimen.save()
-
-                        # add_container: specimen
                         process.add_specimen(specimen)
                         process.save()
+
+                    # create two-way relationship to project
+                    project.add_process(process)
+                    project.save()
+                    process.add_project(project)
+                    process.save()
 
                     success_msg = 'Successfully created process.'
                     logger.info(success_msg)

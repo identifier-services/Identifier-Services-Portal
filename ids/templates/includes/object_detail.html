@@ -5,18 +5,33 @@
         {% with object_type|add:'_uuid='|add:object.uuid as param %}
 
             <h1>
-                {{ object.title }}
+                {{ object_type|title }}: {{ object.title }}
                 <small>
                     <a href="{% url route object.uuid %}" class="btn btn-sm btn-link">Edit</a>
                 </small>
             </h1>
+
+            <div class="container well">
 
             {% if object.fields %}
                 {% for key, value in object.value.items %}
                     {% with key|slice:":1" as leading %}
                         {% if leading != '_' and key != "process_type" %}
                             {% with object.fields|lookup:key as field %}
-                                <p><b>{{ field.label }}</b> {{ value }}</p>
+                                <div class="row">
+                                    <p>
+                                        <div class="col-xs-6 col-sm-4">
+                                            {% if field %}
+                                                <b>{{ field.label }}</b>
+                                            {% else %}
+                                                <b>{{ key|title }}</b>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-xs-6 col-sm-8">
+                                            {{ value }}
+                                        </div>
+                                    </p>
+                                </div>
                             {% endwith %}
                         {% endif %}
                     {% endwith %}
@@ -25,11 +40,22 @@
                 {% for key, value in object.value.items %}
                     {% with key|slice:":1" as leading %}
                         {% if leading != '_' and key != "process_type" %}
-                            <p><b>{{ key|title }}</b> {{ value }}</p>
+                            <div class="row">
+                                <p>
+                                    <div class="col-xs-6 col-sm-4">
+                                        <b>{{ key|title }}</b>
+                                    </div>
+                                    <div class="col-xs-6 col-sm-8">
+                                        {{ value }}
+                                    </div>
+                                </p>
+                            </div>
                         {% endif %}
                     {% endwith %}
                 {% endfor %}
             {% endif %}
+
+            </div>
 
         {% endwith %}
     {% endwith %}

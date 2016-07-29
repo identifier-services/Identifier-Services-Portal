@@ -1,0 +1,13 @@
+{% with assoc.name|slice:"6:" as name %}
+    {% with 'ids_projects:'|add:name|add:'-view' as route %}
+        {% with name|add:'_uuid='|add:assoc.uuid as param %}
+
+        <li>
+            <a href="{% url route assoc.uuid %}">
+                <b>{{ name|title }}</b>: {{ assoc.title }}
+            </a>
+        </li>
+
+        {% endwith %}
+    {% endwith %}
+{% endwith %}

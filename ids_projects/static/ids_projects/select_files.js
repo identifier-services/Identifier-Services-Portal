@@ -61,6 +61,8 @@
 
         $('button[name="file-select"]').on('click', function(e) {
             e.preventDefault();
+            // TODO: make this a modal or something
+            $("table").prepend("<div><h2 style='color: red'>Registering File...</h2></div>");
             var file_path = e.target['dataset']['filePath']
             select_file(file_path);
         });
