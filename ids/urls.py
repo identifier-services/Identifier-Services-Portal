@@ -8,6 +8,8 @@ urlpatterns = patterns(
 
     # admin urls
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/impersonate/', include('hijack.urls')),
+
 
     # project-level urls
     url(r'^$', 'ids.views.homepage', name='homepage'),
