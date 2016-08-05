@@ -60,4 +60,32 @@
     {% if data %}
         {% breadcrumb "Data" "ids_projects:data-view" data.uuid %}
     {% endif %}
+
+    {#### Dataset ####}
+
+    {% if dataset %}
+        {% breadcrumb "Dataset" "ids_projects:dataset-view" dataset.uuid %}
+
+        {% if form_dataset_edit %}
+            {% breadcrumb "Edit Dataset" "ids_projects:dataset-edit" dataset.uuid %}
+        {% endif %}
+    {% endif %}
+
+    {% if form_dataset_create %}
+        {% breadcrumb "Define Dataset" "ids_projects:dataset-create" %}
+    {% endif %}
+
+    {#### Identifier ####}
+
+    {% if identifier %}
+        {% breadcrumb "Identifier" "ids_projects:identifier-view" identifier.uuid %}
+
+        {% if form_identifier_edit %}
+            {% breadcrumb "Edit Identifier" "ids_projects:identifier-edit" identifier.uuid %}
+        {% endif %}
+    {% endif %}
+
+    {% if form_identifier_create %}
+        {% breadcrumb "Define Identifier" "ids_projects:identifier-create" %}
+    {% endif %}
 {% endblock %}
