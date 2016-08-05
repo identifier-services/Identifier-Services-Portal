@@ -3,6 +3,8 @@ agavepy
 requests
 django-bootstrap3
 django-bootstrap-breadcrumbs
+django-hijack
+django-hijack-admin
 python-dateutil
 pyyaml
 mock

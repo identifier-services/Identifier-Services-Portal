@@ -39,6 +39,9 @@ INSTALLED_APPS = [
 
     'bootstrap3',
     'django_bootstrap_breadcrumbs',
+    'hijack',
+    'hijack_admin',
+    'compat',
 
     'ids_auth',
     'ids_projects',
@@ -48,6 +51,8 @@ AUTHENTICATION_BACKENDS = (
     'ids_auth.backends.AgaveOAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+HIJACK_ALLOW_GET_REQUESTS = True
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
