@@ -22,6 +22,8 @@ def dir_list(request, system_id, file_path=None):
     """"""
     api_client = request.user.agave_oauth.api_client
 
+    logger.debug('List contents of dir: %s, on system: %s' % (system_id, file_path))
+
     if file_path is None:
         file_path = '.'
 
