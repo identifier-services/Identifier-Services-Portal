@@ -1,6 +1,8 @@
 from base_metadata import BaseMetadata
 from system import System
-import json, logging
+from ids.utils import get_portal_api_client
+import json
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +134,9 @@ class Data(BaseMetadata):
         """ """
         name = "checksum"
         app_id = "idsvc_checksum-0.1"
-        archive = False
+        archive = True
+
+        portal_client = get_portal_api_client()
 
         if self.sra_id:
             parameters = { 'UUID': self.uuid, 'SRA': self.sra_id }
@@ -141,7 +145,7 @@ class Data(BaseMetadata):
             agave_url = "agave://%s/%s" % (self.system_id, self.path)
             inputs = { 'AGAVE_URL': agave_url }
             parameters = { 'UUID': self.uuid }
-            body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters}
+            body={'name': name, 'appId': app_id, 'inputs': inputs, 'parameters': parameters, 'archive': archive}
 
         try:
             self.meta['value'].update(
@@ -157,7 +161,13 @@ class Data(BaseMetadata):
 
         try:
             logger.debug("Job submission body: %s" % body)
-            response = self._api_client.jobs.submit(body=body)
+
+            import pprint
+            pprint.pprint(body)
+
+            # response = self._api_client.jobs.submit(body=body)
+            response = portal_client.jobs.submit(body=body)
+
             logger.debug("Job submission response: %s" % response['id'])
         except Exception as e:
             exception_msg = 'Unable to initiate job. %s' % e
