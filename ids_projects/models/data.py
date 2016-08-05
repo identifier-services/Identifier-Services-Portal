@@ -36,21 +36,24 @@ class Data(BaseMetadata):
         else:
             self.system_id = self.value.get('system_id')
 
-        self.value.update({'system_id': self.system_id})
+        if self.system_id is not None:
+            self.value.update({'system_id': self.system_id})
 
         if path is not None:
             self.path = path
         else:
             self.path = self.value.get('path')
 
-        self.value.update({'path': self.path})
+        if self.path is not None:
+            self.value.update({'path': self.path})
 
         if sra_id is not None:
             self.sra_id = sra_id
         else:
             self.sra_id = self.value.get('sra_id')
 
-        self.value.update({'sra_id': self.sra_id})
+        if self.sra_id is not None:
+            self.value.update({'sra_id': self.sra_id})
 
     @property
     def title(self):
@@ -139,8 +142,8 @@ class Data(BaseMetadata):
         portal_client = get_portal_api_client()
 
         if self.sra_id:
-            parameters = { 'UUID': self.uuid, 'SRA': self.sra_id }
-            body={'name': name, 'appId': app_id, 'parameters': parameters}
+            parameters = {'UUID': self.uuid, 'SRA': self.sra_id}
+            body = {'name': name, 'appId': app_id, 'parameters': parameters}
         else:
             agave_url = "agave://%s/%s" % (self.system_id, self.path)
             inputs = { 'AGAVE_URL': agave_url }
@@ -149,10 +152,10 @@ class Data(BaseMetadata):
 
         try:
             self.meta['value'].update(
-                 { 'checksum': None,
-                   'lastChecksumUpdated': None,
-                   'checksumConflict': None,
-                   'checkStatus': None })
+                 {'checksum': None,
+                  'lastChecksumUpdated': None,
+                  'checksumConflict': None,
+                  'checkStatus': None})
             self.save()
         except Exception as e:
             exception_msg = 'Unable to initiate job. %s' % e
