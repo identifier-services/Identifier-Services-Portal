@@ -261,7 +261,7 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin, GraphMixin):
             choices = field.get('choices')
             field_dict[key] = {
                 'label': label,
-                'field_class':field_class,
+                'field_class': field_class,
                 'widget': widget,
                 'required': required,
                 'choices': choices,
@@ -309,11 +309,6 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin, GraphMixin):
 
     def save(self):
         """Add or update metadata object on tenant"""
-
-        # if self.name == 'idsvc.data':
-        #     import pdb
-        #     pdb.set_trace()
-
         if self.uuid is None:
             response = self._api_client.meta.addMetadata(body=self.meta)
             self.load_from_meta(response)

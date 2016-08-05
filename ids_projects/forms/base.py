@@ -8,6 +8,7 @@ class DynamicForm(forms.Form):
 
     def __init__(self, fields, *args, **kwargs):
         super(DynamicForm, self).__init__(*args, **kwargs)
+
         for f in fields:
             if f.get('form_field'):
                 self.fields[f['id']] = self._construct_form_field(f)
@@ -15,8 +16,8 @@ class DynamicForm(forms.Form):
             for key in self.initial['value'].iterkeys():
                 if key in self.fields:
                     self.fields[key].initial = self.initial['value'][key]
-        except Exception as e:
-            logger.debug('No initial values.')
+        except KeyError:
+            logger.debug('New %s form, no initial values.' % self.metadata_model.name)
 
     class Meta:
         abstract = True
@@ -30,7 +31,7 @@ class DynamicForm(forms.Form):
         required            = f.get('required', None)
         field_class         = getattr(forms, field_class_name)
         if choices:
-            choices_tuple = tuple([(x,x) for x in choices])
+            choices_tuple = tuple([(x, x) for x in choices])
             return forms.ChoiceField(label=field_label,
                                      choices=choices_tuple,
                                      required=required)

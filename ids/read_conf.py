@@ -1,18 +1,32 @@
-from os.path import abspath, dirname, join, join, isdir, isfile
+from os.path import abspath, dirname, join, isdir, isfile
 from os import listdir
-import yaml, pprint
-
+import yaml
+import pprint
 
 BASE_DIR = dirname(dirname(abspath(__file__)))
 DESCRIPTIONS_DIR = join(BASE_DIR, 'conf/obj_descriptions')
+
+
+def replace_space(d):
+    fields = d.get('fields', [])
+    for field in fields:
+        _id = field.get('id', None)
+        if _id:
+            field['id'] = _id.replace(' ', '_')
 
 
 def process_file(path, conf_file):
     """ """
     with open(join(path, conf_file)) as f:
         data = yaml.safe_load(f)
+        if 'fields' in data.keys():
+            replace_space(data)
+        else:
+            for key in data.keys():
+                replace_space(data[key])
+
     key = conf_file.split('.')[0]
-    return { key : data }
+    return {key: data}
 
 
 def process_dir(path):

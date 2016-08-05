@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.views.decorators.http import require_http_methods
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
-                       get_project_fields)
+                       get_project_form_fields)
 from ..forms.projects import ProjectForm
 from ..models.project import Project
 import logging
@@ -55,7 +55,7 @@ def view(request, project_uuid):
 
     try:
         process_types = get_process_type_keys(project)
-        project_fields = get_project_fields(project)
+        project_fields = get_project_form_fields()
         project.set_fields(project_fields)
     except Exception as e:
         exception_msg = 'Unable to load config values. %s' % e
@@ -72,12 +72,24 @@ def create(request):
     """Create a new project"""
     api_client = request.user.agave_oauth.api_client
 
+    try:
+        project_fields = get_project_form_fields()
+
+        import pprint
+        pprint.pprint(project_fields)
+    except Exception as e:
+        exception_msg = 'Unable to load config values, cannot create project. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:project-list-private'))
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        context = {'form_project_create': ProjectForm(), 'project': None}
+        context = {'form_project_create': ProjectForm(project_fields), 'project': None}
         return render(request, 'ids_projects/projects/create.html', context)
 
     ########
@@ -85,7 +97,7 @@ def create(request):
     ########
     elif request.method == 'POST':
 
-        form = ProjectForm(request.POST)
+        form = ProjectForm(project_fields, request.POST)
 
         if form.is_valid():
 
@@ -115,6 +127,15 @@ def edit(request, project_uuid):
     api_client = request.user.agave_oauth.api_client
 
     try:
+        project_fields = get_project_form_fields()
+    except Exception as e:
+        exception_msg = 'Unable to load config values, cannot create project. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:project-list-private'))
+
+    try:
         project = Project(api_client=api_client, uuid=project_uuid)
     except Exception as e:
         exception_msg = 'Unable to load project. %s' % e
@@ -127,8 +148,8 @@ def edit(request, project_uuid):
     #######
     if request.method == 'GET':
 
-        context = { 'form_project_edit': ProjectForm(initial=project.value),
-                    'project': project }
+        context = {'form_project_edit': ProjectForm(fields=project_fields, initial=project.value),
+                   'project': project}
         return render(request, 'ids_projects/projects/create.html', context)
 
     ########
@@ -136,7 +157,7 @@ def edit(request, project_uuid):
     ########
     elif request.method == 'POST':
 
-        form = ProjectForm(request.POST)
+        form = ProjectForm(project_fields, request.POST)
 
         if form.is_valid():
 

@@ -4,56 +4,47 @@ specimen:
           label: Specimen ID
           required: True
           form_field: True
+
         - id: subspecific genetic lineage
           label: Subspecific Genetic Lineage
           required: False
           form_field: True
+
         - id: taxon name
           label: Taxon Name
           required: False
           form_field: True
+
         - id: haploid chromosome count
           label: Haploid Chromosome Count
           required: False
           form_field: True
+
         - id: ploidy
           label: Ploidy
           required: False
           form_field: True
+
         - id: organ or tissue
           label: Organ or Tissue
           required: False
           form_field: True
+
         - id: developmental stage
           label: Developmental Stage
           required: False
           form_field: True
+
         - id: estimated genome size
           label: Estimated Genome Size
           required: False
           form_field: True
+
         - id: propagation
           label: Propagation
           required: False
           form_field: True
-        - id: existing id type
-          label: Existing ID Type
-          choices:
-              - None
-              - UUID Universally Unique Identifier
-              - ARK Archival Resource id
-              - DOI Digital Object Identifier
-              - URL/URI
-              - NCBI SRA
-              - NCBI BioProject
-              - NCBI BioSample
-              - Local identifier
-          required: False
-          form_field: True
-        - id: existing id
-          label: Existing ID
-          required: False
-          form_field: True
+
         - id: identifier
           label: Identifier
           choices:
@@ -69,28 +60,12 @@ processes:
               label: Sequencing Method
               required: True
               form_field: True
+
             - id: sequencing hardware
               label: Sequencing Hardware
               required: False
               form_field: True
-            - id: existing id type
-              label: Existing ID Type
-              choices:
-                  - None
-                  - UUID Universally Unique Identifier
-                  - ARK Archival Resource id
-                  - DOI Digital Object Identifier
-                  - URL/URI
-                  - NCBI SRA
-                  - NCBI BioProject
-                  - NCBI BioSample
-                  - Local identifier
-              required: False
-              form_field: True
-            - id: existing id
-              label: Existing ID
-              required: False
-              form_field: True
+
             - id: identifier
               label: Identifier
               choices:
@@ -105,40 +80,22 @@ processes:
                 label: Assembly Method
                 required: True
                 form_field: True
+
               - id: reference sequence
                 label: Reference Sequence
                 required: False
                 form_field: True
+
               - id: assembly software
                 label: Assembly Software
                 required: False
                 form_field: True
+
               - id: assembly software version
                 label: Assembly Software Version
                 required: False
                 form_field: True
-              - id: input file
-                label: Input File
-                required: False
-                form_field: True
-              - id: existing id type
-                label: Existing ID Type
-                choices:
-                    - None
-                    - UUID Universally Unique Identifier
-                    - ARK Archival Resource id
-                    - DOI Digital Object Identifier
-                    - URL/URI
-                    - NCBI SRA
-                    - NCBI BioProject
-                    - NCBI BioSample
-                    - Local identifier
-                required: False
-                form_field: True
-              - id: existing id
-                label: Existing ID
-                required: False
-                form_field: True
+
               - id: identifier
                 label: Identifier
                 choices:
@@ -153,28 +110,12 @@ processes:
               label: Anaylsis Method
               required: True
               form_field: True
+
             - id: analysis software
               label: Analysis Software
               required: False
               form_field: True
-            - id: existing id type
-              label: Existing ID Type
-              choices:
-                  - None
-                  - UUID Universally Unique Identifier
-                  - ARK Archival Resource id
-                  - DOI Digital Object Identifier
-                  - URL/URI
-                  - NCBI SRA
-                  - NCBI BioProject
-                  - NCBI BioSample
-                  - Local identifier
-              required: False
-              form_field: True
-            - id: existing id
-              label: Existing ID
-              required: False
-              form_field: True
+
             - id: identifier
               label: Identifier
               choices:
@@ -190,52 +131,42 @@ data:
           widget: TextArea
           required: False
           form_field: True
-        - id: existing id type
-          label: Existing ID Type
-          choices:
-              - None
-              - UUID Universally Unique Identifier
-              - ARK Archival Resource id
-              - DOI Digital Object Identifier
-              - URL/URI
-              - NCBI SRA
-              - NCBI BioProject
-              - NCBI BioSample
-              - Local identifier
-          required: False
-          form_field: True
-        - id: existing id
-          label: Existing ID
-          required: False
-          form_field: True
+
         - id: system
           label: System
           required: False
           form_field: False
+
         - id: path
           label: Path
           required: False
           form_field: False
+
         - id: file name
           label: File Name
           required: False
           form_field: False
+
         - id: size
           label: Size
           required: False
           form_field: False
+
         - id: last modified
           label: Last Modified
           required: False
           form_field: False
+
         - id: checksum
           label: Checksum
           required: False
           form_field: False
+
         - id: checksum date
           label: Checksum Date
           required: False
           form_field: False
+
         - id: identifier
           label: Identifier
           choices:
@@ -250,28 +181,12 @@ dataset:
           label: Name
           required: True
           form_field: True
+
         - id: description
           label: Description
           required: False
           form_field: True
-        - id: existing id type
-          label: Existing ID Type
-          choices:
-              - None
-              - UUID Universally Unique Identifier
-              - ARK Archival Resource id
-              - DOI Digital Object Identifier
-              - URL/URI
-              - NCBI SRA
-              - NCBI BioProject
-              - NCBI BioSample
-              - Local identifier
-          required: False
-          form_field: True
-        - id: existing id
-          label: Existing ID
-          required: False
-          form_field: True
+
         - id: doi
           label: DOI
           required: False

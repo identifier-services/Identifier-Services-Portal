@@ -126,14 +126,14 @@ def create(request):
                     reverse('ids_projects:project-view',
                             kwargs={'project_uuid': project.uuid}))
 
-    context = { 'project':project }
+    context = {'project': project}
 
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        context['form_dataset_create'] = DatasetForm(fields=dataset_fields)
+        context['form_dataset_create'] = DatasetForm(dataset_fields)
         return render(request, 'ids_projects/datasets/create.html', context)
 
     ########

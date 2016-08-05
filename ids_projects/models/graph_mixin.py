@@ -9,10 +9,16 @@ class GraphMixin(object):
     @property
     def graph(self):
         start = time.time()
+
         if self._graph is None:
             self.construct_graph()
 
-        logger.debug("name: {}, graph time: {}".format(self.name, (time.time() - start)))
+        duration = time.time() - start
+        if duration > 0.1:
+            logger.warning("name: {}, graph time: {}".format(self.name, duration))
+        elif duration > 0.0001:
+            logger.debug("name: {}, graph time: {}".format(self.name, duration))
+
         return self._graph
 
     def construct_graph(self):

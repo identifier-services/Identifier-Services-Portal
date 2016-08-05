@@ -96,12 +96,22 @@ def create(request):
         messages.warning(request, exception_msg)
         return HttpResponseRedirect('/projects/')
 
+    try:
+        specimen_fields = get_specimen_fields(project)
+    except Exception as e:
+        exception_msg = 'Missing project type information, cannot create specimen. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:project-view',
+                            kwargs={'project_uuid': project.uuid}))
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        context = {'form_specimen_create': SpecimenForm(),
+        context = {'form_specimen_create': SpecimenForm(specimen_fields),
                    'project': project,
                    'specimen': None}
 
@@ -112,7 +122,7 @@ def create(request):
     ########
     elif request.method == 'POST':
 
-        form = SpecimenForm(request.POST)
+        form = SpecimenForm(specimen_fields, request.POST)
 
         if form.is_valid():
 
@@ -156,18 +166,29 @@ def edit(request, specimen_uuid):
 
     try:
         specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
+        project = specimen.project
     except Exception as e:
         exception_msg = 'Unable to edit specimen. %s' % e
         logger.exception(exception_msg)
         messages.warning(request, exception_msg)
         return HttpResponseRedirect('/projects/')
 
+    try:
+        specimen_fields = get_specimen_fields(project)
+    except Exception as e:
+        exception_msg = 'Missing project type information, cannot edit specimen. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:project-view',
+                            kwargs={'project_uuid': project.uuid}))
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        context = {'form_specimen_edit': SpecimenForm(initial=specimen.value),
+        context = {'form_specimen_edit': SpecimenForm(fields=specimen_fields, initial=specimen.value),
                    'specimen': specimen,
                    'project': specimen.project}
 
@@ -178,7 +199,7 @@ def edit(request, specimen_uuid):
     ########
     elif request.method == 'POST':
 
-        form = SpecimenForm(request.POST)
+        form = SpecimenForm(specimen_fields, request.POST)
 
         if form.is_valid():
 

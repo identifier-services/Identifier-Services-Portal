@@ -169,7 +169,7 @@ def create(request):
             process_type = request.GET.get('process_type')
             process_fields = get_process_fields(project, process_type)
 
-            form_process_type = ProcessTypeForm(process_type_choices, initial={ 'process_type': process_type })
+            form_process_type = ProcessTypeForm(process_type_choices, initial={'process_type': process_type})
             form_process_type.fields['process_type'].widget.attrs['disabled'] = True
             form_process_type.fields['process_type'].widget.attrs['readonly'] = True
 
@@ -261,6 +261,7 @@ def edit(request, process_uuid):
 
     try:
         process = Process(api_client=api_client, uuid=process_uuid)
+        process_type = process.value['process_type']
     except HTTPError as e:
         logger.error('Error editing process. {}'.format(e.message))
         messages.warning(request, 'Error editing process.')
@@ -270,13 +271,13 @@ def edit(request, process_uuid):
         messages.warning(request, 'Process not found.')
         return HttpResponseRedirect('/projects/')
 
-    process_fields = get_process_fields(process.project)
+    process_fields = get_process_fields(process.project, process_type)
 
     #######
     # GET #
     #######
     if request.method == 'GET':
-        context = {'form_process_edit': ProcessFieldsForm(process_fields, initial=process.value),
+        context = {'form_process_edit': ProcessFieldsForm(fields=process_fields, initial=process.value),
                    'specimen': process.specimen,
                    'project': process.project,
                    'process': process}

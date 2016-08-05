@@ -1,7 +1,6 @@
-from django import forms
 from .base import DynamicForm
 from ..models import Dataset
-import six, logging
+import logging
 
 logger = logging.getLogger(__name__)
 

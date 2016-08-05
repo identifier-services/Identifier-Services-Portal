@@ -16,21 +16,17 @@ def get_investigation_type_description(project):
     return project_description
 
 
-def get_project_description(project):
+def get_project_description():
     """Returns project fields."""
     object_descriptions = getattr(settings, 'OBJ_DESCR')
     project_description = object_descriptions['project']
     return project_description
 
 
-def get_project_form_fields(project):
+def get_project_form_fields():
     """Returns project fields."""
-    project_description = get_project_description(project)
+    project_description = get_project_description()
     return project_description['fields']
-
-
-def get_project_fields(project):
-    return get_project_form_fields(project)
 
 
 def get_process_descriptions(project):
