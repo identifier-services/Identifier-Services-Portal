@@ -39,9 +39,9 @@ class GraphMixin(object):
                 processes.append(r)
             if rt == 'data':
                 data.append(r)
-            if rt == 'datasets':
+            if rt == 'dataset':
                 datasets.append(r)
-            if rt == 'identifiers':
+            if rt == 'identifier':
                 identifiers.append(r)
 
         for specimen in specimens:

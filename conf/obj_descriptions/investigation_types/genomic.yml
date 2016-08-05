@@ -177,8 +177,8 @@ data:
           
 dataset:
     fields:
-        - id: name
-          label: Name
+        - id: dataset name
+          label: Dataset Name
           required: True
           form_field: True
 

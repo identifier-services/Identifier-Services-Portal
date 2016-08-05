@@ -43,6 +43,8 @@ urlpatterns += patterns(
     url(r'^dataset/edit/(?P<dataset_uuid>.+?)$', 'edit', name='dataset-edit'),
     # delete a dataset
     url(r'^dataset/delete/(?P<dataset_uuid>.+?)$', 'delete', name='dataset-delete'),
+    # select data
+    url(r'^dataset/select_data/(?P<dataset_uuid>.+?)$', 'list_data', name='dataset-list-data'),
     # add data to dataset
     url(r'^dataset/add_data/(?P<dataset_uuid>.+?)$', 'add_data', name='dataset-add-data'),
     # remove data from dataset

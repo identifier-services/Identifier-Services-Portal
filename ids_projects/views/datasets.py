@@ -95,6 +95,38 @@ def view(request, dataset_uuid):
     return render(request, 'ids_projects/datasets/detail.html', context)
 
 
+@require_http_methods(['GET'])
+@login_required
+def list_data(request, dataset_uuid):
+    """View a specific dataset"""
+    api_client = request.user.agave_oauth.api_client
+
+    try:
+        dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
+        project = dataset.project
+        data = dataset.data
+    except Exception as e:
+        exception_msg = 'Unable to load process. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
+
+    try:
+        process_types = get_process_type_keys(project)
+        dataset_fields = get_dataset_fields(project)
+        dataset.set_fields(dataset_fields)
+    except Exception as e:
+        exception_msg = 'Unable to load config values. %s' % e
+        logger.warning(exception_msg)
+
+    context = { 'project': project,
+                'dataset': dataset,
+                'datas': data,
+                'process_types': process_types }
+
+    return render(request, 'ids_projects/datasets/list_data.html', context)
+
+
 @login_required
 @require_http_methods(['GET', 'POST'])
 def create(request):
@@ -176,9 +208,62 @@ def create(request):
 @require_http_methods(['GET', 'POST'])
 def edit(request, dataset_uuid):
     """Edit existing dataset metadata"""
-    # TODO: this is not done
-    logger.warning('Edit Dataset not implemented, see Dataset view.')
-    return HttpResponseNotFound()
+    api_client = request.user.agave_oauth.api_client
+
+    try:
+        dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
+        project = dataset.project
+    except Exception as e:
+        exception_msg = 'Unable to edit dataset. %s' % e
+        logger.exception(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect('/projects/')
+
+    try:
+        dataset_fields = get_dataset_fields(project)
+    except Exception as e:
+        exception_msg = 'Missing project type information, cannot edit dataset. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(
+            reverse('ids_projects:project-view',
+                    kwargs={'project_uuid': project.uuid}))
+
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+
+        context = {'form_dataset_edit': DatasetForm(fields=dataset_fields, initial=dataset.value),
+                   'dataset': dataset,
+                   'project': project}
+
+        return render(request, 'ids_projects/specimens/create.html', context)
+
+    ########
+    # POST #
+    ########
+    elif request.method == 'POST':
+
+        form = DatasetForm(dataset_fields, request.POST)
+
+        if form.is_valid():
+
+            try:
+                dataset.value.update(form.cleaned_data)
+                dataset.save()
+
+                messages.info(request, 'Dataset successfully edited.')
+                return HttpResponseRedirect(
+                    reverse('ids_projects:dataset-view',
+                            kwargs={'dataset_uuid': dataset.uuid}))
+            except Exception as e:
+                exception_msg = 'Unable to edit specimen. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect(
+                    reverse('ids_projects:dataset-view',
+                            kwargs={'dataset_uuid': dataset.uuid}))
 
 
 @login_required
