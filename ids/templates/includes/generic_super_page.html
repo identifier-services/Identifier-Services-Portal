@@ -50,9 +50,15 @@
             </div>
             <div class="col-sm-9">
 
-                <p>
-                    <h3>{{object_type|title}}'s Related Objects</h3>
-                </p>
+                {% if object.containers or object.parts or object.inputs or object.outputs or object.is_input_to or object.is_output_of %}
+                    <p>
+                        <h3>{{object_type|title}}'s Related Objects</h3>
+                    </p>
+                {% else %}
+                    <p>
+                        <h3>Empty {{object_type|title}}</h3>
+                    </p>
+                {% endif %}
 
                 <div class="well">
 
