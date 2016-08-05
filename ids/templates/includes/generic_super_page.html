@@ -15,6 +15,7 @@
             {% elif object_type != 'data' %}
                 <a href="{% url 'ids_projects:data-type' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Data</a>
             {% elif object_type == 'data' %}
+                {# TODO: SRA and file do not need to be the same object! #}
                 {% if object_type.sra_id %}
                     <a href="{% url 'ids_projects:file-select' 'identical' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add File</a>
                 {% else %}
@@ -59,7 +60,7 @@
                         <p>
                             <b>Containers:</b>
                             <ul>
-                            {% for assoc in object.containers %}
+                            {% for item in object.containers %}
                                 {% include 'includes/related_list_item.html' %}
                             {% endfor %}
                             </ul>
@@ -69,11 +70,45 @@
                     {% if object.parts %}
                         <p>
                         <b>Parts:</b>
-                            <ul>
-                            {% for assoc in object.parts %}
-                                {% include 'includes/related_list_item.html' %}
-                            {% endfor %}
+                            {% if object.graph|length > 0 %}
+                                {% for thing in object.graph %}
+                                    {% with thing as item %}
+                                        {% include 'includes/link_list_item.html' %}
+                                    {% endwith %}
+                                {% endfor %}
+                            {% else %}
+                                <ul>
+                                {% for item in object.parts %}
+                                    {% if item.name == 'idsvc.specimen' %}
+                                        {% include 'includes/related_list_item.html' %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% for item in object.parts %}
+                                    {% if item.name == 'idsvc.process' %}
+                                        {% include 'includes/related_list_item.html' %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% for item in object.parts %}
+                                    {% if item.name == 'idsvc.data' %}
+                                        {% include 'includes/related_list_item.html' %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% for item in object.parts %}
+                                    {% if item.name == 'idsvc.dataset' %}
+                                        {% include 'includes/related_list_item.html' %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% for item in object.parts %}
+                                    {% if item.name == 'idsvc.identifier' %}
+                                        {% include 'includes/related_list_item.html' %}
+                                    {% endif %}
+                                {% endfor %}
                             </ul>
+                            {% endif %}
                         </p>
                     {% endif %}
 
@@ -81,7 +116,7 @@
                         </p>
                             <b>Inputs:</b>
                             <ul>
-                            {% for assoc in object.inputs %}
+                            {% for item in object.inputs %}
                                 {% include 'includes/related_list_item.html' %}
                             {% endfor %}
                             </ul>
@@ -92,7 +127,7 @@
                         </p>
                             <b>Outputs:</b>
                             <ul>
-                            {% for assoc in object.outputs %}
+                            {% for item in object.outputs %}
                                 {% include 'includes/related_list_item.html' %}
                             {% endfor %}
                             </ul>
@@ -103,7 +138,7 @@
                         </p>
                             <b>Is Input To:</b>
                             <ul>
-                            {% for assoc in object.is_input_to %}
+                            {% for item in object.is_input_to %}
                                 {% include 'includes/related_list_item.html' %}
                             {% endfor %}
                             </ul>
@@ -114,7 +149,7 @@
                         </p>
                             <b>Is Output Of:</b>
                             <ul>
-                            {% for assoc in object.is_output_of %}
+                            {% for item in object.is_output_of %}
                                 {% include 'includes/related_list_item.html' %}
                             {% endfor %}
                             </ul>

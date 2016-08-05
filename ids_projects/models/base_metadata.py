@@ -1,5 +1,6 @@
 from .base_agave_object import BaseAgaveObject
 from .metadata_relationship_mixin import MetadataRelationshipMixin
+from .graph_mixin import GraphMixin
 from ids.utils import get_portal_api_client
 import json
 import datetime
@@ -8,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
+class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin, GraphMixin):
     """Base class for IDS Metadata (Project, Specimen, Process, Data)"""
     name = "idsvc.basemetadata"
 
@@ -52,6 +53,8 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin):
         self._fields = None
         self._relationships = None
         self._related_objects = None
+        # warning, big performance hit if _graph is not initialized to None
+        self._graph = None
 
         # get optional arguments
         meta = kwargs.get('meta')
