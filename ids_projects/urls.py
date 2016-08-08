@@ -1,9 +1,9 @@
 from django.conf.urls import patterns, include, url
 
 
-#########
-# Files #
-#########
+########
+# Data #
+########
 urlpatterns = patterns(
     'ids_projects.views.data',
     # intermediate step between adding and sra or a file
@@ -25,7 +25,7 @@ urlpatterns = patterns(
     # view data info
     url(r'^data/(?P<data_uuid>.+?)$', 'view', name='data-view'),
     # edit data info
-    url(r'^data/edit/(?P<data_uuid>.+?)$', 'view', name='data-edit'),
+    url(r'^data/edit/(?P<data_uuid>.+?)$', 'edit', name='data-edit'),
 )
 
 ############
@@ -44,7 +44,7 @@ urlpatterns += patterns(
     # delete a dataset
     url(r'^dataset/delete/(?P<dataset_uuid>.+?)$', 'delete', name='dataset-delete'),
     # select data
-    url(r'^dataset/select_data/(?P<dataset_uuid>.+?)$', 'list_data', name='dataset-list-data'),
+    url(r'^dataset/select_data/(?P<dataset_uuid>.+?)$', 'select_data', name='dataset-select-data'),
     # add data to dataset
     url(r'^dataset/add_data/(?P<dataset_uuid>.+?)$', 'add_data', name='dataset-add-data'),
     # remove data from dataset

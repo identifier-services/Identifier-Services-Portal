@@ -10,7 +10,7 @@
                 <a href="{% url 'ids_projects:data-type' %}?relationship=input&process_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Input Data</a>
                 <a href="{% url 'ids_projects:data-type' %}?relationship=output&process_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Output Data</a>
             {% elif object_type == 'dataset' %}
-                <a href="{% url 'ids_projects:dataset-list-data'  dataset.uuid%}?" class="btn btn-primary btn-block">Select Data</a>
+                <a href="{% url 'ids_projects:dataset-select-data'  dataset.uuid%}?" class="btn btn-primary btn-block">Select Data</a>
                 <a href="#" class="btn btn-primary btn-block">Request Identifier</a>
             {% elif object_type != 'data' %}
                 <a href="{% url 'ids_projects:data-type' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Data</a>

@@ -5,6 +5,11 @@ specimen:
           required: True
           form_field: True
 
+        - id: uri or guid
+          label: URI / GUID
+          required: False
+          form_field: True
+
         - id: subspecific genetic lineage
           label: Subspecific Genetic Lineage
           required: False

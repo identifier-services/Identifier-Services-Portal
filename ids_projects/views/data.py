@@ -129,9 +129,65 @@ def view(request, data_uuid):
 @login_required
 @require_http_methods(['GET', 'POST'])
 def edit(request, data_uuid):
-    # TODO: this is not done
-    logger.warning('Edit Data not implemented, see Data view.')
-    return HttpResponseNotFound()
+    """"""
+    import pdb; pdb.set_trace()
+    
+    api_client = request.user.agave_oauth.api_client
+
+    try:
+        data = Data(api_client=api_client, uuid=data_uuid)
+        project = data.project
+    except Exception as e:
+        exception_msg = 'Unable to edit specimen. %s' % e
+        logger.exception(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect('/projects/')
+
+    try:
+        data_fields = get_data_fields(project)
+    except Exception as e:
+        exception_msg = 'Missing project type information, cannot edit specimen. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(
+            reverse('ids_projects:project-view',
+                    kwargs={'project_uuid': project.uuid}))
+
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+
+        context = {'form_specimen_edit': DataForm(fields=data_fields, initial=data.value),
+                   'data': data,
+                   'project': data.project}
+
+        return render(request, 'ids_projects/data/create.html', context)
+
+    ########
+    # POST #
+    ########
+    elif request.method == 'POST':
+
+        form = DataForm(data_fields, request.POST)
+
+        if form.is_valid():
+
+            try:
+                data.value.update(form.cleaned_data)
+                data.save()
+
+                messages.info(request, 'Data successfully edited.')
+                return HttpResponseRedirect(
+                    reverse('ids_projects:sdata-view',
+                            kwargs={'data_uuid': data.uuid}))
+            except Exception as e:
+                exception_msg = 'Unable to edit data. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect(
+                    reverse('ids_projects:data-view',
+                            kwargs={'data_uuid': data.uuid}))
 
 
 def _get_cancel_url(request):
@@ -565,6 +621,8 @@ def data_delete(request, data_uuid):
     """ """
     next_url = request.GET.get('next_url', None)
     api_client = request.user.agave_oauth.api_client
+
+    import pdb; pdb.set_trace()
 
     try:
         data = Data(api_client=api_client, uuid=data_uuid)

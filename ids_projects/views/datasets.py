@@ -5,8 +5,8 @@ from django.http import HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 import logging
-from ..forms.datasets import DatasetForm
-from ..models import Project, Dataset
+from ..forms.datasets import DatasetForm, DataSelectForm
+from ..models import Project, Specimen, Process, Dataset, Data
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
                        get_dataset_fields)
@@ -95,10 +95,10 @@ def view(request, dataset_uuid):
     return render(request, 'ids_projects/datasets/detail.html', context)
 
 
-@require_http_methods(['GET'])
+@require_http_methods(['GET', 'POST'])
 @login_required
-def list_data(request, dataset_uuid):
-    """View a specific dataset"""
+def select_data(request, dataset_uuid):
+    """List data to add to dataset."""
     api_client = request.user.agave_oauth.api_client
 
     try:
@@ -119,12 +119,62 @@ def list_data(request, dataset_uuid):
         exception_msg = 'Unable to load config values. %s' % e
         logger.warning(exception_msg)
 
-    context = { 'project': project,
-                'dataset': dataset,
-                'datas': data,
-                'process_types': process_types }
+    data_choices = [(x.uuid, x.title) for x in project.data]
 
-    return render(request, 'ids_projects/datasets/list_data.html', context)
+    # TODO: I need this information stored in the Data object, so we don't have to make agave calls
+    # data_choices = [(x.uuid, 'Data: %s, Process: %s, Specimen: %s' % (
+    # x.title, (x.process.title if x.process else 'N/A'), (x.specimen.title if x.specimen else 'N/A'))) for x in
+    #                 project.data]
+
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+        data = [x.uuid for x in dataset.data]
+        initial = {'choices': data}
+        form_data_select = DataSelectForm(choices=data_choices, initial=initial)
+
+        context = {'project': project,
+                   'dataset': dataset,
+                   'datas': data,
+                   'process_types': process_types,
+                   'form_data_select': form_data_select}
+
+        return render(request, 'ids_projects/datasets/select_data.html', context)
+
+    ########
+    # POST #
+    ########
+    elif request.method == 'POST':
+        form_data_select = DataSelectForm(data_choices, request.POST)
+
+        if form_data_select.is_valid():
+
+            data_choices = form_data_select.cleaned_data['data_choices']
+            logger.debug('Selected data: {}'.format(data_choices))
+
+            try:
+                for data_uuid in data_choices:
+                    data = Data(api_client=api_client, uuid=data_uuid)
+                    data.add_container(dataset)
+                    data.save()
+                    dataset.add_part(data)
+
+                dataset.save()
+
+                success_msg = 'Successfully added data to dataset.'
+                logger.info(success_msg)
+                messages.success(request, success_msg)
+                return HttpResponseRedirect(
+                    reverse('ids_projects:dataset-view',
+                            kwargs={'dataset_uuid': dataset.uuid}))
+            except HTTPError as e:
+                exception_msg = 'Unable to select data. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect(
+                    reverse('ids_projects:dataset-view',
+                            kwargs={'dataset_uuid': dataset.uuid}))
 
 
 @login_required
@@ -160,12 +210,14 @@ def create(request):
 
     context = {'project': project}
 
+    data_choices = [(x.uuid, x.title) for x in project.data]
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        context['form_dataset_create'] = DatasetForm(dataset_fields)
+        context['form_dataset_create'] = DatasetForm(dataset_fields, data_choices)
         return render(request, 'ids_projects/datasets/create.html', context)
 
     ########
@@ -173,7 +225,7 @@ def create(request):
     ########
     elif request.method == 'POST':
 
-        form_dataset = DatasetForm(dataset_fields, request.POST)
+        form_dataset = DatasetForm(dataset_fields, data_choices, request.POST)
 
         if form_dataset.is_valid():
             logger.debug('Dataset form is valid')
@@ -229,23 +281,29 @@ def edit(request, dataset_uuid):
             reverse('ids_projects:project-view',
                     kwargs={'project_uuid': project.uuid}))
 
+    data_choices = [(x.uuid, x.title) for x in project.data]
+
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        context = {'form_dataset_edit': DatasetForm(fields=dataset_fields, initial=dataset.value),
+        initial = dataset.value
+        data = [x.uuid for x in dataset.data]
+        initial.update({'data_choices': data})
+
+        context = {'form_dataset_edit': DatasetForm(fields=dataset_fields, choices=data_choices, initial=dataset.value),
                    'dataset': dataset,
                    'project': project}
 
-        return render(request, 'ids_projects/specimens/create.html', context)
+        return render(request, 'ids_projects/datasets/create.html', context)
 
     ########
     # POST #
     ########
     elif request.method == 'POST':
 
-        form = DatasetForm(dataset_fields, request.POST)
+        form = DatasetForm(dataset_fields, choices, request.POST)
 
         if form.is_valid():
 
