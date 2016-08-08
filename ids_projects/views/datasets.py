@@ -131,7 +131,7 @@ def select_data(request, dataset_uuid):
     #######
     if request.method == 'GET':
         data = [x.uuid for x in dataset.data]
-        initial = {'choices': data}
+        initial = {'data_choices': data}
         form_data_select = DataSelectForm(choices=data_choices, initial=initial)
 
         context = {'project': project,

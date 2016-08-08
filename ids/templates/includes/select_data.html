@@ -6,120 +6,31 @@
 
             <div class="col-sm-9">
 
-                {% if object.containers or object.parts or object.inputs or object.outputs or object.is_input_to or object.is_output_of %}
-                    <p>
-                        <h3>{{object_type|title}}'s Related Objects</h3>
-                    </p>
-                {% else %}
-                    <p>
-                        <h3>Empty {{object_type|title}}</h3>
-                    </p>
-                {% endif %}
+                <p>
+                    <h3>{{ object_type|title }}: {{ object.title|title }}</h3>
+                </p>
 
-                <div class="well">
+                <div id="id_data_select" class="well">
 
-                    {% if object.containers %}
-                        <p>
-                            <b>Containers:</b>
-                            <ul>
-                            {% for item in object.containers %}
-                                {% include 'includes/related_list_item.html' %}
-                            {% endfor %}
-                            </ul>
-                        </p>
-                    {% endif %}
 
                     {% if object.parts %}
                         <p>
-                        <b>Parts:</b>
                             {% if object.graph|length > 0 %}
                                 {% for thing in object.graph %}
                                     {% with thing as item %}
-                                        {% include 'includes/link_list_item.html' %}
+                                        {% include 'includes/select_list_item.html' %}
                                     {% endwith %}
                                 {% endfor %}
-                            {% else %}
-                                <ul>
-                                {% for item in object.parts %}
-                                    {% if item.name == 'idsvc.specimen' %}
-                                        {% include 'includes/related_list_item.html' %}
-                                    {% endif %}
-                                {% endfor %}
-
-                                {% for item in object.parts %}
-                                    {% if item.name == 'idsvc.process' %}
-                                        {% include 'includes/related_list_item.html' %}
-                                    {% endif %}
-                                {% endfor %}
-
-                                {% for item in object.parts %}
-                                    {% if item.name == 'idsvc.data' %}
-                                        {% include 'includes/related_list_item.html' %}
-                                    {% endif %}
-                                {% endfor %}
-
-                                {% for item in object.parts %}
-                                    {% if item.name == 'idsvc.dataset' %}
-                                        {% include 'includes/related_list_item.html' %}
-                                    {% endif %}
-                                {% endfor %}
-
-                                {% for item in object.parts %}
-                                    {% if item.name == 'idsvc.identifier' %}
-                                        {% include 'includes/related_list_item.html' %}
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
                             {% endif %}
                         </p>
                     {% endif %}
 
-                    {% if object.inputs %}
-                        </p>
-                            <b>Inputs:</b>
-                            <ul>
-                            {% for item in object.inputs %}
-                                {% include 'includes/related_list_item.html' %}
-                            {% endfor %}
-                            </ul>
-                        </p>
-                    {% endif %}
-
-                    {% if object.outputs %}
-                        </p>
-                            <b>Outputs:</b>
-                            <ul>
-                            {% for item in object.outputs %}
-                                {% include 'includes/related_list_item.html' %}
-                            {% endfor %}
-                            </ul>
-                        </p>
-                    {% endif %}
-
-                    {% if object.is_input_to %}
-                        </p>
-                            <b>Is Input To:</b>
-                            <ul>
-                            {% for item in object.is_input_to %}
-                                {% include 'includes/related_list_item.html' %}
-                            {% endfor %}
-                            </ul>
-                        </p>
-                    {% endif %}
-
-                    {% if object.is_output_of %}
-                        </p>
-                            <b>Is Output Of:</b>
-                            <ul>
-                            {% for item in object.is_output_of %}
-                                {% include 'includes/related_list_item.html' %}
-                            {% endfor %}
-                            </ul>
-                        </p>
-                    {% endif %}
                 </div>
+
             </div>
+
         </div>
 
     {% endblock %}
-{% endwith %} <!-- object_type -->
+
+{% endwith %}
