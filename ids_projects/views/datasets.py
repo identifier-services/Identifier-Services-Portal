@@ -217,7 +217,7 @@ def create(request):
     #######
     if request.method == 'GET':
 
-        context['form_dataset_create'] = DatasetForm(dataset_fields, data_choices)
+        context['form_dataset_create'] = DatasetForm(fields=dataset_fields, choices=data_choices)
         return render(request, 'ids_projects/datasets/create.html', context)
 
     ########
@@ -225,7 +225,7 @@ def create(request):
     ########
     elif request.method == 'POST':
 
-        form_dataset = DatasetForm(dataset_fields, data_choices, request.POST)
+        form_dataset = DatasetForm(fields=dataset_fields, choices=data_choices, initial=request.POST)
 
         if form_dataset.is_valid():
             logger.debug('Dataset form is valid')
