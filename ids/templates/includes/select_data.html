@@ -6,20 +6,25 @@
 
             <div class="col-sm-9">
 
+                <!--<p>-->
+                    <!--<h3>{{ object_type|title }}: {{ object.title|title }}</h3>-->
+                <!--</p>-->
+
                 <p>
-                    <h3>{{ object_type|title }}: {{ object.title|title }}</h3>
+                    <h4>Select data to add to the <i>{{ dataset.title|title }}</i> dataset:</h4>
                 </p>
 
                 <div id="id_data_select" class="well">
-
 
                     {% if object.parts %}
                         <p>
                             {% if object.graph|length > 0 %}
                                 {% for thing in object.graph %}
-                                    {% with thing as item %}
-                                        {% include 'includes/select_list_item.html' %}
-                                    {% endwith %}
+                                    {% if not thing.name == 'idsvc.dataset' %}
+                                        {% with thing as item %}
+                                            {% include 'includes/select_list_item.html' %}
+                                        {% endwith %}
+                                    {% endif %}
                                 {% endfor %}
                             {% endif %}
                         </p>

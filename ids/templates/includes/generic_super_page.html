@@ -7,7 +7,9 @@
         <div class="row">
             <div class="col-sm-3">
             {% if object_type == 'process' %}
-                <a href="{% url 'ids_projects:data-type' %}?relationship=input&process_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Input Data</a>
+                {% if object.process_type != 'sequencing' %}
+                    <a href="{% url 'ids_projects:data-type' %}?relationship=input&process_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Input Data</a>
+                {% endif %}
                 <a href="{% url 'ids_projects:data-type' %}?relationship=output&process_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Output Data</a>
             {% elif object_type == 'dataset' %}
                 <a href="{% url 'ids_projects:dataset-select-data'  dataset.uuid%}?" class="btn btn-primary btn-block">Select Data</a>

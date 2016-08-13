@@ -31,6 +31,10 @@ class Process(BaseMetadata):
         self.value.update({'_outputs': outputs})
 
     @property
+    def process_type(self):
+        return self.value.get('process_type')
+
+    @property
     def title(self):
         not_applicable = ('NA', 'N/A', 'NOT APPLICABLE', 'NONE', 'NULL')
 

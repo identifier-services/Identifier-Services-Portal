@@ -74,9 +74,6 @@ def create(request):
 
     try:
         project_fields = get_project_form_fields()
-
-        import pprint
-        pprint.pprint(project_fields)
     except Exception as e:
         exception_msg = 'Unable to load config values, cannot create project. %s' % e
         logger.error(exception_msg)

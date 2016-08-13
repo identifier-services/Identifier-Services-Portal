@@ -121,60 +121,67 @@ def select_data(request, dataset_uuid):
 
     data_choices = [(x.uuid, x.title) for x in project.data]
 
-    # TODO: I need this information stored in the Data object, so we don't have to make agave calls
-    # data_choices = [(x.uuid, 'Data: %s, Process: %s, Specimen: %s' % (
-    # x.title, (x.process.title if x.process else 'N/A'), (x.specimen.title if x.specimen else 'N/A'))) for x in
-    #                 project.data]
-
     #######
     # GET #
     #######
     if request.method == 'GET':
         data = [x.uuid for x in dataset.data]
-        initial = {'data_choices': data}
-        form_data_select = DataSelectForm(choices=data_choices, initial=initial)
+        # initial = {'data_choices': data}
+        # form_data_select = DataSelectForm(choices=data_choices, initial=initial)
 
         context = {'project': project,
                    'dataset': dataset,
                    'datas': data,
-                   'process_types': process_types,
-                   'form_data_select': form_data_select}
+                   'process_types': process_types}
+                   # 'form_data_select': form_data_select}
 
         return render(request, 'ids_projects/datasets/select_data.html', context)
 
     ########
     # POST #
     ########
-    elif request.method == 'POST':
-        form_data_select = DataSelectForm(data_choices, request.POST)
+    # elif request.method == 'POST':
+    #     import pdb; pdb.set_trace()
 
-        if form_data_select.is_valid():
+        # form_data_select = DataSelectForm(data_choices, request.POST)
 
-            data_choices = form_data_select.cleaned_data['data_choices']
-            logger.debug('Selected data: {}'.format(data_choices))
-
-            try:
-                for data_uuid in data_choices:
-                    data = Data(api_client=api_client, uuid=data_uuid)
-                    data.add_container(dataset)
-                    data.save()
-                    dataset.add_part(data)
-
-                dataset.save()
-
-                success_msg = 'Successfully added data to dataset.'
-                logger.info(success_msg)
-                messages.success(request, success_msg)
-                return HttpResponseRedirect(
-                    reverse('ids_projects:dataset-view',
-                            kwargs={'dataset_uuid': dataset.uuid}))
-            except HTTPError as e:
-                exception_msg = 'Unable to select data. %s' % e
-                logger.error(exception_msg)
-                messages.error(request, exception_msg)
-                return HttpResponseRedirect(
-                    reverse('ids_projects:dataset-view',
-                            kwargs={'dataset_uuid': dataset.uuid}))
+        # if form_data_select.is_valid():
+        #
+        #     import pdb; pdb.set_trace()
+        #
+        #     data_choices = form_data_select.cleaned_data['data_choices']
+        #     logger.debug('Selected data: {}'.format(data_choices))
+        #
+        #     try:
+        #         for data_uuid in data_choices:
+        #             data = Data(api_client=api_client, uuid=data_uuid)
+        #             data.add_container(dataset)
+        #             data.save()
+        #             dataset.add_part(data)
+        #
+        #         dataset.save()
+        #
+        #         success_msg = 'Successfully added data to dataset.'
+        #         logger.info(success_msg)
+        #         messages.success(request, success_msg)
+        #         return HttpResponseRedirect(
+        #             reverse('ids_projects:dataset-view',
+        #                     kwargs={'dataset_uuid': dataset.uuid}))
+        #
+        #     except HTTPError as e:
+        #         exception_msg = 'Unable to select data. %s' % e
+        #         logger.error(exception_msg)
+        #         messages.error(request, exception_msg)
+        #         return HttpResponseRedirect(
+        #             reverse('ids_projects:dataset-view',
+        #                     kwargs={'dataset_uuid': dataset.uuid}))
+        # else:
+        #     exception_msg = "Dataset form is not valid!"
+        #     logger.error(exception_msg)
+        #     messages.error(request, exception_msg)
+        #     return HttpResponseRedirect(
+        #         reverse('ids_projects:dataset-view',
+        #                 kwargs={'dataset_uuid': dataset.uuid}))
 
 
 @login_required
@@ -210,14 +217,15 @@ def create(request):
 
     context = {'project': project}
 
-    data_choices = [(x.uuid, x.title) for x in project.data]
+    # data_choices = [(x.uuid, x.title) for x in project.data]
 
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        context['form_dataset_create'] = DatasetForm(fields=dataset_fields, choices=data_choices)
+        # context['form_dataset_create'] = DatasetForm(fields=dataset_fields, choices=data_choices)
+        context['form_dataset_create'] = DatasetForm(fields=dataset_fields)
         return render(request, 'ids_projects/datasets/create.html', context)
 
     ########
@@ -225,12 +233,14 @@ def create(request):
     ########
     elif request.method == 'POST':
 
-        form_dataset = DatasetForm(fields=dataset_fields, choices=data_choices, initial=request.POST)
+        #form_dataset = DatasetForm(fields=dataset_fields, choices=data_choices, initial=request.POST)
+        form_dataset = DatasetForm(dataset_fields, request.POST)
 
         if form_dataset.is_valid():
             logger.debug('Dataset form is valid')
 
             try:
+
                 dataset = Dataset(api_client=api_client, value=form_dataset.cleaned_data)
                 dataset.save()
 
@@ -254,6 +264,14 @@ def create(request):
                 return HttpResponseRedirect(
                             reverse('ids_projects:project-view',
                                     kwargs={'project_uuid': project.uuid}))
+
+        else:
+            exception_msg = "Dataset form is not valid!"
+            logger.error(exception_msg)
+            messages.error(request, exception_msg)
+            return HttpResponseRedirect(
+                reverse('ids_projects:project-view',
+                        kwargs={'project_uuid': project.uuid}))
 
 
 @login_required
@@ -281,18 +299,14 @@ def edit(request, dataset_uuid):
             reverse('ids_projects:project-view',
                     kwargs={'project_uuid': project.uuid}))
 
-    data_choices = [(x.uuid, x.title) for x in project.data]
+    # data_choices = [(x.uuid, x.title) for x in project.data]
 
     #######
     # GET #
     #######
     if request.method == 'GET':
 
-        initial = dataset.value
-        data = [x.uuid for x in dataset.data]
-        initial.update({'data_choices': data})
-
-        context = {'form_dataset_edit': DatasetForm(fields=dataset_fields, choices=data_choices, initial=dataset.value),
+        context = {'form_dataset_edit': DatasetForm(dataset_fields, dataset.value),
                    'dataset': dataset,
                    'project': project}
 
@@ -303,7 +317,7 @@ def edit(request, dataset_uuid):
     ########
     elif request.method == 'POST':
 
-        form = DatasetForm(dataset_fields, choices, request.POST)
+        form = DatasetForm(dataset_fields, request.POST)
 
         if form.is_valid():
 
@@ -323,13 +337,31 @@ def edit(request, dataset_uuid):
                     reverse('ids_projects:dataset-view',
                             kwargs={'dataset_uuid': dataset.uuid}))
 
+        else:
+            exception_msg = "Dataset form is not valid!"
+            logger.error(exception_msg)
+            messages.error(request, exception_msg)
+            return HttpResponseRedirect(
+                reverse('ids_projects:dataset-view',
+                        kwargs={'dataset_uuid': dataset.uuid}))
+
 
 @login_required
 @require_http_methods(['GET', 'POST'])
-def add_data(self, dataset_uuid):
-    # TODO: this is not done
-    logger.warning('Add Data not implemented, see Dataset view.')
-    return HttpResponseNotFound()
+def add_data(request, dataset_uuid):
+    api_client = request.user.agave_oauth.api_client
+
+    import pdb;
+    pdb.set_trace()
+
+    try:
+        dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
+        project = dataset.project
+    except Exception as e:
+        exception_msg = 'Unable to load process. %s' % e
+        logger.error(exception_msg)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
 
 @login_required

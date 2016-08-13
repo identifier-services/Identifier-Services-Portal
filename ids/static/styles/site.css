@@ -2,6 +2,13 @@
  ** Site Styles **
  *****************/
 
+/* apply alert-danger style for alert-error */
+.alert-error {
+  background-color: #F2DEDE;
+  border-color: #EBCCD1;
+  color: #A94442;
+}
+
 .dl-horizontal dt {
     text-align: left;
     width: 115px;

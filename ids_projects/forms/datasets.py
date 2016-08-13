@@ -25,13 +25,7 @@ class DataSelectForm(forms.Form):
 
 
 class DatasetForm(DynamicForm):
-    data_choices = forms.MultipleChoiceField(label='Select Data',
-                                             widget=forms.CheckboxSelectMultiple,
-                                             required=True,
-                                             help_text='Select data to add to dataset.')
-
     metadata_model = Dataset
 
-    def __init__(self, choices, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(DatasetForm, self).__init__(*args, **kwargs)
-        self.fields['data_choices'].choices = choices

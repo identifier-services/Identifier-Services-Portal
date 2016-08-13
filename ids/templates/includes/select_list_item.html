@@ -3,7 +3,14 @@
         {% with name|add:'_uuid='|add:item.uuid as param %}
             <ul>
                 {% if name == 'data' %}
-                    <label><input type="checkbox" id="id_data_choices_{{ object.uuid }}" value="{{ object.uuid }}"/> <b>{{ name|title }}</b>: {{ item.title }}</label>
+                    <label for="id_data_select_{{ object.uuid }}">
+                        {% if item.uuid in datas %}
+                            <input type="checkbox" checked="checked" id="id_data_select_{{ object.uuid }}" value="{{ object.uuid }}" name="data_select"/>
+                        {% else %}
+                            <input type="checkbox" id="id_data_select_{{ object.uuid }}" value="{{ object.uuid }}" name="data_select"/>
+                        {% endif %}
+                        <b>{{ name|title }}</b>: {{ item.title }}
+                    </label>
                 {% else %}
                     <li>
                         <a href="{% url route item.uuid %}">

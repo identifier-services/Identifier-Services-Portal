@@ -6,18 +6,19 @@
 
 {% block content %}
 
-    {% with project as object %}
-        {% include 'includes/select_data.html' %}
-    {% endwith %}
-
-    <form method="post">
-        {% csrf_token %}
-
-        {% bootstrap_form form_data_select %}
+    <form name="select_data_form" id="id_select_data_form">
+        {% with project as object %}
+            {% include 'includes/select_data.html' %}
+        {% endwith %}
 
         <div>
             <button type="submit" class="btn btn-primary">Save</button>
             <a href="{% url 'ids_projects:dataset-view' dataset_uuid=dataset.uuid %}" class="btn btn-warning">Cancel</a>
         </div>
     </form>
+
 {% endblock %}
+{% block scripts %}
+<script src="{% static 'ids_projects/add_data_to_dataset.js' %}"></script>
+{% endblock %}
+
