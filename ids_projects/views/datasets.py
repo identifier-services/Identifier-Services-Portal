@@ -156,6 +156,7 @@ def select_data(request, dataset_uuid):
             # TODO: this is very inefficient
             for data_uuid in unchecked:
                 data = Data(api_client=api_client, uuid=data_uuid)
+
                 if data in dataset.data:
                     data.remove_container(dataset)
                     data.save()
@@ -167,6 +168,7 @@ def select_data(request, dataset_uuid):
 
             for data_uuid in selected_data:
                 data = Data(api_client=api_client, uuid=data_uuid)
+
                 if data not in dataset.data:
                     data.add_container(dataset)
                     data.save()

@@ -36,14 +36,15 @@
             'id_data_choices' : selected
         }
 
-        var redirect_url = window.location.origin;
+        //var redirect_url = window.location.origin;
+        var redirect_url = url.replace('/select_data', '')
 
 //        console.log(postdata)
 
         $.post(url, postdata)
-//        .then(function(response) {
-//            window.location.replace(redirect_url);
-//        });
+        .then(function(response) {
+            window.location.replace(redirect_url);
+        });
     };
 
 //    $(":checkbox").click(function(e) {
