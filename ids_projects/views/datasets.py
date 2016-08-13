@@ -163,7 +163,7 @@ def select_data(request, dataset_uuid):
 
                     print 'removing: %s' % data.name
 
-                    dataset.save()
+            dataset.save()
 
             for data_uuid in selected_data:
                 data = Data(api_client=api_client, uuid=data_uuid)
@@ -174,7 +174,7 @@ def select_data(request, dataset_uuid):
 
                     print 'adding: %s' % data.name
 
-                    dataset.save()
+            dataset.save()
 
             success_msg = 'Successfully added data to dataset.'
             logger.info(success_msg)
