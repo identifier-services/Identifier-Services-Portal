@@ -26,34 +26,32 @@
         return "";
      }
 
-    var add_data = function add_data() {
+    var foo_bar = function foo_bar() {
 
-        var selected_data = $('input[name=data_select]');
+        var selected_data = $('input[name=request_doi][checked=checked]');
         var url = window.location.href;
-        var selected = selected_data.map(function(index, item) { if (item.checked) {return item.value;}}).toArray();
+        var selected = selected_data.map(function(index, item) {return item.value;})
 
         var postdata={
-            'id_data_choices' : selected
+            selected : selected
         }
 
-        var redirect_url = window.location.origin;
+        var redirect_url = url.replace('/request_doi/','/');
+        var url = url.replace('/request_doi/','/request_doi2/');
 
-//        console.log(postdata)
+        console.log(url)
+        console.log(redirect_url)
+        console.log(postdata)
 
         $.post(url, postdata)
-//        .then(function(response) {
-//            window.location.replace(redirect_url);
-//        });
+        .then(function(response) {
+            window.location.replace(redirect_url);
+        });
     };
 
-//    $(":checkbox").click(function(e) {
-//        e.target.attr('checked');
-//        e.target.prop('checked')
-//    })
-
-    $('#id_select_data_form').on('submit', function(e) {
+    $('#id_request_doi_form').on('submit', function(e) {
         e.preventDefault();
-        add_data();
+        foo_bar();
     });
 
 })(window, jQuery);

@@ -5,9 +5,9 @@
                 {% if name == 'data' %}
                     <label for="id_data_select_{{ object.uuid }}">
                         {% if item.uuid in datas %}
-                            <input type="checkbox" checked="checked" id="id_data_select_{{ object.uuid }}" value="{{ object.uuid }}" name="data_select"/>
+                            <input type="checkbox" checked="checked" id="id_data_select_{{ item.uuid }}" value="{{ item.uuid }}" name="data_select"/>
                         {% else %}
-                            <input type="checkbox" id="id_data_select_{{ object.uuid }}" value="{{ object.uuid }}" name="data_select"/>
+                            <input type="checkbox" id="id_data_select_{{ item.uuid }}" value="{{ item.uuid }}" name="data_select"/>
                         {% endif %}
                         <b>{{ name|title }}</b>: {{ item.title }}
                     </label>
