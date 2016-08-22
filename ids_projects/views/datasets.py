@@ -105,6 +105,8 @@ def select_data(request, dataset_uuid):
     try:
         dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
         project = dataset.project
+        dataset_data = [x.uuid for x in dataset.data]
+        project_data = [x.uuid for x in project.data]
     except Exception as e:
         exception_msg = 'Unable to load process. %s' % e
         logger.error(exception_msg)
@@ -123,11 +125,10 @@ def select_data(request, dataset_uuid):
     # GET #
     #######
     if request.method == 'GET':
-        data = [x.uuid for x in dataset.data]
 
         context = {'project': project,
                    'dataset': dataset,
-                   'datas': data,
+                   'datas': dataset_data,
                    'process_types': process_types}
 
         return render(request, 'ids_projects/datasets/select_data.html', context)
@@ -140,7 +141,6 @@ def select_data(request, dataset_uuid):
         # TODO: this is probably not the best way to do this
         body = urllib.unquote(request.body)
 
-        response_tuples= []
         selected_data = []
 
         if body:
@@ -149,44 +149,49 @@ def select_data(request, dataset_uuid):
             for key, value in response_tuples:
                 selected_data.append(value)
 
-        data_choices = [x.uuid for x in project.data]
-        unchecked = list(set(data_choices) - set(selected_data))
+        unselected_data = list(set(project_data) - set(selected_data))
+        data_to_remove = filter(lambda x: x in dataset_data, unselected_data)
+        data_to_add = list(set(selected_data) - set(dataset_data))
 
+        # remove unselected data
         try:
-            # TODO: this is very inefficient
-            for data_uuid in unchecked:
-                data = Data(api_client=api_client, uuid=data_uuid)
+            if data_to_remove:
+                for data_uuid in data_to_remove:
+                    data = Data(api_client=api_client, uuid=data_uuid)
 
-                if data in dataset.data:
+                    logger.debug('removing: "%s" from dataset: "%s"' % (data.name, dataset.title))
+
                     data.remove_container(dataset)
                     data.save()
                     dataset.remove_part(data)
 
-                    print 'removing: %s' % data.name
+                dataset.save()
+        except HTTPError as e:
+            exception_msg = 'Unable to remove data from dataset. %s' % e
+            logger.error(exception_msg)
+            messages.error(request, exception_msg)
+            return HttpResponseRedirect(
+                reverse('ids_projects:dataset-view',
+                        kwargs={'dataset_uuid': dataset.uuid}))
 
-            dataset.save()
+        # add selected data
+        try:
+            if data_to_add:
+                for data_uuid in data_to_add:
+                    data = Data(api_client=api_client, uuid=data_uuid)
 
-            for data_uuid in selected_data:
-                data = Data(api_client=api_client, uuid=data_uuid)
+                    logger.debug('adding: "%s" to dataset: "%s"' % (data.name, dataset.title))
 
-                if data not in dataset.data:
                     data.add_container(dataset)
                     data.save()
                     dataset.add_part(data)
 
-                    print 'adding: %s' % data.name
-
-            dataset.save()
+                dataset.save()
 
             success_msg = 'Successfully added data to dataset.'
             logger.info(success_msg)
             messages.success(request, success_msg)
-
-            redirect_url = reverse('ids_projects:dataset-view', kwargs={'dataset_uuid': dataset.uuid})
-
-            print 'redirect url: {}'.format(redirect_url)
-
-            return HttpResponseRedirect(redirect_url)
+            return HttpResponseRedirect(reverse('ids_projects:dataset-view', kwargs={'dataset_uuid': dataset.uuid}))
 
         except HTTPError as e:
             exception_msg = 'Unable to select data. %s' % e

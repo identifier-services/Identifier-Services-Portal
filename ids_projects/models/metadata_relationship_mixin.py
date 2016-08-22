@@ -609,7 +609,7 @@ class MetadataRelationshipMixin(object):
         Returns None
         """
         if type(relationship) is not dict or\
-                not all(key in ['@rel:type', '@id'] for key in relationship.key()):
+                not all(key in ['@rel:type', '@id'] for key in relationship.keys()):
             raise Exception('Invalid relationship format.')
 
         self.relationships.remove(relationship)
