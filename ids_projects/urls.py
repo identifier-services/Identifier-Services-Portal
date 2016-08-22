@@ -16,16 +16,16 @@ urlpatterns = patterns(
     url(r'^dir/list/(?P<system_id>[^/]+)/(?P<file_path>.+)?', 'dir_list', name='dir-list'),
     # delete a data metadata object associated with a process
     url(r'^data/delete/(?P<data_uuid>.+?)$', 'data_delete', name='data-delete'),
+    # edit data info
+    url(r'^data/edit/(?P<data_uuid>.+?)$', 'edit', name='data-edit'),
     # do checksum
     url(r'^data/checksum/(?P<data_uuid>.+?)$', 'do_checksum', name='data-checksum'),
     # request identifier
     url(r'^data/request/(?P<id_type>.+?)/(?P<data_uuid>.+?)$', 'request_id', name='data-request-id'),
-    # view data info
+    # list data for project
     url(r'^data/list/?$', 'list', name='data-list'),
     # view data info
     url(r'^data/(?P<data_uuid>.+?)$', 'view', name='data-view'),
-    # edit data info
-    url(r'^data/edit/(?P<data_uuid>.+?)$', 'edit', name='data-edit'),
 )
 
 ############

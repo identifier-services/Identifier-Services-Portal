@@ -133,7 +133,6 @@ data:
     fields:
         - id: description
           label: Description
-          widget: TextArea
           required: False
           form_field: True
 

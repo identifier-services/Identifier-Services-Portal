@@ -6,12 +6,13 @@ from django.http import (JsonResponse,
                          HttpResponseNotFound)
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
-import logging, urllib
-from ..forms.data import DataTypeForm, SRAForm
+from ..forms.data import DataTypeForm, SRAForm, DataForm
 from ..models import Project, Specimen, Process, System, Data
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
                        get_data_fields)
+import logging
+import urllib
 
 logger = logging.getLogger(__name__)
 
@@ -117,11 +118,11 @@ def view(request, data_uuid):
         exception_msg = 'Unable to load config values. %s' % e
         logger.warning(exception_msg)
 
-    context = {'process' : data.process,
-               'project' : data.project,
-               'specimen' : data.specimen,
-               'data' : data,
-               'process_types' : process_types }
+    context = {'process': data.process,
+               'project': data.project,
+               'specimen': data.specimen,
+               'data': data,
+               'process_types': process_types}
 
     return render(request, 'ids_projects/data/detail.html', context)
 
@@ -130,15 +131,13 @@ def view(request, data_uuid):
 @require_http_methods(['GET', 'POST'])
 def edit(request, data_uuid):
     """"""
-    import pdb; pdb.set_trace()
-    
     api_client = request.user.agave_oauth.api_client
 
     try:
         data = Data(api_client=api_client, uuid=data_uuid)
         project = data.project
     except Exception as e:
-        exception_msg = 'Unable to edit specimen. %s' % e
+        exception_msg = 'Unable to edit data. %s' % e
         logger.exception(exception_msg)
         messages.warning(request, exception_msg)
         return HttpResponseRedirect('/projects/')
@@ -146,7 +145,7 @@ def edit(request, data_uuid):
     try:
         data_fields = get_data_fields(project)
     except Exception as e:
-        exception_msg = 'Missing project type information, cannot edit specimen. %s' % e
+        exception_msg = 'Missing project type information, cannot edit data. %s' % e
         logger.error(exception_msg)
         messages.warning(request, exception_msg)
         return HttpResponseRedirect(
@@ -158,11 +157,11 @@ def edit(request, data_uuid):
     #######
     if request.method == 'GET':
 
-        context = {'form_specimen_edit': DataForm(fields=data_fields, initial=data.value),
+        context = {'form_data_edit': DataForm(fields=data_fields, initial=data.value),
                    'data': data,
                    'project': data.project}
 
-        return render(request, 'ids_projects/data/create.html', context)
+        return render(request, 'ids_projects/data/edit.html', context)
 
     ########
     # POST #
@@ -179,7 +178,7 @@ def edit(request, data_uuid):
 
                 messages.info(request, 'Data successfully edited.')
                 return HttpResponseRedirect(
-                    reverse('ids_projects:sdata-view',
+                    reverse('ids_projects:data-view',
                             kwargs={'data_uuid': data.uuid}))
             except Exception as e:
                 exception_msg = 'Unable to edit data. %s' % e
@@ -538,8 +537,6 @@ def file_select(request, relationship):
                 data.load_file_info()
                 data.save()
 
-            # data = Data(api_client=api_client, system_id=system_id, path=file_path)
-            # data.load_file_info()
         except Exception as e:
             exception_msg = 'Unable to access system with system_id=%s. %s' % (system_id, e)
             logger.error(exception_msg)

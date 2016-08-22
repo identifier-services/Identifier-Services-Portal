@@ -36,21 +36,13 @@
             'id_data_choices' : selected
         }
 
-        //var redirect_url = window.location.origin;
         var redirect_url = url.replace('/select_data', '')
-
-//        console.log(postdata)
 
         $.post(url, postdata)
         .then(function(response) {
             window.location.replace(redirect_url);
         });
     };
-
-//    $(":checkbox").click(function(e) {
-//        e.target.attr('checked');
-//        e.target.prop('checked')
-//    })
 
     $('#id_select_data_form').on('submit', function(e) {
         e.preventDefault();
