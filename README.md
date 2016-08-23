@@ -6,8 +6,8 @@
 1. Clone the repo
 
    ```
-   $ git clone https://github.com/DesignSafe-CI/portal.git
-   $ cd portal
+   $ git clone https://github.com/identifier-services/Identifier-Services-Portal 
+   $ cd Identifier-Services-Portal 
    ```
 
 2. Configure environment variables
@@ -19,10 +19,12 @@
 
    - AGAVE_CLIENT_KEY  
    - AGAVE_CLIENT_SECRET  
+   - AGAVE_SUPER_TOKEN
 
    Optional:
 
    - AGAVE_TENANT_BASEURL  (default: https://agave.iplantc.org/)
+   - DJANGO_DEBUG (default: False)
 
 3. Installing
 
