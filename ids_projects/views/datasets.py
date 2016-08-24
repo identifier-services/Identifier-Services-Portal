@@ -413,10 +413,27 @@ def request_doi(request, dataset_uuid):
     # logger.warning('Request DOI not implemented, see Dataset view.')
     # return HttpResponseNotFound()
 
+    
     if request.method == 'GET':
         context = {}
+        if request.user.is_anonymous():
+            api_client = get_portal_api_client()
+        else:
+            api_client = request.user.agave_oauth.api_client
 
-        return render(request, 'ids_projects/datasets/request_doi.html', context)
+        try:
+            dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
+            project = dataset.project
+            data = dataset.data
+                    
+            return render(request, 'ids_projects/datasets/request_doi.html', context)
+
+        except Exception as e:
+            exception_msg = 'Unable to load process. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))        
+            return render(request, 'ids_projects/datasets/request_doi.html', context)
 
     if request.method == 'POST':
 
@@ -437,6 +454,56 @@ def request_doi(request, dataset_uuid):
         messages.success(request, success_msg)
 
         return HttpResponseRedirect('/')
+
+def meta_for_doi(dataset):
+    """ constructing json for build xml object """
+    project = dataset.project
+
+    metadata = {}
+    creators = []
+    creator = {}
+    creator['creatorName'] = {}
+    creator['creatorName']['text'] = project.value.get('creator', None)
+    creators.append(creator)    
+
+    titles = []
+    title = {}      
+    title['xml:lang'] = "en-us"
+    title['text'] = dataset.title
+    titles.append(title)
+
+    subject = {}
+    subject['xml:lang'] = "en-us"    
+    subject['text'] = project.value.get('investigation_type', None)
+    subjects.append(subject)
+
+    alternateIdentifiers = []
+    alternateIdentifier = {}
+    alternateIdentifier['alternateIdentifierType'] = "URL"
+    alternateIdentifier['text'] = "http://schema.datacite.org/schema/meta/kernel-3.1/example/datacite-example-full-v3.1.xml"
+    alternateIdentifiers.append(alternateIdentifier)        
+
+    resourceType = {}
+    resourceType['resourceTypeGeneral'] = "Dataset"
+    resourceType['text'] = "data"
+
+    descriptions = []
+    description = {}
+    description['xml:lang'] = "en-us"    
+    description['text'] = dataset.value.get('description', None)
+    descriptions.append(description)
+
+    metadata['identifier'] = identifier
+    metadata['creators'] = creators
+    metadata['titles'] = titles
+    metadata['publisher'] = publisher
+    metadata['publicationYear'] = publicationYear
+    metadata['subjects'] = subjects
+    metadata['alternateIdentifiers'] = alternateIdentifiers
+    metadata['descriptions'] = descriptions
+
+    # TODO: Add dates, sizes, formats, version, rghtsList, description, if necessary
+    return metadata
 
 
 # @login_required
