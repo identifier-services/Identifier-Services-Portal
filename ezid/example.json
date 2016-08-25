@@ -1,0 +1,121 @@
+{
+  "publisher": {
+    "text": "(:unas)"
+  },
+  "publicationYear": {
+    "text": "2015"
+  },
+  "creators": [
+    {
+      "affiliation": {
+        "text": "CyVerse.org"
+      },
+      "creatorName": {
+        "text": "(:unas)"
+      },
+      "nameIdentifier": {
+        "nameIdentifierScheme": "ORCID",
+        "schemeURI": "http://orcid.org/",
+        "text": "(:unas)"
+      }
+    }
+  ],
+  "version": {
+    "text": "1.0"
+  },
+  "contributors": [
+    {
+      "contributorName": {
+        "text": "(:unas)"
+      },
+      "contributorType": "ProjectLeader",
+      "nameIdentifier": {
+        "nameIdentifierScheme": "ORCID",
+        "schemeURI": "http://orcid.org/",
+        "text": "(:unas)"
+      },
+      "affiliation": {
+        "text": "(:unas)"
+      }
+    }
+  ],
+  "sizes": [
+    {
+      "text": "500000000"
+    }
+  ],
+  "resourceType": {
+    "text": "data",
+    "resourceTypeGeneral": "Dataset"
+  },
+  "rightsList": [
+    {
+      "rightsURI": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "text": "CC0 1.0 Universal"
+    }
+  ],
+  "dates": [
+    {
+      "text": "2015-4-1",
+      "dateType": "Updated"
+    }
+  ],
+  "relatedIdentifiers": [
+    {
+      "relationType": "HasMetadata",
+      "text": "http://data.datacite.org/application/citeproc+json/10.5072/example-full",
+      "relatedMetadataScheme": "citeproc+json",
+      "schemeURI": "https://github.com/citation-style-language/schema/raw/master/csl-data.json",
+      "relatedIdentifierType": "URL"
+    }
+  ],
+  "alternateIdentifiers": [
+    {
+      "alternateIdentifierType": "URL",
+      "text": "http://schema.datacite.org/schema/meta/kernel-3.1/example/datacite-example-full-v3.1.xml"
+    }
+  ],
+  "titles": [
+    {
+      "text": "(:unas)",
+      "xml:lang": "en-us"
+    }
+  ],
+  "descriptions": [
+    {
+      "descriptionType": "Abstract",
+      "xml:lang": "en-us",
+      "text": "here is the description of the file"
+    }
+  ],
+  "formats": [
+    {
+      "text": "100BPtiles"
+    }
+  ],
+  "geoLocations": [
+    {
+      "geoLocationPoint": {
+        "text": "31.233 -67.302"
+      },
+      "geoLocationPlace": {
+        "text": "Atlantic Ocean"
+      },
+      "geoLocationBox": {
+        "text": "41.090 -71.032  42.893 -68.211"
+      }
+    }
+  ],
+  "identifier": {
+    "text": "(:tba)",
+    "identifierType": "DOI"
+  },
+  "subjects": [
+    {
+      "subjectScheme": "dewey",
+      "text": "Plant biology",
+      "xml:lang": "en-us",
+      "schemeURI": "http://dewey.info/"
+    }
+  ]
+}
