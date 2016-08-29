@@ -35,6 +35,13 @@
     $ pip install -r requirements.txt
     ```
 
+4. Migrating
+
+    Run migrations:
+    ```
+    $ python manage.py migrate
+    ```
+
 ## Running
 
 1. From project directory (same directory as manage.py):
