@@ -461,25 +461,6 @@ def request_doi(request, dataset_uuid):
             messages.warning(request, exception_msg)
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                    
 
-    if request.method == 'POST':
-
-        body = urllib.unquote(request.body)
-        response_tuples = map(lambda x: (x.split('=')[0], x.split('=')[1]), body.split('&'))
-        response = {}
-        for key, value in response_tuples:
-            response[key] = value
-
-        # import pdb; pdb.set_trace()
-
-        print response
-
-        context = {}
-
-        success_msg = 'Something was successful.'
-        logger.info(success_msg)
-        messages.success(request, success_msg)
-
-        return HttpResponseRedirect('/')
 
 def meta_for_doi(dataset):
     """ constructing json for build xml object """
@@ -533,33 +514,7 @@ def update_alternateIdentifier(essential_meta, ark):
 
     essential_meta['alternateIdentifiers'] = alternateIdentifiers
     print json.dumps(essential_meta, indent = 2)
-    return essential_meta 
-
-
-# @login_required
-@require_http_methods(['GET', 'POST'])
-def request_doi2(request, dataset_uuid):
-    # # TODO: this is not done
-    # logger.warning('Request DOI not implemented, see Dataset view.')
-    # return HttpResponseNotFound()
-
-    if request.method == 'GET':
-        context = {}
-
-        success_msg = 'Something was successful.'
-        logger.info(success_msg)
-        messages.success(request, success_msg)
-
-        return HttpResponseRedirect('/')
-
-    if request.method == 'POST':
-        context = {}
-
-        success_msg = 'Something was successful.'
-        logger.info(success_msg)
-        messages.success(request, success_msg)
-
-        return HttpResponseRedirect('/')
+    return essential_meta
 
 
 @login_required
