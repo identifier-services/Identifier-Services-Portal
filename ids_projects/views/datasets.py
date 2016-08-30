@@ -423,12 +423,10 @@ def request_doi(request, dataset_uuid):
     
     if request.method == 'GET':
         context = {}
-        # if request.user.is_anonymous():
-        #     api_client = get_portal_api_client()
-        # else:
-        #     api_client = request.user.agave_oauth.api_client
-
-        api_client = request.user.agave_oauth.api_client
+        if request.user.is_anonymous():
+            api_client = get_portal_api_client()
+        else:
+            api_client = request.user.agave_oauth.api_client
 
         try:
             dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
@@ -458,6 +456,8 @@ def request_doi(request, dataset_uuid):
             ark_identifier = Identifier(api_client=api_client, type='ark', uid=ark, dataset=dataset)            
             ark_identifier.save()
 
+            print "save end"
+
             # NEED TO BE TEST
             dataset.add_identifier(doi_identifier)
             dataset.add_identifier(ark_identifier)
@@ -473,25 +473,6 @@ def request_doi(request, dataset_uuid):
             messages.warning(request, exception_msg)
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                    
 
-    if request.method == 'POST':
-
-        body = urllib.unquote(request.body)
-        response_tuples = map(lambda x: (x.split('=')[0], x.split('=')[1]), body.split('&'))
-        response = {}
-        for key, value in response_tuples:
-            response[key] = value
-
-        # import pdb; pdb.set_trace()
-
-        print response
-
-        context = {}
-
-        success_msg = 'Something was successful.'
-        logger.info(success_msg)
-        messages.success(request, success_msg)
-
-        return HttpResponseRedirect('/')
 
 def meta_for_doi(dataset):
     """ constructing json for build xml object """
@@ -545,7 +526,7 @@ def update_alternateIdentifier(essential_meta, ark):
 
     essential_meta['alternateIdentifiers'] = alternateIdentifiers
     # print json.dumps(essential_meta, indent = 2)
-    return essential_meta 
+    return essential_meta
 
 
 @login_required
