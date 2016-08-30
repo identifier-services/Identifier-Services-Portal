@@ -24,10 +24,6 @@ class Identifier(BaseMetadata):
         """
         super(Identifier, self).__init__(*args, **kwargs)
         
-        # print kwargs.get('type')
-        # print kwargs.get('uid')
-        # print kwargs.get('dataset')
-
         self._type = kwargs.get('type')
         self._uid = kwargs.get('uid')
         self._dataset = kwargs.get('dataset')
@@ -73,3 +69,10 @@ class Identifier(BaseMetadata):
         logger.debug('deleting identifier: %s - %s' % (self.title, self.uuid))
         self._api_client.meta.deleteMetadata(uuid=self.uuid)
         self.uuid = None
+
+    def save(self):
+        super(Identifier, self).save()
+        print "UUID is: %s" % self.uuid        
+
+    def add_to_dataset(self, dataset):
+        self.add_container(dataset)

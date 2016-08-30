@@ -94,13 +94,13 @@ class GraphMixin(object):
                         if match:
                             break
 
-        for identifier in identifiers:
-            component_relationships = [x for x in identifier.relationships if x['@rel:type'] == 'IsPartOf']
-            if self.name[6:] == 'dataset' or len(component_relationships) == 1:
-                self._graph.append(process) # ??
-            else:
-                for relationship in component_relationships:
-                        for dataset in [x for x in self._graph if x.name[6:] == 'dataset']:
-                            if relationship['@id'] == dataset.uuid:
-                                dataset._graph.append(identifier)
-                                break
+        # for identifier in identifiers:
+        #     component_relationships = [x for x in identifier.relationships if x['@rel:type'] == 'IsPartOf']
+        #     if self.name[6:] == 'dataset' or len(component_relationships) == 1:
+        #         self._graph.append(process) # ??
+        #     else:
+        #         for relationship in component_relationships:
+        #                 for dataset in [x for x in self._graph if x.name[6:] == 'dataset']:
+        #                     if relationship['@id'] == dataset.uuid:
+        #                         dataset._graph.append(identifier)
+        #                         break

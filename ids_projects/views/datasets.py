@@ -450,19 +450,19 @@ def request_doi(request, dataset_uuid):
             metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")            
             response = client.Update(doi, metadata)            
             
-            # create identifier objects
-            doi_identifier = Identifier(api_client=api_client, type='doi', uid=doi, dataset=dataset)                                    
+            # save identifier objects
+            doi_identifier = Identifier(api_client=api_client, type='doi', uid=doi, dataset=dataset)                                                
             doi_identifier.save()
-            ark_identifier = Identifier(api_client=api_client, type='ark', uid=ark, dataset=dataset)            
+
+            ark_identifier = Identifier(api_client=api_client, type='ark', uid=ark, dataset=dataset)                        
             ark_identifier.save()
-
-            print "save end"
-
-            # NEED TO BE TEST
-            dataset.add_identifier(doi_identifier)
-            dataset.add_identifier(ark_identifier)
-
-            for elem in dataset.identifiers():
+            
+            dataset = _add_identifier_to_dataset(dataset, doi_identifier, ark_identifier)
+            
+            # NOTES:
+            # It seems due to network delay, results are not printed immediately. 
+            # However, the metadata were successfully updated in agave            
+            for elem in dataset.identifiers:
                 print elem.title, elem.uid
             
             return render(request, 'ids_projects/datasets/request_doi.html', context)
@@ -473,6 +473,18 @@ def request_doi(request, dataset_uuid):
             messages.warning(request, exception_msg)
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                    
 
+def _add_identifier_to_dataset(dataset, doi_identifier, ark_identifier):
+    if (dataset != None):
+        doi_identifier.add_to_dataset(dataset)
+        doi_identifier.save()
+
+        ark_identifier.add_to_dataset(dataset)
+        ark_identifier.save()
+
+        dataset.add_identifier(doi_identifier)
+        dataset.add_identifier(ark_identifier)
+        dataset.save()
+    return dataset
 
 def meta_for_doi(dataset):
     """ constructing json for build xml object """

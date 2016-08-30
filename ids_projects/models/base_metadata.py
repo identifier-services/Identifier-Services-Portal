@@ -308,19 +308,18 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin, GraphMixin):
         return perm_result
 
     def save(self):
-        """Add or update metadata object on tenant"""
+        """Add or update metadata object on tenant"""        
+
         if self.uuid is None:            
             response = self._api_client.meta.addMetadata(body=self.meta)
             self.load_from_meta(response)
-
-            print self.uuid
-            
+                        
             # TODO: get rid of share result, I just want to see what comes back.            
             share_result = self.share()            
             logger.debug('Sharing result: {}'.format(share_result))
         else:
             response = self._api_client.meta.updateMetadata(uuid=self.uuid, body=self.meta)
-            self.load_from_meta(response)
+            self.load_from_meta(response)        
 
     def delete(self):
         """Delete metadata object, and all metadata associated to this object"""
