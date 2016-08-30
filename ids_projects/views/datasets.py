@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 import logging
 from ..forms.datasets import DatasetForm, DataSelectForm
-from ..models import Project, Specimen, Process, Dataset, Data
+from ..models import Project, Specimen, Process, Dataset, Data, Identifier
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
                        get_dataset_fields)
@@ -423,10 +423,12 @@ def request_doi(request, dataset_uuid):
     
     if request.method == 'GET':
         context = {}
-        if request.user.is_anonymous():
-            api_client = get_portal_api_client()
-        else:
-            api_client = request.user.agave_oauth.api_client
+        # if request.user.is_anonymous():
+        #     api_client = get_portal_api_client()
+        # else:
+        #     api_client = request.user.agave_oauth.api_client
+
+        api_client = request.user.agave_oauth.api_client
 
         try:
             dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
@@ -449,10 +451,20 @@ def request_doi(request, dataset_uuid):
             xmlObject = builder.getXML()
             metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")            
             response = client.Update(doi, metadata)            
+            
+            # create identifier objects
+            doi_identifier = Identifier(api_client=api_client, type='doi', uid=doi, dataset=dataset)                                    
+            doi_identifier.save()
+            ark_identifier = Identifier(api_client=api_client, type='ark', uid=ark, dataset=dataset)            
+            ark_identifier.save()
 
-            context['doi'] = doi
-            context['ark'] = ark
+            # NEED TO BE TEST
+            dataset.add_identifier(doi_identifier)
+            dataset.add_identifier(ark_identifier)
 
+            for elem in dataset.identifiers():
+                print elem.title, elem.uid
+            
             return render(request, 'ids_projects/datasets/request_doi.html', context)
 
         except Exception as e:
@@ -521,7 +533,7 @@ def meta_for_doi(dataset):
     metadata['descriptions'] = descriptions
 
     # TODO: Add dates, sizes, formats, version, rghtsList, description, if necessary
-    print json.dumps(metadata, indent = 2)
+    # print json.dumps(metadata, indent = 2)
     return metadata
 
 def update_alternateIdentifier(essential_meta, ark):
@@ -532,34 +544,8 @@ def update_alternateIdentifier(essential_meta, ark):
     alternateIdentifiers.append(alternateIdentifier)
 
     essential_meta['alternateIdentifiers'] = alternateIdentifiers
-    print json.dumps(essential_meta, indent = 2)
+    # print json.dumps(essential_meta, indent = 2)
     return essential_meta 
-
-
-# @login_required
-@require_http_methods(['GET', 'POST'])
-def request_doi2(request, dataset_uuid):
-    # # TODO: this is not done
-    # logger.warning('Request DOI not implemented, see Dataset view.')
-    # return HttpResponseNotFound()
-
-    if request.method == 'GET':
-        context = {}
-
-        success_msg = 'Something was successful.'
-        logger.info(success_msg)
-        messages.success(request, success_msg)
-
-        return HttpResponseRedirect('/')
-
-    if request.method == 'POST':
-        context = {}
-
-        success_msg = 'Something was successful.'
-        logger.info(success_msg)
-        messages.success(request, success_msg)
-
-        return HttpResponseRedirect('/')
 
 
 @login_required

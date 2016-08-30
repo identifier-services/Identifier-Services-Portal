@@ -29,7 +29,7 @@ class GraphMixin(object):
         data = []
         datasets = []
         identifiers = []
-
+    
         for r in self.parts:
             r._graph = []
             rt = r.name[6:]
@@ -97,7 +97,7 @@ class GraphMixin(object):
         for identifier in identifiers:
             component_relationships = [x for x in identifier.relationships if x['@rel:type'] == 'IsPartOf']
             if self.name[6:] == 'dataset' or len(component_relationships) == 1:
-                self._graph.append(process)
+                self._graph.append(process) # ??
             else:
                 for relationship in component_relationships:
                         for dataset in [x for x in self._graph if x.name[6:] == 'dataset']:
