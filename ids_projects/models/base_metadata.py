@@ -61,8 +61,7 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin, GraphMixin):
         value = kwargs.get('value')
         uuid = kwargs.get('uuid')
         fields = kwargs.get('fields')
-        
-
+                
         # set fields that are displayed in forms and detail view
         if fields is not None:
             self.set_fields(fields)

@@ -35,11 +35,11 @@ class Identifier(BaseMetadata):
             self.value.update({ 'uid': self._uid })
 
         # if self.related_dataset is not None:
-        #     self.add_association_to(self.related_dataset)
+        #     self.add_association_to(self.related_dataset)        
         
     @property
     def title(self):
-        return self.value.get('type')
+        return self.value.get('uid')
 
     @property
     def uid(self):
