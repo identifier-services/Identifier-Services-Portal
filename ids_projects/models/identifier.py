@@ -71,8 +71,7 @@ class Identifier(BaseMetadata):
         self.uuid = None
 
     def save(self):
-        super(Identifier, self).save()
-        print "UUID is: %s" % self.uuid        
+        super(Identifier, self).save()          
 
     def add_to_dataset(self, dataset):
         self.add_container(dataset)
