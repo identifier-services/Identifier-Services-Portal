@@ -29,7 +29,7 @@ class GraphMixin(object):
         data = []
         datasets = []
         identifiers = []
-
+    
         for r in self.parts:
             r._graph = []
             rt = r.name[6:]

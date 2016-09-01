@@ -22,6 +22,9 @@ def agave_oauth(request):
     tenant_base_url = getattr(settings, 'AGAVE_TENANT_BASEURL')
     client_key = getattr(settings, 'AGAVE_CLIENT_KEY')
 
+    print tenant_base_url
+    print client_key
+
     session = request.session
     session['auth_state'] = os.urandom(24).encode('hex')
     next_page = request.GET.get('next')

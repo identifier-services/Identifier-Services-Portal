@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 import logging
 from ..forms.datasets import DatasetForm, DataSelectForm
-from ..models import Project, Specimen, Process, Dataset, Data
+from ..models import Project, Specimen, Process, Dataset, Data, Identifier
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
                        get_dataset_fields)
@@ -449,10 +449,18 @@ def request_doi(request, dataset_uuid):
             xmlObject = builder.getXML()
             metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")            
             response = client.Update(doi, metadata)            
-
-            context['doi'] = doi
-            context['ark'] = ark
-
+            
+            # save identifier objects
+            identifier = Identifier(api_client=api_client, type='doi', uid=doi, dataset=dataset)                                                
+            identifier.save()                        
+            dataset = _add_identifier_to_dataset(dataset, identifier)
+            
+            # NOTES:
+            # It seems due to network delay, results are not printed immediately. 
+            # However, the metadata were successfully updated in agave            
+            # for elem in dataset.identifiers:
+            #     print elem.title, elem.uid
+            
             return render(request, 'ids_projects/datasets/request_doi.html', context)
 
         except Exception as e:
@@ -461,6 +469,13 @@ def request_doi(request, dataset_uuid):
             messages.warning(request, exception_msg)
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                    
 
+def _add_identifier_to_dataset(dataset, identifier):
+    if (dataset != None):
+        identifier.add_to_dataset(dataset)
+        identifier.save()
+        dataset.add_identifier(identifier)        
+        dataset.save()
+    return dataset
 
 def meta_for_doi(dataset):
     """ constructing json for build xml object """
@@ -502,7 +517,7 @@ def meta_for_doi(dataset):
     metadata['descriptions'] = descriptions
 
     # TODO: Add dates, sizes, formats, version, rghtsList, description, if necessary
-    print json.dumps(metadata, indent = 2)
+    # print json.dumps(metadata, indent = 2)
     return metadata
 
 def update_alternateIdentifier(essential_meta, ark):
@@ -513,7 +528,7 @@ def update_alternateIdentifier(essential_meta, ark):
     alternateIdentifiers.append(alternateIdentifier)
 
     essential_meta['alternateIdentifiers'] = alternateIdentifiers
-    print json.dumps(essential_meta, indent = 2)
+    # print json.dumps(essential_meta, indent = 2)
     return essential_meta
 
 
