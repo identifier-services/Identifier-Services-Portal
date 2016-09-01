@@ -187,6 +187,7 @@ class Data(BaseMetadata):
         # delete all objects that have this object's uuid in their associationIds
         for container in self.containers:
             container.remove_part(self)
+            container.save()
 
         logger.debug('deleting data: %s - %s' % (self.title, self.uuid))
         self._api_client.meta.deleteMetadata(uuid=self.uuid)

@@ -619,8 +619,6 @@ def data_delete(request, data_uuid):
     next_url = request.GET.get('next_url', None)
     api_client = request.user.agave_oauth.api_client
 
-    import pdb; pdb.set_trace()
-
     try:
         data = Data(api_client=api_client, uuid=data_uuid)
 
@@ -633,6 +631,10 @@ def data_delete(request, data_uuid):
                                    kwargs={'%s_uuid' % name: container.uuid})
 
         data.delete()
+
+        success_msg = 'Successfully unregistered data.'
+        logger.info(success_msg)
+        messages.success(request, success_msg)
 
         if next_url is not None:
             return HttpResponseRedirect(next_url)

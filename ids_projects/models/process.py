@@ -80,6 +80,7 @@ class Process(BaseMetadata):
         # delete all objects that have this object's uuid in their associationIds
         for container in self.containers:
             container.remove_part(self)
+            container.save()
 
         for part in self.parts:
             part.delete()

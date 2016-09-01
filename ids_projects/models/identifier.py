@@ -59,12 +59,15 @@ class Identifier(BaseMetadata):
         if self.uuid is None:
             raise Exception('Cannot delete without UUID.')
 
-        # delete all objects that have this object's uuid in their associationIds
-        for container in self.containers:
-            container.remove_part(self)
+            # remove dataset from containing objects (project)
+            for container in self.containers:
+                container.remove_part(self)
+                container.save()
 
-        for part in self.parts:
-            part.remove_part()
+            # remove dataset as container from dataset's parts (data)
+            for part in self.parts:
+                part.remove_container(self)
+                part.save()
 
         logger.debug('deleting identifier: %s - %s' % (self.title, self.uuid))
         self._api_client.meta.deleteMetadata(uuid=self.uuid)

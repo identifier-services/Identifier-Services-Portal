@@ -37,7 +37,6 @@
         }
 
         var redirect_url = url.replace('/request_doi/','/');
-        var url = url.replace('/request_doi/','/request_doi2/');
 
         console.log(url)
         console.log(redirect_url)

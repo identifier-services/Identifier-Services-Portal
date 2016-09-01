@@ -439,32 +439,6 @@ def request_doi(request, dataset_uuid):
         return HttpResponseRedirect('/')
 
 
-# @login_required
-@require_http_methods(['GET', 'POST'])
-def request_doi2(request, dataset_uuid):
-    # # TODO: this is not done
-    # logger.warning('Request DOI not implemented, see Dataset view.')
-    # return HttpResponseNotFound()
-
-    if request.method == 'GET':
-        context = {}
-
-        success_msg = 'Something was successful.'
-        logger.info(success_msg)
-        messages.success(request, success_msg)
-
-        return HttpResponseRedirect('/')
-
-    if request.method == 'POST':
-        context = {}
-
-        success_msg = 'Something was successful.'
-        logger.info(success_msg)
-        messages.success(request, success_msg)
-
-        return HttpResponseRedirect('/')
-
-
 @login_required
 @require_http_methods(['GET'])
 def delete(request, dataset_uuid):
@@ -484,6 +458,10 @@ def delete(request, dataset_uuid):
                                    kwargs={'%s_uuid' % name: container.uuid})
 
         dataset.delete()
+
+        success_msg = 'Successfully deleted dataset.'
+        logger.info(success_msg)
+        messages.success(request, success_msg)
 
         if next_url is not None:
             return HttpResponseRedirect(next_url)

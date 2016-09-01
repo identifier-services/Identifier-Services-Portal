@@ -64,16 +64,18 @@ def view(request, specimen_uuid):
         process_types = get_process_type_keys(project)
         specimen_fields = get_specimen_fields(project)
         specimen.set_fields(specimen_fields)
+
+        context = {'project': project,
+                   'specimen': specimen,
+                   'processes': processes,
+                   'process_types': process_types}
+
+        return render(request, 'ids_projects/specimens/detail.html', context)
     except Exception as e:
         exception_msg = 'Unable to load config values. %s' % e
         logger.warning(exception_msg)
-
-    context = { 'project': project,
-                'specimen': specimen,
-                'processes': processes,
-                'process_types': process_types }
-
-    return render(request, 'ids_projects/specimens/detail.html', context)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
 
 @login_required

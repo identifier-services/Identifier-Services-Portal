@@ -66,16 +66,19 @@ class Dataset(BaseMetadata):
         self.add_part(identifier)
 
     def delete(self):
-        """ """
+        """Delete the dataset and erase relationships"""
         if self.uuid is None:
             raise Exception('Cannot delete without UUID.')
 
-        # delete all objects that have this object's uuid in their associationIds
+        # remove dataset from containing objects (project)
         for container in self.containers:
             container.remove_part(self)
+            container.save()
 
+        # remove dataset as container from dataset's parts (data)
         for part in self.parts:
-            part.remove_part()
+            part.remove_container(self)
+            part.save()
 
         logger.debug('deleting dataset: %s - %s' % (self.title, self.uuid))
         self._api_client.meta.deleteMetadata(uuid=self.uuid)
