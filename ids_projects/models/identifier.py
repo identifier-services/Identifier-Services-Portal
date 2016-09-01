@@ -23,23 +23,23 @@ class Identifier(BaseMetadata):
         Explicit parameters take precedence over values found in the meta dictionary
         """
         super(Identifier, self).__init__(*args, **kwargs)
+        
+        self._type = kwargs.get('type')
+        self._uid = kwargs.get('uid')
+        self._dataset = kwargs.get('dataset')
+                        
+        if self._type is not None:
+            self.value.update({ 'type': self._type })
+        
+        if self._uid is not None:
+            self.value.update({ 'uid': self._uid })
 
-        self.id_type = kwargs.get('type')
-        self.uid = kwargs.get('uid')
-        self.dataset = kwargs.get('dataset')
-
-        if self.id_type is not None:
-            self.value.update({ 'id_type': self.id_type })
-
-        if self.uid is not None:
-            self.value.update({ 'uid': self.uid })
-
-        if self.dataset is not None:
-            self.add_association_to(self.dataset)
-
+        # if self.related_dataset is not None:
+        #     self.add_association_to(self.related_dataset)        
+        
     @property
     def title(self):
-        return self.value.get('id_type')
+        return self.value.get('uid')
 
     @property
     def uid(self):
@@ -72,3 +72,9 @@ class Identifier(BaseMetadata):
         logger.debug('deleting identifier: %s - %s' % (self.title, self.uuid))
         self._api_client.meta.deleteMetadata(uuid=self.uuid)
         self.uuid = None
+
+    def save(self):
+        super(Identifier, self).save()          
+
+    def add_to_dataset(self, dataset):
+        self.add_container(dataset)

@@ -60,7 +60,7 @@ class Dataset(BaseMetadata):
 
     @property
     def identifiers(self):
-        return [x for x in self.parts if x.name == 'idsvc.identifiers']
+        return [x for x in self.parts if x.name == 'idsvc.identifier']
 
     def add_identifier(self, identifier):
         self.add_part(identifier)

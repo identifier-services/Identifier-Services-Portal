@@ -61,7 +61,7 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin, GraphMixin):
         value = kwargs.get('value')
         uuid = kwargs.get('uuid')
         fields = kwargs.get('fields')
-
+                
         # set fields that are displayed in forms and detail view
         if fields is not None:
             self.set_fields(fields)
@@ -94,7 +94,7 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin, GraphMixin):
             meta.update({ 'value': value })
 
         # set instance variables
-        self.load_from_meta(meta)
+        self.load_from_meta(meta)        
 
     def add_association_to(self, related_object):
         """
@@ -206,7 +206,6 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin, GraphMixin):
 
                 self._associations_to_me.append(assoc_object)
 
-        return self._associations_to_me
 
     def load_from_meta(self, meta):
         """Set instance variables from dictionary or json"""
@@ -292,10 +291,10 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin, GraphMixin):
                             The permission to set. (Default: READ_WRITE)
         :return: None
         """
-        if self.uuid is None:
+        if self.uuid is None:            
             raise Exception('Cannot grant permissions, objects does not have a UUID.')
 
-        if not username:
+        if not username:            
             username = get_portal_api_client().profiles.get().username
 
         perm_result = self._api_client.meta.updateMetadataPermissions(
@@ -308,16 +307,18 @@ class BaseMetadata(BaseAgaveObject, MetadataRelationshipMixin, GraphMixin):
         return perm_result
 
     def save(self):
-        """Add or update metadata object on tenant"""
-        if self.uuid is None:
+        """Add or update metadata object on tenant"""        
+
+        if self.uuid is None:            
             response = self._api_client.meta.addMetadata(body=self.meta)
             self.load_from_meta(response)
-            # TODO: get rid of share result, I just want to see what comes back.
-            share_result = self.share()
+                        
+            # TODO: get rid of share result, I just want to see what comes back.            
+            share_result = self.share()            
             logger.debug('Sharing result: {}'.format(share_result))
         else:
             response = self._api_client.meta.updateMetadata(uuid=self.uuid, body=self.meta)
-            self.load_from_meta(response)
+            self.load_from_meta(response)        
 
     def delete(self):
         """Delete metadata object, and all metadata associated to this object"""

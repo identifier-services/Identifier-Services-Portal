@@ -6,12 +6,19 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 import logging
 from ..forms.datasets import DatasetForm, DataSelectForm
-from ..models import Project, Specimen, Process, Dataset, Data
+from ..models import Project, Specimen, Process, Dataset, Data, Identifier
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
                        get_dataset_fields)
 from requests import HTTPError
 import urllib
+
+from ezid.ezid import ezidClient
+from ezid.identifier_creator import identifierBuilder
+import xml.etree.ElementTree as ET
+import json
+import sys
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -413,30 +420,116 @@ def request_doi(request, dataset_uuid):
     # logger.warning('Request DOI not implemented, see Dataset view.')
     # return HttpResponseNotFound()
 
+    
     if request.method == 'GET':
         context = {}
+        if request.user.is_anonymous():
+            api_client = get_portal_api_client()
+        else:
+            api_client = request.user.agave_oauth.api_client
 
-        return render(request, 'ids_projects/datasets/request_doi.html', context)
+        try:
+            dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
+            essential = meta_for_doi(dataset)
+            builder = identifierBuilder()
+            builder.buildXML(essential)
+            xmlObject = builder.getXML()
 
-    if request.method == 'POST':
+            # requesting doi
+            client = ezidClient('apitest', 'apitest')            
+            metadata = {}
+            metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")                       
+            response = client.Mint('doi:10.5072/FK2', metadata)
+            doi = response.split('|')[0].strip()
+            ark = response.split('|')[1].strip()
+            
+            # update generated ARK as alternative identifier
+            essential_new = update_alternateIdentifier(essential, ark)
+            builder.setAlternateIdentifiers(essential_new)
+            xmlObject = builder.getXML()
+            metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")            
+            response = client.Update(doi, metadata)            
+            
+            # save identifier objects
+            identifier = Identifier(api_client=api_client, type='doi', uid=doi, dataset=dataset)                                                
+            identifier.save()                        
+            dataset = _add_identifier_to_dataset(dataset, identifier)
+            
+            # NOTES:
+            # It seems due to network delay, results are not printed immediately. 
+            # However, the metadata were successfully updated in agave            
+            # for elem in dataset.identifiers:
+            #     print elem.title, elem.uid
+            
+            return render(request, 'ids_projects/datasets/request_doi.html', context)
 
-        body = urllib.unquote(request.body)
-        response_tuples = map(lambda x: (x.split('=')[0], x.split('=')[1]), body.split('&'))
-        response = {}
-        for key, value in response_tuples:
-            response[key] = value
+        except Exception as e:
+            exception_msg = 'Unable to load process. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                    
 
-        # import pdb; pdb.set_trace()
+def _add_identifier_to_dataset(dataset, identifier):
+    if (dataset != None):
+        identifier.add_to_dataset(dataset)
+        identifier.save()
+        dataset.add_identifier(identifier)        
+        dataset.save()
+    return dataset
 
-        print response
+def meta_for_doi(dataset):
+    """ constructing json for build xml object """
+    project = dataset.project
 
-        context = {}
+    metadata = {}
+    creators = []
+    creator = {}
+    creator['creatorName'] = {}
+    creator['creatorName']['text'] = project.value.get('creator', None)
+    creators.append(creator)    
 
-        success_msg = 'Something was successful.'
-        logger.info(success_msg)
-        messages.success(request, success_msg)
+    titles = []
+    title = {}      
+    title['xml:lang'] = "en-us"
+    title['text'] = dataset.title
+    titles.append(title)
 
-        return HttpResponseRedirect('/')
+    subjects = []
+    subject = {}
+    subject['xml:lang'] = "en-us"    
+    subject['text'] = project.value.get('investigation_type', '(:unas)')
+    subjects.append(subject)
+    
+    resourceType = {}
+    resourceType['resourceTypeGeneral'] = "Dataset"
+    resourceType['text'] = dataset.value.get('name', '(:unas)')
+
+    descriptions = []
+    description = {}
+    description['xml:lang'] = "en-us"
+    description['descriptionType'] = "Abstract"    
+    description['text'] = dataset.value.get('description', '(:unas)')
+    descriptions.append(description)
+    
+    metadata['creators'] = creators
+    metadata['titles'] = titles        
+    metadata['subjects'] = subjects    
+    metadata['descriptions'] = descriptions
+
+    # TODO: Add dates, sizes, formats, version, rghtsList, description, if necessary
+    # print json.dumps(metadata, indent = 2)
+    return metadata
+
+def update_alternateIdentifier(essential_meta, ark):
+    alternateIdentifiers = []
+    alternateIdentifier = {}
+    alternateIdentifier['alternateIdentifierType'] = 'ARK'
+    alternateIdentifier['text'] = ark
+    alternateIdentifiers.append(alternateIdentifier)
+
+    essential_meta['alternateIdentifiers'] = alternateIdentifiers
+    # print json.dumps(essential_meta, indent = 2)
+    return essential_meta
 
 
 @login_required

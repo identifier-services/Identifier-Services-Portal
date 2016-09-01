@@ -141,3 +141,11 @@ urlpatterns += patterns(
     'ids_projects.webhooks',
     url(r'webhook/(?P<hook_type>\w+)/?$', 'handle_webhook', name='webhook'),
 )
+
+###############
+# Identifiers #
+###############
+urlpatterns += patterns(
+    'ids_projects.views.identifiers',
+    url(r'^identifier/(?P<identifier_uuid>.+?)$', 'view', name='identifier-view'),
+)
