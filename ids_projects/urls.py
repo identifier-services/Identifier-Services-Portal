@@ -55,7 +55,7 @@ urlpatterns += patterns(
     url(r'^project/make_private/(?P<dataset_uuid>.+?)$', 'make_private', name='dataset-make-private'),
     # request doi for public dataset
     url(r'^dataset/request_doi/(?P<dataset_uuid>.+?)$', 'request_doi', name='dataset-request-doi'),
-    # url(r'^dataset/request_doi2/(?P<dataset_uuid>.+?)$', 'request_doi2', name='dataset-request-doi2'),
+    url(r'^dataset/request_ark/(?P<dataset_uuid>.+?)$', 'request_ark', name='dataset-request-ark'),
     # view a process
     url(r'^dataset/(?P<dataset_uuid>.+?)$', 'view', name='dataset-view'),
 )
