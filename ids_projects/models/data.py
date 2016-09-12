@@ -73,7 +73,7 @@ class Data(BaseMetadata):
 
     @property
     def process(self):
-        return next(iter([x for x in self.containers if x.name == 'idsvc.process']), None)
+        return next(iter([x for x in self.is_input_to + self.is_output_of if x.name == 'idsvc.process']), None)
 
     @property
     def datasets(self):
