@@ -83,14 +83,22 @@ class Process(BaseMetadata):
             container.save()
 
         for part in self.parts:
+            logger.debug('Calling delete on {}: {} - {}'.format(part.name, part.uuid, part.title))
             part.delete()
 
         for _input in self.inputs:
+            logger.debug('Calling delete on {}: {} - {}'.format(_input.name, _input.uuid, _input.title))
             _input.delete()
 
         for output in self.outputs:
+            logger.debug('Calling delete on {}: {} - {}'.format(output.name, output.uuid, output.title))
             output.delete()
 
         logger.debug('deleting process: %s - %s' % (self.title, self.uuid))
-        self._api_client.meta.deleteMetadata(uuid=self.uuid)
+
+        try:
+            self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        except Exception as e:
+            logger.debug('Object does not exist, probably previously deleted. Error: %s' % e)
+
         self.uuid = None

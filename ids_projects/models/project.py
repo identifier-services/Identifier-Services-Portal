@@ -65,8 +65,14 @@ class Project(BaseMetadata):
             raise Exception('Cannot delete without UUID.')
 
         for part in self.parts:
+            logger.debug('Calling delete on {}: {} - {}'.format(part.name, part.uuid, part.title))
             part.delete()
 
-        logger.debug('deleting project: %s - %s' % (self.title, self.uuid))
-        self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        logger.debug('deleting %s: %s - %s' % (self.name, self.uuid, self.title))
+
+        try:
+            self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        except Exception as e:
+            logger.debug('Object does not exist, probably previously deleted. Error: %s' % e)
+
         self.uuid = None

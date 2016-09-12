@@ -315,6 +315,9 @@ def type_select(request):
 def _get_containers(request):
     """Internal method..."""
 
+    if not request.GET:
+        return None, None, None, None
+
     project_uuid = request.GET.get('project_uuid', None)
     specimen_uuid = request.GET.get('specimen_uuid', None)
     process_uuid = request.GET.get('process_uuid', None)
