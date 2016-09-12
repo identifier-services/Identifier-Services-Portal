@@ -66,10 +66,22 @@ class GraphMixin(object):
             if self.name[6:] == 'dataset' or len(component_relationships) == 1:
                 self._graph.append(d)
             else:
+                match_found = False
+
                 for relationship in component_relationships:
                     for dataset in [x for x in self._graph if x.name[6:] == 'dataset']:
                         if relationship['@id'] == dataset.uuid:
                             dataset._graph.append(d)
+                            match_found = True
+                            break
+
+                # this is like if the data is related directly to a specimen, and this
+                # is the graph for the specimen. hacky.
+                if not match_found:
+                    for relationship in component_relationships:
+                        if relationship['@id'] == self.uuid:
+                            self._graph.append(d)
+                            match_found = True
                             break
 
             process_relationships = [x for x in d.relationships if x['@rel:type'] == 'IsInputTo' or x['@rel:type'] == 'IsOutputOf']
