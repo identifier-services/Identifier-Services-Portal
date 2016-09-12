@@ -1,133 +1,59 @@
 specimen:
     fields:
+        - id: species
+          label: Species
+          required: True
+          form_field: True
+
         - id: specimen id
           label: Specimen ID
           required: True
           form_field: True
 
-        - id: uri or guid
-          label: URI / GUID
+        - id: strain
+          label: Strain
           required: False
           form_field: True
 
-        - id: subspecific genetic lineage
-          label: Subspecific Genetic Lineage
+        - id: age
+          label: Age
           required: False
           form_field: True
 
-        - id: taxon name
-          label: Taxon Name
+        - id: type
+          label: Type
           required: False
           form_field: True
 
-        - id: haploid chromosome count
-          label: Haploid Chromosome Count
+        - id: gender
+          label: Gender
           required: False
           form_field: True
 
-        - id: ploidy
-          label: Ploidy
-          required: False
+probe:
+    fields:
+        - id: probe id
+          label: Probe ID
+          required: True
           form_field: True
 
-        - id: organ or tissue
-          label: Organ or Tissue
-          required: False
+        - id: gene sysmbol
+          label: Gene Symbol
+          required: True
           form_field: True
 
-        - id: developmental stage
-          label: Developmental Stage
+        - id: sequence
+          label: Sequence
           required: False
           form_field: True
-
-        - id: estimated genome size
-          label: Estimated Genome Size
-          required: False
-          form_field: True
-
-        - id: propagation
-          label: Propagation
-          required: False
-          form_field: True
-
-        - id: identifier
-          label: Identifier
-          choices:
-              - ARK - Archival Resource id
-              - DOI - Digital Object Identifier
-          required: False
-          form_field: False
 
 processes:
-    sequencing:
+    ISH:
         fields:
-            - id: sequencing method
-              label: Sequencing Method
+            - id: description
+              label: Description
               required: True
               form_field: True
-
-            - id: sequencing hardware
-              label: Sequencing Hardware
-              required: False
-              form_field: True
-
-            - id: identifier
-              label: Identifier
-              choices:
-                  - ARK - Archival Resource ID
-                  - DOI - Digital Object Identifier
-              required: False
-              form_field: False
-
-    assembly:
-        fields:
-              - id: assembly method
-                label: Assembly Method
-                required: True
-                form_field: True
-
-              - id: reference sequence
-                label: Reference Sequence
-                required: False
-                form_field: True
-
-              - id: assembly software
-                label: Assembly Software
-                required: False
-                form_field: True
-
-              - id: assembly software version
-                label: Assembly Software Version
-                required: False
-                form_field: True
-
-              - id: identifier
-                label: Identifier
-                choices:
-                    - ARK - Archival Resource id
-                    - DOI - Digital Object Identifier
-                required: False
-                form_field: False
-
-    analysis:
-        fields:
-            - id: anaylsis method
-              label: Anaylsis Method
-              required: True
-              form_field: True
-
-            - id: analysis software
-              label: Analysis Software
-              required: False
-              form_field: True
-
-            - id: identifier
-              label: Identifier
-              choices:
-                  - ARK - Archival Resource id
-                  - DOI - Digital Object Identifier
-              required: False
-              form_field: False
 
 data:
     fields:
@@ -184,6 +110,11 @@ dataset:
         - id: dataset name
           label: Dataset Name
           required: True
+          form_field: True
+
+        - id: grouping
+          label: Grouping
+          required: False
           form_field: True
 
         - id: description

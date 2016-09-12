@@ -65,7 +65,7 @@
 
                     {% if object.containers %}
                         <p>
-                            <b>Containers:</b>
+                            <!--<b>Containers:</b>-->
                             <ul>
                             {% for item in object.containers %}
                                 {% include 'includes/related_list_item.html' %}
@@ -76,7 +76,7 @@
 
                     {% if object.parts %}
                         <p>
-                        <b>Parts:</b>
+                        <!--<b>Parts:</b>-->
                             {% if object.graph|length > 0 %}
                                 {% for thing in object.graph %}
                                     {% with thing as item %}
@@ -111,7 +111,7 @@
 
                                 {% for item in object.parts %}
                                     {% if item.name == 'idsvc.identifier' %}
-                                        {% include 'includes/related_list_item.html' %}                                        
+                                        {% include 'includes/related_list_item.html' %}
                                     {% endif %}
                                 {% endfor %}
                             </ul>
