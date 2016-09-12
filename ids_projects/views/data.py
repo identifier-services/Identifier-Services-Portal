@@ -567,9 +567,10 @@ def file_select(request, relationship):
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
 
-        success_msg = 'Successfully added file to process.'
+        success_msg = 'Successfully added file.'
         logger.info(success_msg)
         messages.success(request, success_msg)
+
         return HttpResponseRedirect(
                     reverse('ids_projects:data-view',
                             kwargs={'data_uuid': data.uuid}))

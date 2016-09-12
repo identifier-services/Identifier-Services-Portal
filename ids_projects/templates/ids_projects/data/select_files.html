@@ -28,6 +28,36 @@
     </div>
 </form>
 
+{% if process %}
+    <div class="well">
+        <label><h4>Click
+            <a href="{% url 'ids_projects:process-view' process_uuid=process.uuid %}" class="btn btn-primary">Finished</a>
+            when all files have been selected.</h4>
+        </label>
+    </div>
+{% elif specimen %}
+    <div class="well">
+        <label><h4>Click
+            <a href="{% url 'ids_projects:specimen-view' specimen_uuid=specimen.uuid %}" class="btn btn-primary">Finished</a>
+            when all files have been selected.</h4>
+        </label>
+    </div>
+{% elif project %}
+    <div class="well">
+        <label><h4>Click
+            <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-primary">Finished</a>
+            when all files have been selected.</h4>
+        </label>
+    </div>
+{% else %}
+    <div class="well">
+        <label><h4>Click
+            <a href="{% url 'ids_projects:project-list-private' %}" class="btn btn-primary">Finished</a>
+            when all files have been selected.</h4>
+        </label>
+    </div>
+{% endif %}
+
 <table class="table table-striped" id="files_listing">
     <thead>
         <th>File name</th>

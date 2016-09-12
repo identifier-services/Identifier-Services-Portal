@@ -76,19 +76,25 @@
             file_path : file_path
         }
 
-        var redirect_url = 'projects/';
+//        var redirect_url = 'projects/';
 
-        if (url.indexOf("output") > -1) {
-            redirect_url = url.replace('file/select/output?process_uuid=','process/');
-        } else if (url.indexOf("input") > -1) {
-            redirect_url = url.replace('file/select/input?process_uuid=','process/');
-        }
+//        if (url.indexOf("output") > -1) {
+//            redirect_url = url.replace('file/select/output?process_uuid=','process/');
+//        } else if (url.indexOf("input") > -1) {
+//            redirect_url = url.replace('file/select/input?process_uuid=','process/');
+//        } else if (url.indexOf("None") > -1) {
+//            if (url.indexOf("specimen_uuid") > -1) {
+//                redirect_url = url.replace('file/select/None?specimen_uuid=','specimen/');
+//            } else if (url.indexOf("project_uuid") > -1) {
+//                redirect_url = url.replace('file/select/None?process_uuid=','project/');
+//            }
+//        }
 
         if (postdata.system_id && postdata.file_path) {
             $.post(url, postdata)
-            .then(function(response) {
-                window.location.replace(redirect_url);
-            });
+//            .then(function(response) {
+//                window.location.replace(redirect_url);
+//            });
         }
     }
 
