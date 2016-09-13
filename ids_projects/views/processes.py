@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 import logging
-from ..forms.processes import ProcessTypeForm, ProcessFieldsForm
+from ..forms.processes import ProcessTypeForm, ProcessFieldsForm, AddRelationshipForm
 from ..models import Project, Specimen, Process
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
@@ -250,6 +250,72 @@ def create(request):
                     return HttpResponseRedirect(
                                 reverse('ids_projects:specimen-view',
                                         kwargs={'specimen_uuid': specimen.uuid}))
+
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def add_relationship(request, process_uuid):
+    """Edit existing process metadata"""
+
+    api_client = request.user.agave_oauth.api_client
+
+    try:
+        process = Process(api_client=api_client, uuid=process_uuid)
+        project = process.project
+        specimen_choices = [(x.uuid, x.title) for x in project.specimens]
+        if process.specimen:
+            initial = process.specimen.uuid
+        else:
+            initial = None
+    except HTTPError as e:
+        logger.error('Error editing process. {}'.format(e.message))
+        messages.warning(request, 'Error editing process.')
+        return HttpResponseRedirect('/process/{}'.format(process_uuid))
+    except Exception as e:
+        logger.error('Error editing process. {}'.format(e.message))
+        messages.warning(request, 'Process not found.')
+        return HttpResponseRedirect('/projects/')
+
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+        context = {'form_add_relationship': AddRelationshipForm(choices=specimen_choices, initial=initial),
+                   'specimen': process.specimen,
+                   'project': process.project,
+                   'process': process}
+
+        return render(request, 'ids_projects/processes/add_relationship.html', context)
+
+    ########
+    # POST #
+    ########
+    elif request.method == 'POST':
+        form = AddRelationshipForm(specimen_choices, request.POST)
+
+        if form.is_valid():
+            try:
+                data = form.cleaned_data
+                specimen_uuid = data['specimen_choices']
+                specimen = Specimen(api_client=api_client, uuid=specimen_uuid)
+
+                process.add_specimen(specimen)
+                process.save()
+
+                specimen.add_process(process)
+                specimen.save()
+
+                messages.info(request, 'Successfully added relationship.')
+                return HttpResponseRedirect(
+                    reverse('ids_projects:process-view',
+                            kwargs={'process_uuid': process.uuid}))
+            except Exception as e:
+                exception_msg = 'Unable to add relationship. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect(
+                    reverse('ids_projects:process-view',
+                            kwargs={'process_uuid': process.uuid}))
 
 
 @login_required

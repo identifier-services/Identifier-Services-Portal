@@ -14,7 +14,9 @@ urlpatterns = patterns(
     url(r'^file/select/(?P<relationship>.+?)$', 'file_select', name='file-select'),
     # list content at given path on system
     url(r'^dir/list/(?P<system_id>[^/]+)/(?P<file_path>.+)?', 'dir_list', name='dir-list'),
-    # delete a data metadata object associated with a process
+    # relate data to an existing process
+    url(r'^data/add_relationship/(?P<data_uuid>.+?)$', 'add_relationship', name='relate-data-to-process'),
+    # delete a data metadata object associated with a file or sra
     url(r'^data/delete/(?P<data_uuid>.+?)$', 'data_delete', name='data-delete'),
     # edit data info
     url(r'^data/edit/(?P<data_uuid>.+?)$', 'edit', name='data-edit'),
@@ -88,6 +90,8 @@ urlpatterns += patterns(
     url(r'^process/create/?$', 'create', name='process-create'),
     # edit a process
     url(r'^process/edit/(?P<process_uuid>.+?)$', 'edit', name='process-edit'),
+    # relate process to an existing specimen
+    url(r'^process/add_relationship/(?P<process_uuid>.+?)$', 'add_relationship', name='relate-process-to-specimen'),
     # delete a process
     url(r'^process/delete/(?P<process_uuid>.+?)$', 'delete', name='process-delete'),
     # view a process

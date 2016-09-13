@@ -4,9 +4,10 @@ from django.core.urlresolvers import reverse
 from django.http import (JsonResponse,
                          HttpResponseRedirect,
                          HttpResponseNotFound)
+from requests.exceptions import HTTPError
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
-from ..forms.data import DataTypeForm, SRAForm, DataForm
+from ..forms.data import DataTypeForm, SRAForm, DataForm, AddRelationshipForm
 from ..models import Project, Specimen, Process, System, Data
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
@@ -125,6 +126,78 @@ def view(request, data_uuid):
                'process_types': process_types}
 
     return render(request, 'ids_projects/data/detail.html', context)
+
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def add_relationship(request, data_uuid):
+    """Edit existing process metadata"""
+
+    api_client = request.user.agave_oauth.api_client
+
+    try:
+        data = Data(api_client=api_client, uuid=data_uuid)
+        project = data.project
+        process_choices = [(x.uuid, x.title) for x in project.processes]
+        if data.process:
+            initial = data.process.uuid
+        else:
+            initial = None
+    except HTTPError as e:
+        logger.error('Error editing process. {}'.format(e.message))
+        messages.warning(request, 'Error editing process.')
+        return HttpResponseRedirect('/process/{}'.format(process_uuid))
+    except Exception as e:
+        logger.error('Error editing process. {}'.format(e.message))
+        messages.warning(request, 'Process not found.')
+        return HttpResponseRedirect('/projects/')
+
+    #######
+    # GET #
+    #######
+    if request.method == 'GET':
+        context = {'form_add_relationship': AddRelationshipForm(choices=process_choices, initial=initial),
+                   'process': data.process,
+                   'specimen': data.specimen,
+                   'project': data.project,
+                   'data': data}
+
+        return render(request, 'ids_projects/data/add_relationship.html', context)
+
+    ########
+    # POST #
+    ########
+    elif request.method == 'POST':
+        form = AddRelationshipForm(process_choices, request.POST)
+
+        if form.is_valid():
+            try:
+                cleaned_data = form.cleaned_data
+                process_uuid = cleaned_data['specimen_choices']
+                input_output = cleaned_data['input_output']
+                process = Process(api_client=api_client, uuid=process_uuid)
+
+                if input_output == 'input':
+                    process.add_input(data)
+                    data.add_is_input_to(process)
+                elif input_output == 'output':
+                    process.add_output(data)
+                    data.add_is_output_of(process)
+
+                process.save()
+                data.save()
+
+                messages.info(request, 'Successfully added relationship.')
+                return HttpResponseRedirect(
+                    reverse('ids_projects:process-view',
+                            kwargs={'process_uuid': data.uuid}))
+            except Exception as e:
+                exception_msg = 'Unable to add relationship. %s' % e
+                logger.error(exception_msg)
+                messages.error(request, exception_msg)
+                return HttpResponseRedirect(
+                    reverse('ids_projects:process-view',
+                            kwargs={'process_uuid': data.uuid}))
 
 
 @login_required

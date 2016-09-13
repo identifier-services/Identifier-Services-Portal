@@ -7,6 +7,9 @@
         <div class="row">
             <div class="col-sm-3">
             {% if object_type == 'process' %}
+                {% if not specimen %}
+                    <a href="{% url 'ids_projects:relate-process-to-specimen'  process.uuid%}" class="btn btn-primary btn-block">Relate to Specimen</a>
+                {% endif %}
                 {% if object.process_type != 'sequencing' %}
                     <a href="{% url 'ids_projects:data-type' %}?relationship=input&process_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Input Data</a>
                 {% endif %}
@@ -17,6 +20,9 @@
             {% elif object_type != 'data' %}
                 <a href="{% url 'ids_projects:data-type' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Data</a>
             {% elif object_type == 'data' %}
+                {% if not process %}
+                    <a href="{% url 'ids_projects:relate-data-to-process'  process.uuid%}" class="btn btn-primary btn-block">Relate to Process</a>
+                {% endif %}
                 {% if object.process %}
                     <a href="{% url 'ids_projects:data-type' %}?process_uuid={{ object.process.uuid }}" class="btn btn-primary btn-block">Add Data</a>
                 {% else %}
