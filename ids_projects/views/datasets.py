@@ -415,12 +415,7 @@ def make_private(request, dataset_uuid):
 
 # @login_required
 @require_http_methods(['GET', 'POST'])
-def request_doi(request, dataset_uuid):
-    # # TODO: this is not done
-    # logger.warning('Request DOI not implemented, see Dataset view.')
-    # return HttpResponseNotFound()
-
-    
+def request_doi(request, dataset_uuid):    
     if request.method == 'GET':
         context = {}
         if request.user.is_anonymous():
@@ -430,6 +425,11 @@ def request_doi(request, dataset_uuid):
 
         try:
             dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
+            associated_ids = dataset.identifiers
+            if _has_identifier(associated_ids, 'doi'):
+                messages.warning(request, "Dataset alread has a DOI identifier.")
+                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                                    
+
             essential = meta_for_doi(dataset)
             builder = identifierBuilder()
             builder.buildXML(essential)
@@ -440,26 +440,34 @@ def request_doi(request, dataset_uuid):
             metadata = {}
             metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")                       
             response = client.Mint('doi:10.5072/FK2', metadata)
-            doi = response.split('|')[0].strip()
-            ark = response.split('|')[1].strip()
-            
-            # update generated ARK as alternative identifier
-            essential_new = update_alternateIdentifier(essential, ark)
-            builder.setAlternateIdentifiers(essential_new)
-            xmlObject = builder.getXML()
-            metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")            
-            response = client.Update(doi, metadata)            
-            
-            # save identifier objects
-            identifier = Identifier(api_client=api_client, type='doi', uid=doi, dataset=dataset)                                                
-            identifier.save()                        
-            dataset = _add_identifier_to_dataset(dataset, identifier)
-            
-            # NOTES:
-            # It seems due to network delay, results are not printed immediately. 
-            # However, the metadata were successfully updated in agave            
-            # for elem in dataset.identifiers:
-            #     print elem.title, elem.uid
+            if "success" in response.keys():
+                res = response['success']
+                doi = res.split('|')[0].strip()
+                ark = res.split('|')[1].strip()   
+
+                # update generated ARK as alternative identifier
+                essential_new = update_alternateIdentifier(essential, ark)
+                builder.setAlternateIdentifiers(essential_new)
+                xmlObject = builder.getXML()
+                metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")            
+                response = client.Update(doi, metadata)            
+                
+                # save identifier objects
+                identifier = Identifier(api_client=api_client, type='doi', uid=doi, dataset=dataset)                                                
+                identifier.save()                        
+                dataset = _add_identifier_to_dataset(dataset, identifier)
+                
+                # NOTES:
+                # It seems due to network delay, results are not printed immediately. 
+                # However, the metadata were successfully updated in agave            
+                # for elem in dataset.identifiers:
+                #     print elem.title, elem.uid
+                
+            else:
+                logger.error("Failed to mint a DOI identifier!")
+                messages.warning(request, "Error in requesting DOI!")
+                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                    
+
             
             return render(request, 'ids_projects/datasets/request_doi.html', context)
 
@@ -469,6 +477,53 @@ def request_doi(request, dataset_uuid):
             messages.warning(request, exception_msg)
             return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                    
 
+# @login_required
+@require_http_methods(['GET'])
+def request_ark(request, dataset_uuid):
+    if request.method == 'GET':
+        context = {}
+        if request.user.is_anonymous():
+            api_client = get_portal_api_client()
+        else:
+            api_client = request.user.agave_oauth.api_client
+
+        try:
+            dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
+            associated_ids = dataset.identifiers
+            if _has_identifier(associated_ids, 'ark'):
+                messages.warning(request, "Dataset alread has an ARK identifier.")
+                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                                    
+
+            metadata = meta_for_ark(dataset)
+            client = ezidClient('apitest', 'apitest')                        
+            response = client.Mint('ark:/99999/fk4', metadata)
+
+            if "success" in response.keys():
+                ark = response['success']
+
+                identifier = Identifier(api_client=api_client, type='ark', uid=ark, dataset=dataset)
+                identifier.save()
+                dataset = _add_identifier_to_dataset(dataset, identifier)
+            else:
+                logger.error("Failed to mint an ARK identifier!")
+                messages.warning(request, "Error in requesting ARK!")
+                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                                    
+
+            return render(request, 'ids_projects/datasets/request_doi.html', context)
+
+        except Exception as e:
+            exception_msg = 'Unable to load process. %s' % e
+            logger.error(exception_msg)
+            messages.warning(request, exception_msg)
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))            
+
+def _has_identifier(associated_ids, target_type='doi'):
+    for identifier in associated_ids:
+        if identifier.type == target_type:            
+            return True
+    return False
+
+
 def _add_identifier_to_dataset(dataset, identifier):
     if (dataset != None):
         identifier.add_to_dataset(dataset)
@@ -476,6 +531,17 @@ def _add_identifier_to_dataset(dataset, identifier):
         dataset.add_identifier(identifier)        
         dataset.save()
     return dataset
+
+
+def meta_for_ark(dataset):
+    project = dataset.project
+
+    metadata = {}
+    metadata['erc.who'] = project.value.get('creator', None)
+    metadata['erc.what'] = dataset.title
+    metadata['erc.when'] = datetime.date.today().strftime("%B %d, %Y")    
+
+    return metadata
 
 def meta_for_doi(dataset):
     """ constructing json for build xml object """
@@ -520,6 +586,8 @@ def meta_for_doi(dataset):
     # print json.dumps(metadata, indent = 2)
     return metadata
 
+
+# Update alternateIdentifier field as the shoadow ARK identifier
 def update_alternateIdentifier(essential_meta, ark):
     alternateIdentifiers = []
     alternateIdentifier = {}
@@ -530,6 +598,9 @@ def update_alternateIdentifier(essential_meta, ark):
     essential_meta['alternateIdentifiers'] = alternateIdentifiers
     # print json.dumps(essential_meta, indent = 2)
     return essential_meta
+
+
+
 
 
 @login_required

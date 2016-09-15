@@ -178,9 +178,9 @@ def create(request):
             context['form_process_fields'] = form_process_fields
             context['process_type'] = process_type
 
-        if request.is_ajax():
+        if request.is_ajax():            
             return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
-        else:
+        else:            
             return render(request, 'ids_projects/processes/create.html', context)
 
     ########
