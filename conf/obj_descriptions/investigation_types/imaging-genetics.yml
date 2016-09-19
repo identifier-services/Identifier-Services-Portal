@@ -37,7 +37,7 @@ probe:
           required: True
           form_field: True
 
-        - id: gene sysmbol
+        - id: gene symbol
           label: Gene Symbol
           required: True
           form_field: True
@@ -97,14 +97,6 @@ data:
           required: False
           form_field: False
 
-        - id: identifier
-          label: Identifier
-          choices:
-              - ARK - Archival Resource id
-              - DOI - Digital Object Identifier
-          required: False
-          form_field: False
-          
 dataset:
     fields:
         - id: dataset name
