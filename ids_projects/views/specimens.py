@@ -11,8 +11,12 @@ from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
                        get_specimen_fields)
 from ..forms.upload_option import UploadOptionForm, UploadFileForm
+
+from ids_projects.tasks import bulk_specimen_registration
+
 import logging
 import csv
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -91,9 +95,13 @@ def upload_option(request):
         messages.warning(request, 'Missing project UUID, cannot create specimen.')
         return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
-    api_client = request.user.agave_oauth.api_client
+    if request.user.is_anonymous():
+        api_client = get_portal_api_client()
+    else:
+        api_client = request.user.agave_oauth.api_client
 
     project = Project(api_client=api_client, uuid=project_uuid)
+    print project.title
 
     # POST
     if request.method == 'POST':
@@ -108,14 +116,17 @@ def upload_option(request):
         elif request.POST.get('upload_option', None) == 'Bulk':
             # To be done
             try:                
-                specimens_meta = _handle_uploaded_file(request.FILES['file'], project)
-                num_specimens = _bulk_register(api_client, specimens_meta, project)          
+                specimens_meta = _handle_uploaded_file(request.FILES['file'], project)                
+                bulk_specimen_registration.apply_async(args=(specimens_meta,
+                                                             project_uuid), serilizer='json')
+                # num_specimens = _bulk_register(api_client, specimens_meta, project)          
 
-                success_msg = 'Successfully created %d specimen.' % num_specimens
+                success_msg = 'Your %d specimens have been in the registration queue.' % len(specimens_meta)
                 logger.info(success_msg)
                 messages.success(request, success_msg)
                   
             except Exception as e:
+                traceback.print_exc()
                 exception_msg = repr(e)
                 logger.error(exception_msg) 
                 messages.warning(request, exception_msg)            
