@@ -72,14 +72,18 @@ class Dataset(BaseMetadata):
 
         # remove dataset from containing objects (project)
         for container in self.containers:
+            logger.debug('removing part (%s): %s - %s, from container (%s): : %s - %s' %
+                         (self.name, self.uuid, self.title, container.name, container.uuid, container.title))
             container.remove_part(self)
             container.save()
 
         # remove dataset as container from dataset's parts (data)
         for part in self.parts:
+            logger.debug('removing container (%s): %s - %s, from part (%s): : %s - %s' %
+                         (self.name, self.uuid, self.title, container.name, container.uuid, container.title))
             part.remove_container(self)
             part.save()
 
-        logger.debug('deleting dataset: %s - %s' % (self.title, self.uuid))
+        logger.debug('deleting %s: %s - %s' % (self.name, self.uuid, self.title))
         self._api_client.meta.deleteMetadata(uuid=self.uuid)
         self.uuid = None

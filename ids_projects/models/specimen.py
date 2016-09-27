@@ -80,8 +80,14 @@ class Specimen(BaseMetadata):
             container.save()
 
         for part in self.parts:
+            logger.debug('Calling delete on {}: {} - {}'.format(part.name, part.uuid, part.title))
             part.delete()
 
         logger.debug('deleting specimen: %s - %s' % (self.title, self.uuid))
-        self._api_client.meta.deleteMetadata(uuid=self.uuid)
+
+        try:
+            self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        except Exception as e:
+            logger.debug('Object does not exist, probably previously deleted. Error: %s' % e)
+
         self.uuid = None

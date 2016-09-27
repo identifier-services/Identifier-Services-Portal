@@ -1,0 +1,120 @@
+specimen:
+    fields:
+        - id: species
+          label: Species
+          required: True
+          form_field: True
+
+        - id: specimen id
+          label: Specimen ID
+          required: True
+          form_field: True
+
+        - id: strain
+          label: Strain
+          required: False
+          form_field: True
+
+        - id: age
+          label: Age
+          required: False
+          form_field: True
+
+        - id: type
+          label: Type
+          required: False
+          form_field: True
+
+        - id: gender
+          label: Gender
+          required: False
+          form_field: True
+
+probe:
+    fields:
+        - id: probe id
+          label: Probe ID
+          required: True
+          form_field: True
+
+        - id: gene symbol
+          label: Gene Symbol
+          required: True
+          form_field: True
+
+        - id: sequence
+          label: Sequence
+          required: False
+          form_field: True
+
+processes:
+    ISH:
+        fields:
+            - id: description
+              label: Description
+              required: True
+              form_field: True
+
+data:
+    fields:
+        - id: description
+          label: Description
+          required: False
+          form_field: True
+
+        - id: system
+          label: System
+          required: False
+          form_field: False
+
+        - id: path
+          label: Path
+          required: False
+          form_field: False
+
+        - id: file name
+          label: File Name
+          required: False
+          form_field: False
+
+        - id: size
+          label: Size
+          required: False
+          form_field: False
+
+        - id: last modified
+          label: Last Modified
+          required: False
+          form_field: False
+
+        - id: checksum
+          label: Checksum
+          required: False
+          form_field: False
+
+        - id: checksum date
+          label: Checksum Date
+          required: False
+          form_field: False
+
+dataset:
+    fields:
+        - id: dataset name
+          label: Dataset Name
+          required: True
+          form_field: True
+
+        - id: grouping
+          label: Grouping
+          required: False
+          form_field: True
+
+        - id: description
+          label: Description
+          required: False
+          form_field: True
+
+        - id: doi
+          label: DOI
+          required: False
+          form_field: False

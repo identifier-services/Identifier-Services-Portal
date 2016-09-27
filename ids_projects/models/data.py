@@ -73,7 +73,7 @@ class Data(BaseMetadata):
 
     @property
     def process(self):
-        return next(iter([x for x in self.containers if x.name == 'idsvc.process']), None)
+        return next(iter([x for x in self.is_input_to + self.is_output_of if x.name == 'idsvc.process']), None)
 
     @property
     def datasets(self):
@@ -186,9 +186,16 @@ class Data(BaseMetadata):
 
         # delete all objects that have this object's uuid in their associationIds
         for container in self.containers:
+            logger.debug('removing part (%s): %s - %s, from container (%s): : %s - %s' %
+                         (self.name, self.uuid, self.title, container.name, container.uuid, container.title))
             container.remove_part(self)
             container.save()
 
-        logger.debug('deleting data: %s - %s' % (self.title, self.uuid))
-        self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        logger.debug('deleting %s: %s - %s' % (self.name, self.uuid, self.title))
+
+        try:
+            self._api_client.meta.deleteMetadata(uuid=self.uuid)
+        except Exception as e:
+            logger.debug('Object does not exist, probably previously deleted. Error: %s' % e)
+
         self.uuid = None
