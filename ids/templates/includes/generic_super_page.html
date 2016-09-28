@@ -10,6 +10,7 @@
                 {% if not specimen %}
                     <a href="{% url 'ids_projects:relate-process-to-specimen'  process.uuid%}" class="btn btn-primary btn-block">Relate to Specimen</a>
                 {% endif %}
+
                 {% if object.process_type != 'sequencing' %}
                     <a href="{% url 'ids_projects:data-type' %}?relationship=input&process_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Input Data</a>
                 {% endif %}
@@ -34,10 +35,14 @@
             {% if object_type == 'project' %}
                 <!-- <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Define Specimen</a> -->
                 <a href="{% url 'ids_projects:specimen-upload-option' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Define Specimen</a>
-            {% else %}
+                {% if investigation_type == 'imaging-genetics' %}                
+                    <a href="{% url 'ids_projects:probe-upload-option' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Define Probe</a>
+                {% endif %}
+            {% else %}                
                 <!-- <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{ object.project.uuid }}" class="btn btn-default btn-block">Define Specimen</a> -->
-                <a href="{% url 'ids_projects:specimen-upload-option' %}?project_uuid={{ object.project.uuid }}" class="btn btn-default btn-block">Define Specimen</a>
+                <!-- <a href="{% url 'ids_projects:specimen-upload-option' %}?project_uuid={{ object.project.uuid }}" class="btn btn-default btn-block">Define Specimen</a> -->
             {% endif %}
+
 
             {% for process_type in process_types %}
                 {% if object_type == 'project' or object_type == 'specimen' %}
@@ -54,7 +59,7 @@
             {% if object_type == 'project' %}
                 <a href="{% url 'ids_projects:dataset-create' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Create Dataset</a>
             {% else %}
-                <a href="{% url 'ids_projects:dataset-create' %}?project_uuid={{ object.project.uuid }}" class="btn btn-default btn-block">Create Dataset</a>
+                <!-- <a href="{% url 'ids_projects:dataset-create' %}?project_uuid={{ object.project.uuid }}" class="btn btn-default btn-block">Create Dataset</a> -->
             {% endif %}
 
             </div>

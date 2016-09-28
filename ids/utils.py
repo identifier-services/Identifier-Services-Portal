@@ -6,6 +6,8 @@ def get_portal_api_client():
     return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
                  token=settings.AGAVE_SUPER_TOKEN)
 
+def get_investigation_type(project):    
+    return project.value['investigation_type'].lower()
 
 def get_investigation_type_description(project):
     """Returns full project description, as read from yaml config."""
@@ -37,9 +39,9 @@ def get_process_descriptions(project):
 
 
 def get_process_type_keys(project):
-    """Returns the types of process for a given project"""
+    """Returns the types of process for a given project"""    
     project_processes = get_process_descriptions(project)
-    process_types = project_processes.keys()
+    process_types = project_processes.keys()    
     return process_types
 
 
@@ -117,3 +119,17 @@ def get_data_fields(project):
     data_description = get_data_description(project)
     data_fields = data_description['fields']
     return data_fields
+
+# TO BE TESTED
+def get_probe_description(project):
+    """Returns full probe descriptions, as read from yaml config."""
+    investigation_type_description = get_investigation_type_description(project)
+    probe_description = investigation_type_description['probe']
+    return probe_description
+
+def get_probe_fields(project):
+    """Returns probe fields."""
+    probe_description = get_probe_description(project)
+    probe_fields = probe_description['fields']
+    return probe_fields
+

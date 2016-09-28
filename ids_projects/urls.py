@@ -121,6 +121,14 @@ urlpatterns += patterns(
     url(r'^specimen/(?P<specimen_uuid>.+?)$', 'view', name='specimen-view'),
 )
 
+#############
+# Probes #
+#############
+urlpatterns += patterns(
+    'ids_projects.views.probes',
+    url(r'probes/upload_option/?$', 'upload_option', name='probe-upload-option'),
+)
+
 
 ############
 # Projects #

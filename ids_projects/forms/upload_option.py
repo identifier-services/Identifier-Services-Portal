@@ -10,7 +10,7 @@ class UploadOptionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(UploadOptionForm, self).__init__(*args, **kwargs)
-        self.fields['upload_option'].choices = [('Single','Single Specimen'), ('Bulk','Bulk Specimens')]
+        self.fields['upload_option'].choices = [('Single','Single'), ('Bulk','Bulk')]
 
 
 class UploadFileForm(forms.Form):

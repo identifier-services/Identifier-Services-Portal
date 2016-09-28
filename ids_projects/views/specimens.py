@@ -100,8 +100,7 @@ def upload_option(request):
     else:
         api_client = request.user.agave_oauth.api_client
 
-    project = Project(api_client=api_client, uuid=project_uuid)
-    print project.title
+    project = Project(api_client=api_client, uuid=project_uuid)    
 
     # POST
     if request.method == 'POST':
@@ -114,12 +113,11 @@ def upload_option(request):
 
 
         elif request.POST.get('upload_option', None) == 'Bulk':
-            # To be done
+            
             try:                
-                specimens_meta = _handle_uploaded_file(request.FILES['file'], project)                
+                specimens_meta = _validate_specimens(request.FILES['file'], project)                
                 bulk_specimen_registration.apply_async(args=(specimens_meta,
-                                                             project_uuid), serilizer='json')
-                # num_specimens = _bulk_register(api_client, specimens_meta, project)          
+                                                             project_uuid), serilizer='json')                        
 
                 success_msg = 'Your %d specimens have been in the registration queue.' % len(specimens_meta)
                 logger.info(success_msg)
@@ -140,15 +138,17 @@ def upload_option(request):
         context = {'project': project}        
         context['form_upload_file'] = UploadFileForm()
         context['form_upload_option'] = UploadOptionForm()
+        return render(request, 'ids_projects/specimens/upload_option.html', context)
 
-    return render(request, 'ids_projects/specimens/upload_option.html', context)
-
-def _handle_uploaded_file(f, project):
+def _validate_specimens(f, project):
     """ process uploaded csv file to register specimens """
-    
+    # NEED TO ADD VALIDATION
+
     header = True
     
     specimen_fields = get_specimen_fields(project)            
+    print specimen_fields
+
     reader = csv.reader(f)
     row_num = 0
     specimens_meta = []
@@ -170,26 +170,6 @@ def _handle_uploaded_file(f, project):
 
     return specimens_meta
                   
-def _bulk_register(api_client, specimens_meta, project):
-    # bad data?
-
-    count = 0
-    for specimen_info in specimens_meta:
-        meta = {'value': specimen_info}
-        specimen = Specimen(api_client=api_client, meta=meta)
-        specimen.save()
-
-        # add_part: specimen
-        project.add_specimen(specimen)
-        project.save()
-
-        # add_container: project
-        specimen.add_project(project)
-        specimen.save()
-
-        count = count + 1
-
-    return count
 
 @login_required
 @require_http_methods(['GET', 'POST'])

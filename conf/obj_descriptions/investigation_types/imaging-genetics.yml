@@ -42,11 +42,46 @@ probe:
           required: True
           form_field: True
 
-        - id: sequence
-          label: Sequence
-          required: False
+        - id: accession number
+          label: Accession Number
+          required: True
           form_field: True
 
+        - id: template length
+          label: Template Length
+          required: True
+          form_field: True
+
+        - id: template sequence
+          label: Template Sequence
+          required: True
+          form_field: True
+
+        - id: primer forward
+          label: Primer Forward
+          required: True
+          form_field: True
+
+        - id: primer reverse
+          label: Primer Reverse
+          required: True
+          form_field: True
+
+        - id: tm primer forward
+          label: TM Primer Forward
+          required: True
+          form_field: True
+
+        - id: t3 primer forward
+          label: T3 Primer Forward
+          required: True
+          form_field: True
+
+        - id: t7 primer reverse
+          label: T7 Primer Reverse
+          required: True
+          form_field: True
+        
 processes:
     ISH:
         fields:
