@@ -34,7 +34,7 @@ probe:
     fields:
         - id: probe_id
           label: BCM Probe ID
-          required: False
+          required: True
           form_field: True
 
         - id: official_gene_symbol
