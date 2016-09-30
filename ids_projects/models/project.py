@@ -43,6 +43,10 @@ class Project(BaseMetadata):
     def datasets(self):
         return [x for x in self.parts if x.name == 'idsvc.dataset']
 
+    @property
+    def probes(self):
+        return [x for x in self.parts if x.name == 'idsvc.probe']
+
     def add_specimen(self, specimen):
         """ """
         self.add_part(specimen)
@@ -58,6 +62,10 @@ class Project(BaseMetadata):
     def add_dataset(self, dataset):
         """ """
         self.add_part(dataset)
+
+    def add_probe(self, probe):
+        """ """
+        self.add_part(probe)
 
     def delete(self):
         """Delete everything in the project"""

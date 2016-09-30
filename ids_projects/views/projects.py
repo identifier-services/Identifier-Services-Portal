@@ -48,6 +48,8 @@ def view(request, project_uuid):
 
     try:
         project = Project(api_client=api_client, uuid=project_uuid)
+        print "Number of probes: %d" % len(project.probes)
+
     except Exception as e:
         exception_msg = 'Unable to load project. %s' % e
         logger.error(exception_msg)
@@ -56,12 +58,9 @@ def view(request, project_uuid):
 
     try:
         process_types = get_process_type_keys(project)        
-        project_fields = get_project_form_fields()
-        
+        project_fields = get_project_form_fields()        
         project.set_fields(project_fields)
-
-        investigation_type = get_investigation_type(project)
-        print investigation_type
+        investigation_type = get_investigation_type(project)        
 
     except Exception as e:
         exception_msg = 'Unable to load config values. %s' % e

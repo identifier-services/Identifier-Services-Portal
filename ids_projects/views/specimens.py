@@ -122,6 +122,9 @@ def upload_option(request):
                 success_msg = 'Your %d specimens have been in the registration queue.' % len(specimens_meta)
                 logger.info(success_msg)
                 messages.success(request, success_msg)
+                return HttpResponseRedirect(
+                                reverse('ids_projects:project-view',
+                                        kwargs={'project_uuid': project.uuid}))
                   
             except Exception as e:
                 traceback.print_exc()
@@ -129,9 +132,9 @@ def upload_option(request):
                 logger.error(exception_msg) 
                 messages.warning(request, exception_msg)            
                 
-            return HttpResponseRedirect(
-                            reverse('ids_projects:project-view',
-                                    kwargs={'project_uuid': project.uuid}))
+                return HttpResponseRedirect(
+                                reverse('ids_projects:project-view',
+                                        kwargs={'project_uuid': project.uuid}))
 
     # GET
     else:
