@@ -13,6 +13,8 @@ from ids.utils import (get_portal_api_client,
                        get_process_fields)
 from requests import HTTPError
 
+from ..forms.upload_option import UploadOptionForm, UploadFileForm
+
 logger = logging.getLogger(__name__)
 
 
@@ -178,9 +180,11 @@ def create(request):
             context['form_process_fields'] = form_process_fields
             context['process_type'] = process_type
 
-        if request.is_ajax():            
+            context['form_upload_file'] = UploadFileForm()            
+        
+        if request.is_ajax():                        
             return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
-        else:            
+        else:                       
             return render(request, 'ids_projects/processes/create.html', context)
 
     ########
