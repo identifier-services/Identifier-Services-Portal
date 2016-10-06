@@ -9,3 +9,4 @@ python-dateutil
 pyyaml
 mock
 selenium
+celery==3.1.20

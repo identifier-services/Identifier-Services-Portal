@@ -46,6 +46,10 @@ class Identifier(BaseMetadata):
         return self.value.get('uid')
 
     @property
+    def type(self):
+        return self.value.get('type')    
+
+    @property
     def project(self):
         return next(iter([x for x in self.containers if x.name == 'idsvc.project']), None)
 

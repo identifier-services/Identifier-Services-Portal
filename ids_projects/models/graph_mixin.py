@@ -29,6 +29,7 @@ class GraphMixin(object):
         data = []
         datasets = []
         identifiers = []
+        # probes = []
     
         for r in self.parts:
             r._graph = []
@@ -43,9 +44,14 @@ class GraphMixin(object):
                 datasets.append(r)
             if rt == 'identifier':
                 identifiers.append(r)
+            # if rt == 'probe':
+            #     probes.append(r)
 
         for specimen in specimens:
             self._graph.append(specimen)
+
+        # for probe in probes:
+        #     self._graph.append(probe)
 
         for process in processes:
             component_relationships = [x for x in process.relationships if x['@rel:type'] == 'IsPartOf']

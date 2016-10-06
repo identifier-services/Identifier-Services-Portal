@@ -613,3 +613,39 @@ class MetadataRelationshipMixin(object):
             raise Exception('Invalid relationship format.')
 
         self.relationships.remove(relationship)
+
+    ########################
+    # Customized Queries
+    ########################
+
+    def _query_related_meta(self, query):
+        if not self.uuid:
+            raise Exception('Missing UUID, cannot look up relationships without UUID.')
+        
+        queried_meta = self._api_client.meta.listMetadata(q=json.dumps(query))
+
+        return queried_meta
+
+    def query_related_objects(self, query):
+        queried_objects = []
+
+        for meta in self._query_related_meta(query):
+            try:
+                # instantiate related objects
+                queried_object = self.get_class_by_name(meta.name)(
+                    meta=meta,
+                    api_client=self._api_client
+                )
+
+                # append to list
+                queried_objects.append(queried_object)
+            except Exception as e:
+                logger.exception(e)
+
+        return queried_objects
+
+
+
+
+
+

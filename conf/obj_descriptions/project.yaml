@@ -15,7 +15,7 @@ fields:
       widget: Select
       choices:
           - Genomic
-          - Imaging Genetics
+          - Imaging-Genetics
       required: True
       form_field: True
 

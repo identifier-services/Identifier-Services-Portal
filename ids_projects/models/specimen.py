@@ -27,16 +27,16 @@ class Specimen(BaseMetadata):
     def title(self):
         not_applicable = ('NA', 'N/A', 'NOT APPLICABLE', 'NONE', 'NULL')
 
-        specimen_id = self.value.get('specimen_id')
-        if specimen_id.upper() in not_applicable:
+        specimen_id = self.value.get('specimen_id', None)
+        if specimen_id and specimen_id.upper() in not_applicable:
             specimen_id = None
 
-        taxon_name = self.value.get('taxon_name')
-        if taxon_name.upper() in not_applicable:
+        taxon_name = self.value.get('taxon_name', None)
+        if taxon_name and taxon_name.upper() in not_applicable:
             taxon_name = None
 
-        organ_or_tissue = self.value.get('organ_or_tissue')
-        if organ_or_tissue.upper() in not_applicable:
+        organ_or_tissue = self.value.get('organ_or_tissue', None)
+        if organ_or_tissue and organ_or_tissue.upper() in not_applicable:
             organ_or_tissue = None
 
         title = specimen_id if specimen_id else ''

@@ -2,6 +2,22 @@
 {% bootstrap_form form_process_fields %}
 <input type="hidden" id="id_process_fields" name="process_fields" value="1">
 <input type="hidden" id="id_process_type" name="process_type" value="{{process_type}}">
+
+{% if process_type == 'ISH' %}
+	<div class="checkbox">
+	    <label>
+	      <input type="checkbox"> Apply same metadata to all processes
+	    </label>
+	</div>
+
+	<br>
+	<label for="id_form_upload_file">Process links file</label>
+    <fieldset id="id_form_upload_file">
+        <p type="hidden" id="id_upload_tips"> {{ form_upload_file.file.label}}, {{ form_upload_file.file.help_text }} </p>
+        <p id="id_upload_dialog"> {{ form_upload_file.file }} </p>                
+    </fieldset>    
+{% endif %}
+
 <div>
     <button type="submit" class="btn btn-primary">Save</button>
     {% if specimen %}

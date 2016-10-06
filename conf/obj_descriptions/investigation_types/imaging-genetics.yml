@@ -32,56 +32,56 @@ specimen:
 
 probe:
     fields:
-        - id: probe_id
-          label: BCM Probe ID
-          required: True
-          form_field: True
-
-        - id: official_gene_symbol
+        - id: gene symbol
           label: Official Gene Symbol
           required: False
           form_field: True
 
-        - id: accession_number
+        - id: accession number
           label: Accession Number
           required: False
           form_field: True
 
-        - id: template_length
+        - id: probe id
+          label: Probe ID
+          required: True
+          form_field: True
+
+        - id: template length
           label: Template Length
           required: False
           form_field: True
 
-        - id: template_sequence
+        - id: template sequence
           label: Template Sequence
           required: False
           form_field: True
 
-        - id: primer_forward
+        - id: primer forward
           label: Primer Forward
           required: False
           form_field: True
 
-        - id: primer_reverse
+        - id: primer reverse
           label: Primer Reverse
           required: False
           form_field: True
 
-        - id: tm_primer_frw
+        - id: tm primer frw
           label: TM Primer Forward
           required: False
           form_field: True
 
-        - id: t3_primer_frw
+        - id: t3 primer frw
           label: T3 Primer Forward
           required: False
           form_field: True
 
-        - id: t7_primer_rev
+        - id: t7 primer forward
           label: T7 Primer Reverse
           required: False
           form_field: True
-
+        
 processes:
     ISH:
         fields:
