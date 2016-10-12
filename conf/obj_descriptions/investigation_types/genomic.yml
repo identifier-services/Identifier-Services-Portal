@@ -1,62 +1,55 @@
-specimen:
-    fields:
-        - id: specimen id
-          label: Specimen ID
-          required: True
-          form_field: True
+material:
+  specimen:
+      fields:
+          - id: specimen id
+            label: Specimen ID
+            required: True
+            form_field: True
 
-        - id: uri or guid
-          label: URI / GUID
-          required: False
-          form_field: True
+          - id: uri or guid
+            label: URI / GUID
+            required: False
+            form_field: True
 
-        - id: subspecific genetic lineage
-          label: Subspecific Genetic Lineage
-          required: False
-          form_field: True
+          - id: subspecific genetic lineage
+            label: Subspecific Genetic Lineage
+            required: False
+            form_field: True
 
-        - id: taxon name
-          label: Taxon Name
-          required: False
-          form_field: True
+          - id: taxon name
+            label: Taxon Name
+            required: False
+            form_field: True
 
-        - id: haploid chromosome count
-          label: Haploid Chromosome Count
-          required: False
-          form_field: True
+          - id: haploid chromosome count
+            label: Haploid Chromosome Count
+            required: False
+            form_field: True
 
-        - id: ploidy
-          label: Ploidy
-          required: False
-          form_field: True
+          - id: ploidy
+            label: Ploidy
+            required: False
+            form_field: True
 
-        - id: organ or tissue
-          label: Organ or Tissue
-          required: False
-          form_field: True
+          - id: organ or tissue
+            label: Organ or Tissue
+            required: False
+            form_field: True
 
-        - id: developmental stage
-          label: Developmental Stage
-          required: False
-          form_field: True
+          - id: developmental stage
+            label: Developmental Stage
+            required: False
+            form_field: True
 
-        - id: estimated genome size
-          label: Estimated Genome Size
-          required: False
-          form_field: True
+          - id: estimated genome size
+            label: Estimated Genome Size
+            required: False
+            form_field: True
 
-        - id: propagation
-          label: Propagation
-          required: False
-          form_field: True
-
-        - id: identifier
-          label: Identifier
-          choices:
-              - ARK - Archival Resource id
-              - DOI - Digital Object Identifier
-          required: False
-          form_field: False
+          - id: propagation
+            label: Propagation
+            required: False
+            form_field: True
 
 processes:
     sequencing:
@@ -70,14 +63,6 @@ processes:
               label: Sequencing Hardware
               required: False
               form_field: True
-
-            - id: identifier
-              label: Identifier
-              choices:
-                  - ARK - Archival Resource ID
-                  - DOI - Digital Object Identifier
-              required: False
-              form_field: False
 
     assembly:
         fields:
@@ -101,14 +86,6 @@ processes:
                 required: False
                 form_field: True
 
-              - id: identifier
-                label: Identifier
-                choices:
-                    - ARK - Archival Resource id
-                    - DOI - Digital Object Identifier
-                required: False
-                form_field: False
-
     analysis:
         fields:
             - id: anaylsis method
@@ -120,14 +97,6 @@ processes:
               label: Analysis Software
               required: False
               form_field: True
-
-            - id: identifier
-              label: Identifier
-              choices:
-                  - ARK - Archival Resource id
-                  - DOI - Digital Object Identifier
-              required: False
-              form_field: False
 
 data:
     fields:
@@ -171,14 +140,6 @@ data:
           required: False
           form_field: False
 
-        - id: identifier
-          label: Identifier
-          choices:
-              - ARK - Archival Resource id
-              - DOI - Digital Object Identifier
-          required: False
-          form_field: False
-          
 dataset:
     fields:
         - id: dataset name

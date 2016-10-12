@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 staticfiles %}
+
+{% block title %}Material Entity{% endblock %}
+
+{% block content %}
+
+    {% with material as object %}
+        {% include 'includes/generic_super_page.html' %}
+    {% endwith %}
+
+{% endblock %}

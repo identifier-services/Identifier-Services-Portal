@@ -1,0 +1,9 @@
+{% load bootstrap3 %}
+{% bootstrap_form form_material_fields %}
+<input type="hidden" id="id_material_fields" name="material_fields" value="1">
+<input type="hidden" id="id_material_type" name="material_type" value="{{material_type}}">
+<div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{% url 'ids_projects:material-create' %}?project_uuid={{project.uuid}}" class="btn btn-default">Change material Type</a>
+    <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+</div>

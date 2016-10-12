@@ -86,7 +86,7 @@ urlpatterns += patterns(
     'ids_projects.views.processes',
     # list all processes related to a specimen
     url(r'^processes/?$', 'list', name='process-list'),
-    # create a processes related to a specimen
+    # create a process related to a specimen
     url(r'^process/create/?$', 'create', name='process-create'),
     # edit a process
     url(r'^process/edit/(?P<process_uuid>.+?)$', 'edit', name='process-edit'),
@@ -98,6 +98,22 @@ urlpatterns += patterns(
     url(r'^process/(?P<process_uuid>.+?)$', 'view', name='process-view'),
 )
 
+###################
+# Material Entity #
+###################
+urlpatterns += patterns(
+    'ids_projects.views.material',
+    # create a material entity related to a specimen
+    url(r'^material/create/?$', 'create', name='material-create'),
+    # edit a material entity
+    url(r'^material/edit/(?P<material_uuid>.+?)$', 'edit', name='material-edit'),
+    # relate material entity to an existing specimen
+    url(r'^material/add_relationship/(?P<material_uuid>.+?)$', 'add_relationship', name='relate-material-to-process'),
+    # delete a material entity
+    url(r'^material/delete/(?P<material_uuid>.+?)$', 'delete', name='material-delete'),
+    # view a material entity
+    url(r'^material/(?P<material_uuid>.+?)$', 'view', name='material-view'),
+)
 
 #############
 # Specimens #

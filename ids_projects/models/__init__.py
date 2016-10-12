@@ -28,6 +28,11 @@ except Exception as e:
     logger.exception(e)
 
 try:
+    from material import Material
+except Exception as e:
+    logger.exception(e)
+
+try:
     from process import Process
 except Exception as e:
     logger.exception(e)

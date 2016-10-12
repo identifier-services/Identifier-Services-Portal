@@ -2,11 +2,17 @@ from django.conf import settings
 from agavepy.agave import Agave
 
 
+def replace_space(func):
+    def func_wrapper(project):
+        return project.replace(" ", "-")
+    return func_wrapper
+
+
 def get_portal_api_client():
     return Agave(api_server=settings.AGAVE_TENANT_BASEURL,
                  token=settings.AGAVE_SUPER_TOKEN)
 
-
+@replace_space
 def get_investigation_type_description(project):
     """Returns full project description, as read from yaml config."""
     investigation_type = project.value['investigation_type'].lower()
@@ -29,6 +35,7 @@ def get_project_form_fields():
     return project_description['fields']
 
 
+@replace_space
 def get_process_descriptions(project):
     """Returns full process descriptions, as read from yaml config."""
     investigation_type_description = get_investigation_type_description(project)
@@ -36,13 +43,31 @@ def get_process_descriptions(project):
     return process_description
 
 
+@replace_space
+def get_material_descriptions(project):
+    """Returns full process descriptions, as read from yaml config."""
+    investigation_type_description = get_investigation_type_description(project)
+    material_description = investigation_type_description['material']
+    return material_description
+
+@replace_space
 def get_process_type_keys(project):
     """Returns the types of process for a given project"""
+
     project_processes = get_process_descriptions(project)
     process_types = project_processes.keys()
     return process_types
 
 
+@replace_space
+def get_material_type_keys(project):
+    """Returns the types of process for a given project"""
+    material_processes = get_process_descriptions(project)
+    material_types = material_processes.keys()
+    return material_types
+
+
+@replace_space
 def get_process_type_titles(project):
     """Returns the types of process for a given project"""
     project_processes = get_process_descriptions(project)
@@ -50,6 +75,15 @@ def get_process_type_titles(project):
     return process_titles
 
 
+@replace_space
+def get_material_type_titles(project):
+    """Returns the types of process for a given project"""
+    project_material = get_material_descriptions(project)
+    material_titles = [x.title() for x in project_material.keys()]
+    return material_titles
+
+
+@replace_space
 def get_process_choices(project):
     """
     Returns a list of tuples containing process types and process type
@@ -61,6 +95,18 @@ def get_process_choices(project):
     return process_type_choices
 
 
+@replace_space
+def get_material_choices(project):
+    """
+    Returns a list of tuples containing process types and process type
+    titles.  Intended for use in a form (includes 'choose one' tuple).
+    """
+    project_material = get_material_descriptions(project)
+    material_type_choices = [('', 'Choose one'),] + \
+                            [(x,x.title()) for x in project_material.keys()]
+    return material_type_choices
+
+
 def get_process_description(project, process_type):
     """Returns full process description, as read from yaml config,
     given project and process type."""
@@ -69,12 +115,28 @@ def get_process_description(project, process_type):
     return process_description
 
 
+def get_material_description(project, material_type):
+    """Returns full process description, as read from yaml config,
+    given project and process type."""
+    project_material = get_process_descriptions(project)
+    material_description = project_material[material_type]
+    return material_description
+
+
 def get_process_fields(project, process_type):
     """Returns process fields for a given process type."""
     project_processes = get_process_descriptions(project)
     process_description = project_processes[process_type]
     process_fields = process_description['fields']
     return process_fields
+
+
+def get_material_fields(project, material_type):
+    """Returns process fields for a given process type."""
+    project_material = get_material_descriptions(project)
+    material_description = project_material[material_type]
+    material_fields = material_description['fields']
+    return material_fields
 
 
 def get_specimen_description(project):
