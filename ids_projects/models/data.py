@@ -27,14 +27,14 @@ class Data(BaseMetadata):
         super(Data, self).__init__(*args, **kwargs)
 
         self.system = None
-        system_id = kwargs.get('system_id')
-        path = kwargs.get('path')
-        sra_id = kwargs.get('sra_id')
+        system_id = kwargs.get('system_id', None)
+        path = kwargs.get('path', None)
+        sra_id = kwargs.get('sra_id', None)
 
         if system_id is not None:
             self.system_id = system_id
         else:
-            self.system_id = self.value.get('system_id')
+            self.system_id = self.value.get('system_id', None)
 
         if self.system_id is not None:
             self.value.update({'system_id': self.system_id})
@@ -42,7 +42,7 @@ class Data(BaseMetadata):
         if path is not None:
             self.path = path
         else:
-            self.path = self.value.get('path')
+            self.path = self.value.get('path', None)
 
         if self.path is not None:
             self.value.update({'path': self.path})
@@ -50,13 +50,14 @@ class Data(BaseMetadata):
         if sra_id is not None:
             self.sra_id = sra_id
         else:
-            self.sra_id = self.value.get('sra_id')
+            self.sra_id = self.value.get('sra_id', None)
 
         if self.sra_id is not None:
             self.value.update({'sra_id': self.sra_id})
 
     @property
     def title(self):
+        ## When is the 'name' get set?
         file_name = self.value.get('name')
         if file_name:
             return file_name
@@ -78,6 +79,11 @@ class Data(BaseMetadata):
     @property
     def datasets(self):
         return [x for x in self.containers if x.name == 'idsvc.datasets']
+
+    def add_project(self, project):
+        """ """ 
+        self.add_container(project)
+
 
     def load_file_info(self):
         if self.system_id is None:

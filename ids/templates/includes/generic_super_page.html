@@ -19,6 +19,10 @@
                 <a href="{% url 'ids_projects:dataset-select-data'  dataset.uuid%}" class="btn btn-primary btn-block">Select Data</a>
                 <a href="{% url 'ids_projects:dataset-request-doi' dataset.uuid%}" class="btn btn-primary btn-block">Request DOI</a>
                 <a href="{% url 'ids_projects:dataset-request-ark' dataset.uuid%}" class="btn btn-primary btn-block">Request ARK</a>
+            {% elif object_type == 'project' %}
+                {% if investigation_type == 'imaging-genetics' %}
+                    <a href="{% url 'ids_projects:add-images' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Images</a>
+                {% endif %}    
             {% elif object_type != 'data' %}
                 <a href="{% url 'ids_projects:data-type' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Data</a>
             {% elif object_type == 'data' %}

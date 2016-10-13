@@ -231,7 +231,6 @@ def create(request):
                 meta = {'value': data}
 
                 ## Single process registration
-
                 if request.FILES['file'] == None:
                     print "single process reg"
                     try:
@@ -284,7 +283,7 @@ def create(request):
                         messages.warning(request, exception_msg)
 
                         return HttpResponseRedirect(
-                                        reverse('ids-projects:project-view'),
+                                        reverse('ids_projects:project-view'),
                                                 kwargs={'project_uuid': project_uuid})
 
 

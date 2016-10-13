@@ -26,6 +26,8 @@ urlpatterns = patterns(
     url(r'^data/request/(?P<id_type>.+?)/(?P<data_uuid>.+?)$', 'request_id', name='data-request-id'),
     # list data for project
     url(r'^data/list/?$', 'list', name='data-list'),
+    # add image under imaging-genetics project
+    url(r'^data/add_images/?$', 'add_images', name='add-images'),
     # view data info
     url(r'^data/(?P<data_uuid>.+?)$', 'view', name='data-view'),
 )
