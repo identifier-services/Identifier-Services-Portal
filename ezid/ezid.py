@@ -52,11 +52,7 @@ class ezidClient:
         response = self.issueRequest("shoulder/"+self.encode(shoulder), "POST", anvl)                        
         self.printAnvlResponse(response)
         response = self.parseAnvlResponse(response)
-        
-        if "success" in response.keys():            
-            return response["success"]  
-        else:
-            print "Fail to mint a new identifier!"          
+        return response
     
     def View(self, id):
         response = self.issueRequest("id/" + self.encode(id), "GET")

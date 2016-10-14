@@ -18,3 +18,4 @@ logfile*
 .idea/
 pystuff.py
 conf/agave
+ENV/

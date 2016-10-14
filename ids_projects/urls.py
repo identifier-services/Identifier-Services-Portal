@@ -57,6 +57,7 @@ urlpatterns += patterns(
     url(r'^project/make_private/(?P<dataset_uuid>.+?)$', 'make_private', name='dataset-make-private'),
     # request doi for public dataset
     url(r'^dataset/request_doi/(?P<dataset_uuid>.+?)$', 'request_doi', name='dataset-request-doi'),
+    url(r'^dataset/request_ark/(?P<dataset_uuid>.+?)$', 'request_ark', name='dataset-request-ark'),
     # view a process
     url(r'^dataset/(?P<dataset_uuid>.+?)$', 'view', name='dataset-view'),
 )
@@ -126,12 +127,22 @@ urlpatterns += patterns(
     url(r'^specimens/?$', 'list', name='specimen-list'),
     # create a specimen related to a project, view takes project_uuid query parameter
     url(r'^specimen/create/?$', 'create', name='specimen-create'),
+    # choose upload option for specimens
+    url(r'^specimen/upload_option/?$', 'upload_option', name='specimen-upload-option'),
     # edit a specimen
     url(r'^specimen/edit/(?P<specimen_uuid>.+?)$', 'edit', name='specimen-edit'),
     # delete a specimen
     url(r'^specimen/delete/(?P<specimen_uuid>.+?)$', 'delete', name='specimen-delete'),
     # view a specimen
     url(r'^specimen/(?P<specimen_uuid>.+?)$', 'view', name='specimen-view'),
+)
+
+#############
+# Probes #
+#############
+urlpatterns += patterns(
+    'ids_projects.views.probes',
+    url(r'probes/upload_option/?$', 'upload_option', name='probe-upload-option'),
 )
 
 

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'hijack',
     'hijack_admin',
     'compat',
+    'djcelery',
 
     'ids_auth',
     'ids_projects',
@@ -218,3 +219,18 @@ AGAVE_TOKEN_SESSION_ID = 'agave_token'
 #######################
 
 OBJ_DESCR = read_conf.read()
+
+
+#########
+# Celery
+#########
+
+BROKER_URL = 'amqp://guest:guest@localhost//'
+CELERY_RESULT_BACKEND = 'rpc://'
+
+#: Only add pickle to this list if your broker is secured
+#: from unwanted access (see userguide/security.html)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+

@@ -4,7 +4,6 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
-import logging
 from ..forms.processes import ProcessTypeForm, ProcessFieldsForm, AddRelationshipForm
 from ..models import Project, Specimen, Process
 from ids.utils import (get_portal_api_client,
@@ -12,6 +11,14 @@ from ids.utils import (get_portal_api_client,
                        get_process_choices,
                        get_process_fields)
 from requests import HTTPError
+
+from ..forms.upload_option import UploadOptionForm, UploadFileForm
+from ids_projects.tasks import bulk_ISH_registration
+
+import traceback
+import csv
+import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -178,9 +185,11 @@ def create(request):
             context['form_process_fields'] = form_process_fields
             context['process_type'] = process_type
 
-        if request.is_ajax():
+            context['form_upload_file'] = UploadFileForm()            
+        
+        if request.is_ajax():                        
             return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
-        else:
+        else:                       
             return render(request, 'ids_projects/processes/create.html', context)
 
     ########
@@ -225,38 +234,90 @@ def create(request):
                 data.update(form_process_type.cleaned_data.copy())
                 data.update(form_process_fields.cleaned_data.copy())
 
+                # meta data for process
                 meta = {'value': data}
 
-                try:
-                    process = Process(api_client=api_client, meta=meta)
-                    process.save()
+                ## Single process registration
 
-                    if specimen:
-                        # create two-way relationship to specimen
-                        specimen.add_process(process)
-                        specimen.save()
-                        process.add_specimen(specimen)
+                if request.FILES['file'] == None:
+                    print "single process reg"
+                    try:
+                        process = Process(api_client=api_client, meta=meta)
                         process.save()
 
-                    # create two-way relationship to project
-                    project.add_process(process)
-                    project.save()
-                    process.add_project(project)
-                    process.save()
+                        if specimen:
+                            # create two-way relationship to specimen
+                            specimen.add_process(process)
+                            specimen.save()
+                            process.add_specimen(specimen)
+                            process.save()
 
-                    success_msg = 'Successfully created process.'
-                    logger.info(success_msg)
-                    messages.success(request, success_msg)
-                    return HttpResponseRedirect(
-                                reverse('ids_projects:process-view',
-                                        kwargs={'process_uuid': process.uuid}))
-                except HTTPError as e:
-                    exception_msg = 'Unable to create new process. %s' % e
-                    logger.error(exception_msg)
-                    messages.error(request, exception_msg)
-                    return HttpResponseRedirect(
-                                reverse('ids_projects:specimen-view',
-                                        kwargs={'specimen_uuid': specimen.uuid}))
+                        # create two-way relationship to project
+                        project.add_process(process)
+                        project.save()
+                        process.add_project(project)
+                        process.save()
+
+                        success_msg = 'Successfully created process.'
+                        logger.info(success_msg)
+                        messages.success(request, success_msg)
+                        return HttpResponseRedirect(
+                                    reverse('ids_projects:process-view',
+                                            kwargs={'process_uuid': process.uuid}))
+                    except HTTPError as e:
+                        exception_msg = 'Unable to create new process. %s' % e
+                        logger.error(exception_msg)
+                        messages.error(request, exception_msg)
+                        return HttpResponseRedirect(
+                                    reverse('ids_projects:specimen-view',
+                                            kwargs={'specimen_uuid': specimen.uuid}))
+
+                ## Bulk ISH process registration
+                else:
+                    print "bulk process reg"                     
+
+                    try:
+                        ISH_meta = _validate_ISH(request.FILES['file'], project)
+                        bulk_ISH_registration.apply_async(args=(ISH_meta, meta, project.uuid), serializer='json')
+
+                        return HttpResponseRedirect(
+                                    reverse('ids_projects:project-view',
+                                            kwargs={'project_uuid': project.uuid}))
+
+                    except Exception as e:
+                        traceback.print_exc()
+                        exception_msg = repr(e)
+                        logger.error(exception_msg)
+                        messages.warning(request, exception_msg)
+
+                        return HttpResponseRedirect(
+                                        reverse('ids-projects:project-view'),
+                                                kwargs={'project_uuid': project_uuid})
+
+
+
+def _validate_ISH(f, project):
+    ISH_meta = []
+    header = True
+
+    reader = csv.reader(f)
+    fields = {}
+    
+    if header:
+        row = next(reader, None)
+        for i in range(len(row)):
+            fields[row[i]] = i
+
+    for row in reader:
+        meta = {}
+        for field in fields:
+            meta[field] = row[fields[field]]
+
+    # print meta['probe_id']
+    # print type(meta['probe_id'])
+
+    ISH_meta.append(meta)
+    return ISH_meta
 
 
 @login_required

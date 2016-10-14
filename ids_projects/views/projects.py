@@ -6,7 +6,8 @@ from django.core.urlresolvers import reverse
 from django.views.decorators.http import require_http_methods
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
-                       get_project_form_fields)
+                       get_project_form_fields,
+                       get_investigation_type)
 from ..forms.projects import ProjectForm
 from ..models.project import Project
 import logging
@@ -28,9 +29,6 @@ def list_private(request):
         messages.warning(request, exception_msg)
         return HttpResponseRedirect('/')
 
-    # for project in projects:
-    #     print "\n\nprivate_project.meta: %s\n\n" % project.meta
-
     context = { 'type': 'private', 'private_projects': projects, 'create_button': True }
 
     return render(request, 'ids_projects/projects/index.html', context)
@@ -38,7 +36,7 @@ def list_private(request):
 
 @login_required
 @require_http_methods(['GET'])
-def view(request, project_uuid):
+def view(request, project_uuid):    
     """Queries project metadata and all associated metadata"""
     if request.user.is_anonymous():
         api_client = get_portal_api_client()
@@ -47,9 +45,6 @@ def view(request, project_uuid):
 
     try:
         project = Project(api_client=api_client, uuid=project_uuid)
-
-        import pdb; pdb.set_trace()
-
     except Exception as e:
         exception_msg = 'Unable to load project. %s' % e
         logger.error(exception_msg)
@@ -57,14 +52,15 @@ def view(request, project_uuid):
         return HttpResponseRedirect('/projects/')
 
     try:
-        process_types = get_process_type_keys(project)
-        project_fields = get_project_form_fields()
+        process_types = get_process_type_keys(project)        
+        project_fields = get_project_form_fields()        
         project.set_fields(project_fields)
+        investigation_type = get_investigation_type(project)
     except Exception as e:
         exception_msg = 'Unable to load config values. %s' % e
         logger.warning(exception_msg)
 
-    context = {'project': project, 'process_types': process_types}
+    context = {'project': project, 'investigation_type': investigation_type, 'process_types': process_types}    
 
     return render(request, 'ids_projects/projects/detail.html', context)
 
