@@ -3,9 +3,10 @@ from __future__ import absolute_import
 from celery import shared_task
 from .models import Specimen, Project, Probe, Process
 from ids.utils import get_portal_api_client
-from agavepy.agave import Agave                      
+import logging
 
-import os
+logger = logging.getLogger(__name__)
+
 
 @shared_task(bind=True)
 def bulk_specimen_registration(self, specimens_meta, project_uuid):        
@@ -17,7 +18,7 @@ def bulk_specimen_registration(self, specimens_meta, project_uuid):
         specimen = Specimen(api_client=api_client, meta=meta)
         specimen.save()
 
-        print specimen.uuid
+        logger.debug("Specimen UUID: {}".format(specimen.uuid))
 
         # add_part: specimen
         project.add_specimen(specimen)
@@ -26,6 +27,7 @@ def bulk_specimen_registration(self, specimens_meta, project_uuid):
         # add_container: project
         specimen.add_project(project)
         specimen.save()            
+
 
 @shared_task(bind=True)
 def bulk_probe_registration(self, probes_meta, project_uuid):    
@@ -65,7 +67,7 @@ def bulk_ISH_registration(self, ISH_meta, process_meta, project_uuid):
         # Query probes with given probe ids
         probe_ids = ISH_link['probe_id'].split(',')
 
-        print probe_ids
+        logger.debug("Probe IDs: {}".format(probe_ids))
         probes = project.query_probes_by_id(probe_ids)
 
         for probe in probes:
@@ -78,7 +80,7 @@ def bulk_ISH_registration(self, ISH_meta, process_meta, project_uuid):
         # Query specimens with given specimen ids
         specimen_ids = ISH_link['specimen_id'].split(',')
 
-        print specimen_ids
+        logger.debug("Specimen IDs: {}".format(specimen_ids))
         specimens = project.query_specimens_by_id(specimen_ids)
 
         for specimen in specimens:
@@ -86,9 +88,8 @@ def bulk_ISH_registration(self, ISH_meta, process_meta, project_uuid):
             specimen.add_is_input_to(process)
             process.save()
             specimen.save()
-            # print specimen.value
 
-        print "Process id: %s" % process.uuid
+        logger.debug("Process ID: {}".format(process.uuid))
 
 
 

@@ -22,8 +22,7 @@ def agave_oauth(request):
     tenant_base_url = getattr(settings, 'AGAVE_TENANT_BASEURL')
     client_key = getattr(settings, 'AGAVE_CLIENT_KEY')
 
-    print tenant_base_url
-    print client_key
+    logger.info("tenant url: %s, system consumer key: %s" % (tenant_base_url, client_key))
 
     session = request.session
     session['auth_state'] = os.urandom(24).encode('hex')
@@ -72,15 +71,19 @@ def agave_oauth_callback(request):
                                  auth=(client_key, client_sec))
         token_data = response.json()
         token_data['created'] = int(time.time())
+
         # log user in
         user = authenticate(backend='agave', token=token_data['access_token'])
+
         if user:
+
             try:
                 token = user.agave_oauth
                 token.update(**token_data)
             except ObjectDoesNotExist:
                 token = AgaveOAuthToken(**token_data)
                 token.user = user
+
             token.save()
 
             request.session[getattr(settings, 'AGAVE_TOKEN_SESSION_ID')] = token.token

@@ -22,12 +22,14 @@ class AgaveOAuthBackend(ModelBackend):
                 'Authorization': 'Bearer %s' % token
                 })
             json_result = response.json()
+
             if 'status' in json_result and json_result['status'] == 'success':
                 agave_user = json_result['result']
                 username = agave_user['username']
                 UserModel = get_user_model()
 
                 try:
+
                     user = UserModel.objects.get(username=username)
 
                     if 'first_name' in agave_user:
@@ -42,6 +44,7 @@ class AgaveOAuthBackend(ModelBackend):
 
                     user.email = agave_user['email']
                     user.save()
+
                 except UserModel.DoesNotExist:
                     self.logger.info('Creating local user record for "%s" from Agave Profile' % username)
 

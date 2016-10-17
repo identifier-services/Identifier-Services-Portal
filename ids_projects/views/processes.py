@@ -18,7 +18,6 @@ from ids_projects.tasks import bulk_ISH_registration
 import traceback
 import csv
 import logging
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -204,14 +203,10 @@ def create(request):
         form_process_type.fields['process_type'].widget.attrs['disabled'] = True
         form_process_type.fields['process_type'].widget.attrs['readonly'] = True
 
-        print "#### DEBUG 1 #####"
-
         #################################################
         # POST includes 'form_process_type' fields only #
         #################################################
         if not 'process_fields' in request.POST:
-
-            print "#### DEBUG 2 #####"
 
             form_process_fields = ProcessFieldsForm(process_fields)
             context['form_process_type'] = form_process_type
@@ -222,8 +217,6 @@ def create(request):
         # POST includes form_process_type & form_process_fields fields #
         ################################################################
         else:
-
-            print "#### DEBUG 3 #####"
             form_process_fields = ProcessFieldsForm(process_fields, request.POST)
 
             if form_process_type.is_valid() and form_process_fields.is_valid():
@@ -239,8 +232,10 @@ def create(request):
 
                 ## Single process registration
 
-                if request.FILES['file'] == None:
-                    print "single process reg"
+                if request.FILES['file'] is None:
+
+                    logger.debug("Single process registration")
+
                     try:
                         process = Process(api_client=api_client, meta=meta)
                         process.save()
@@ -274,7 +269,7 @@ def create(request):
 
                 ## Bulk ISH process registration
                 else:
-                    print "bulk process reg"                     
+                    logger.debug("Bulk process registration")
 
                     try:
                         ISH_meta = _validate_ISH(request.FILES['file'], project)

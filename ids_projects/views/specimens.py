@@ -150,7 +150,7 @@ def _validate_specimens(f, project):
     
     specimen_fields = get_specimen_fields(project)                
     
-    print specimen_fields
+    logger.debug("Specimen fields: {}".format(specimen_fields))
 
     reader = csv.reader(f)
     row_num = 0
@@ -162,7 +162,7 @@ def _validate_specimens(f, project):
             if row[index].lower() != specimen_fields[index]['id']:             
                 raise Exception("Fields does not match!")
             else:
-                print "Field match OK: %s" % row[index]
+                logger.debug("Field match OK: %s" % row[index])
 
     # reading metadata
     for row in reader:        
@@ -176,7 +176,7 @@ def _validate_specimens(f, project):
         specimens_meta.append(meta)
         row_num = row_num + 1
 
-    print specimens_meta
+    logger.debug("Specimens meta: {}".format(specimens_meta))
 
     return specimens_meta
                   
@@ -184,7 +184,6 @@ def _validate_specimens(f, project):
 @login_required
 @require_http_methods(['GET', 'POST'])
 def create(request):
-    print "in the specimen create view" 
     """Create a new specimen related to a project"""
     project_uuid = request.GET.get('project_uuid', False)
 
@@ -229,13 +228,10 @@ def create(request):
     elif request.method == 'POST':
 
         form = SpecimenForm(specimen_fields, request.POST)
-        print request.POST
-        print specimen_fields
 
         if form.is_valid():
 
             meta = {'value': form.cleaned_data}
-            print meta
 
             try:
                 specimen = Specimen(api_client=api_client, meta=meta)

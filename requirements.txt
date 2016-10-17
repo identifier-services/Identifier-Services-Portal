@@ -3,6 +3,7 @@ agavepy
 requests
 django-bootstrap3
 django-bootstrap-breadcrumbs
+django-celery
 django-hijack
 django-hijack-admin
 python-dateutil
