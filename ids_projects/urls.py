@@ -116,6 +116,23 @@ urlpatterns += patterns(
     url(r'^material/(?P<material_uuid>.+?)$', 'view', name='material-view'),
 )
 
+###################
+# Information Entity #
+###################
+urlpatterns += patterns(
+    'ids_projects.views.information',
+    # create a information entity related to a specimen
+    url(r'^information/create/?$', 'create', name='information-create'),
+    # edit a information entity
+    url(r'^information/edit/(?P<information_uuid>.+?)$', 'edit', name='information-edit'),
+    # relate information entity to an existing specimen
+    url(r'^information/add_relationship/(?P<information_uuid>.+?)$', 'add_relationship', name='relate-information-to-process'),
+    # delete a information entity
+    url(r'^information/delete/(?P<information_uuid>.+?)$', 'delete', name='information-delete'),
+    # view a information entity
+    url(r'^information/(?P<information_uuid>.+?)$', 'view', name='information-view'),
+)
+
 #############
 # Specimens #
 #############

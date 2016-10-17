@@ -57,6 +57,14 @@ def get_material_descriptions(project):
 
 
 @replace_space
+def get_information_descriptions(project):
+    """Returns full process descriptions, as read from yaml config."""
+    investigation_type_description = get_investigation_type_description(project)
+    information_description = investigation_type_description['information']
+    return information_description
+
+
+@replace_space
 def get_process_type_keys(project):
     """Returns the types of process for a given project"""
     project_processes = get_process_descriptions(project)
@@ -73,6 +81,14 @@ def get_material_type_keys(project):
 
 
 @replace_space
+def get_information_type_keys(project):
+    """Returns the types of process for a given project"""
+    information_processes = get_process_descriptions(project)
+    information_types = information_processes.keys()
+    return information_types
+
+
+@replace_space
 def get_process_type_titles(project):
     """Returns the types of process for a given project"""
     project_processes = get_process_descriptions(project)
@@ -86,6 +102,14 @@ def get_material_type_titles(project):
     project_material = get_material_descriptions(project)
     material_titles = [x.title() for x in project_material.keys()]
     return material_titles
+
+
+@replace_space
+def get_information_type_titles(project):
+    """Returns the types of process for a given project"""
+    project_information = get_information_descriptions(project)
+    information_titles = [x.title() for x in project_information.keys()]
+    return information_titles
 
 
 @replace_space
@@ -107,9 +131,21 @@ def get_material_choices(project):
     titles.  Intended for use in a form (includes 'choose one' tuple).
     """
     project_material = get_material_descriptions(project)
-    material_type_choices = [('', 'Choose one'),] + \
-                            [(x,x.title()) for x in project_material.keys()]
+    material_type_choices = [('', 'Choose one'), ] + \
+                            [(x, x.title()) for x in project_material.keys()]
     return material_type_choices
+
+
+@replace_space
+def get_information_choices(project):
+    """
+    Returns a list of tuples containing process types and process type
+    titles.  Intended for use in a form (includes 'choose one' tuple).
+    """
+    project_information = get_information_descriptions(project)
+    information_type_choices = [('', 'Choose one'), ] + \
+                               [(x, x.title()) for x in project_information.keys()]
+    return information_type_choices
 
 
 def get_process_description(project, process_type):
@@ -142,6 +178,15 @@ def get_material_fields(project, material_type):
     material_description = project_material[material_type]
     material_fields = material_description['fields']
     return material_fields
+
+
+@replace_space
+def get_information_fields(project, information_type):
+    """Returns process fields for a given process type."""
+    project_information = get_information_descriptions(project)
+    information_description = project_information[information_type]
+    information_fields = information_description['fields']
+    return information_fields
 
 
 def get_specimen_description(project):
@@ -185,12 +230,14 @@ def get_data_fields(project):
     data_fields = data_description['fields']
     return data_fields
 
-# TO BE TESTED
+
+# TODO: TO BE TESTED
 def get_probe_description(project):
     """Returns full probe descriptions, as read from yaml config."""
     investigation_type_description = get_investigation_type_description(project)
     probe_description = investigation_type_description['probe']
     return probe_description
+
 
 def get_probe_fields(project):
     """Returns probe fields."""

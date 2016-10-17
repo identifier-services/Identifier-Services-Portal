@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'hijack_admin',
     'compat',
     'djcelery',
+    'djng',
 
     'ids_auth',
     'ids_projects',

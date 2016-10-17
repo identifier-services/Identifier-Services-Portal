@@ -33,6 +33,11 @@ except Exception as e:
     logger.exception(e)
 
 try:
+    from information import Information
+except Exception as e:
+    logger.exception(e)
+
+try:
     from probe import Probe
 except Exception as e:
     logger.exception(e)

@@ -1,6 +1,7 @@
 Django==1.9
 agavepy
 requests
+django-angular
 django-bootstrap3
 django-bootstrap-breadcrumbs
 django-celery
