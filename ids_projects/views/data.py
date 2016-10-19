@@ -603,8 +603,8 @@ def _image_process(f, project):
 
     for row in reader:
         meta = {}
-        for field in fields:
-            meta[field['id']] = None
+        # for field in fields:
+        #     meta[field['id']] = None
 
         image_url = row[0]
         data_url = re.sub(r'image_service', "data_service", image_url)

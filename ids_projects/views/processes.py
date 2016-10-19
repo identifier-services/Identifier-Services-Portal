@@ -305,9 +305,6 @@ def _validate_ISH(f, project):
         for field in fields:
             meta[field] = row[fields[field]]
 
-    # print meta['probe_id']
-    # print type(meta['probe_id'])
-
     ISH_meta.append(meta)
     return ISH_meta
 

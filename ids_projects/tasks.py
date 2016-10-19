@@ -82,9 +82,9 @@ def bulk_ISH_registration(self, ISH_meta, process_meta, project_uuid):
         specimens = project.query_specimens_by_id(specimen_ids)
 
         # Query data with given image uri        
-        image_urls = ISH_link['image_url'].split(',')
-        print image_urls
-        images = project.query_image_by_url(image_urls)
+        image_urls = ISH_link['image_url'].split(',')        
+        images = project.query_images_by_url(image_urls)
+        print "number of images returned %d" % len(images)
 
         for probe in probes:
             process.add_input(probe)
@@ -116,15 +116,13 @@ def bulk_images_registration(self, images_meta, project_uuid):
         # create new data object
         data = Data(api_client=api_client, meta=meta)
         data.save()
+        # data.calculate_checksum()
 
         project.add_data(data)
         project.save()
 
         data.add_project(project)
         data.save()
-
-        print data.title
-        print data.value
 
 
 
