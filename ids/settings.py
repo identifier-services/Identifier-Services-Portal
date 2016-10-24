@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'hijack_admin',
     'compat',
     'djcelery',
+    'djng',
+    'sekizai',
 
     'ids_auth',
     'ids_projects',
@@ -56,6 +58,7 @@ AUTHENTICATION_BACKENDS = (
 HIJACK_ALLOW_GET_REQUESTS = True
 
 MIDDLEWARE_CLASSES = [
+    'djng.middleware.AngularUrlMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

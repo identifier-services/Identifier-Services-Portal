@@ -1,0 +1,34 @@
+{
+  "name": "identifier-services-portal",
+  "description": "Identifier Services Portal",
+  "main": "manage.py",
+  "authors": [
+    ""
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/identifier-services/Identifier-Services-Portal",
+  "private": true,
+  "dependencies": {
+    "bootstrap": "~3.3.5",
+    "jquery": "~2.1.4",
+    "bootstrap-datepicker": "~1.4.1",
+    "angular": "~1.4.8",
+    "angular-translate": "~2.4.0",
+    "angular-cookies": "~1.4.0",
+    "angular-resource": "~1.4.0",
+    "angular-ui-router": "0.3.1",
+    "angular-ui-codemirror": "~0.3.0",
+    "angular-bootstrap": "~0.14.3",
+    "angular-schema-form": "~0.8.12",
+    "angular-schema-form-ui-codemirror": "~0.2.2",
+    "angular-mocks": "~1.4.8",
+    "angular-toastr": "^1.7.0",
+    "angular-drag-and-drop-lists": "1.4.0",
+    "angular-xeditable": "0.1.12"
+  },
+  "resolutions": {
+    "angular": "~1.4.8",
+    "angular-ui-codemirror": "~0.3.0",
+    "codemirror": "~5.1.0"
+  }
+}

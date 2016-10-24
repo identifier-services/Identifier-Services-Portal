@@ -229,9 +229,9 @@ def create(request):
 
                 # meta data for process
                 meta = {'value': data}
-
+            
                 ## Single process registration
-                if request.FILES['file'] == None:
+                if 'file' not in request.FILES:
                     print "single process reg"
                     try:
                         process = Process(api_client=api_client, meta=meta)

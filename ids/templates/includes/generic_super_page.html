@@ -36,7 +36,7 @@
                 {% endif %}
             {% endif %}
 
-            {% if object_type == 'project' %}
+            {% if object_type == 'project' %}`
                 <!-- <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Define Specimen</a> -->
                 <a href="{% url 'ids_projects:specimen-upload-option' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Define Specimen</a>
                 {% if investigation_type == 'imaging-genetics' %}                
