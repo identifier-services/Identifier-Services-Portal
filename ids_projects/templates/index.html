@@ -5,18 +5,20 @@
 
 <div class="container" role="main" ng-app="idsApp" id="ids_project">
  	<div ng-controller="DetailPanelController"
- 		 ng-include="'{% static "html/layout/detailpanel.html" %}'"></div>
-<!--  	<div class="row">
- 		<div ng-controller="MenuBarController"
- 			 ng-include="'{% static "html/layout/menubar.html" %}'"
- 			 class=""
- 			 ng-class=""></div>
-
- 		<div ng-controller="ObjectComponentsCtrl"
- 			 ng-include=""
- 			 class=""
- 			 ng-class=""></div>
- 	</div> -->
+ 		 ng-include="'{% static "html/layout/detailpanel.html" %}'">
+	</div>
+ 	<div class="row">
+ 		<div class="col-sm-3">
+	 		<div ng-controller="MenuBarController"
+	 			 ng-include="'{% static "html/layout/menubar.html" %}'"> 			
+	 		</div>
+	 	</div>
+	 	<div class="col-sm-9">
+	 		<div ng-controller="RelationViewController"
+	 			 ng-include="'{% static "html/layout/relationview.html" %}'">	 			 	
+	 		</div>
+ 		</div>
+ 	</div>
 </div>
 
 
@@ -43,6 +45,7 @@
 <script src="{% static 'javascripts/layout/controllers/detailpanel.controller.js' %}"></script>
 <script src="{% static 'javascripts/layout/services/detailpanel.services.js' %}"></script>
 <script src="{% static 'javascripts/layout/controllers/menubar.controller.js' %}"></script>
+<script src="{% static 'javascripts/layout/controllers/relationview.controller.js' %}"></script>
 
 {% endaddtoblock %}
 

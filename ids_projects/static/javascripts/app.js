@@ -3,6 +3,12 @@
 	
 	angular.module('idsApp', [
 		'idsApp.layout',
+		'idsApp.data',
+		'idsApp.datasets',
+		'idsApp.probes',
+		'idsApp.processes',
+		'idsApp.projects',
+		'idsApp.specimens',
 		'djng.urls'
 		]);
 
