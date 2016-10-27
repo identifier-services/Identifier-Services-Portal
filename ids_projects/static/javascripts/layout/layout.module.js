@@ -1,10 +1,13 @@
 (function() {
 	'use strict';
-
-	angular.module('ids_projects.layout', [
-		'ids_project.layout.controllers'
+		
+	angular.module('idsApp.layout', [
+		'idsApp.layout.controllers',
+		'idsApp.layout.services'
 		]);
 
-	angular.module('ids_projects.layout.controllers', []);
-	
+	angular.module('idsApp.layout.controllers', []);
+
+	angular.module('idsApp.layout.services', []);
+
 })();

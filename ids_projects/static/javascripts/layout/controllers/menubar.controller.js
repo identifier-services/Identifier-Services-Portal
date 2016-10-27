@@ -7,18 +7,18 @@
 	'use strict';
 
 	angular
-		.module('ids_projects.layout.controllers')
+		.module('idsApp.layout.controllers')
 		.controller('MenuBarController', MenubarController);
 
 
 	MenubarController.$inject = ['$scope'];
-	
+
 	/**
 	* @namespace MenuBarController
 	*/
 
 	function MenubarController($scope) {
-
+		console.log("empty");
 	}
 
 

@@ -149,6 +149,17 @@ urlpatterns += patterns(
     url(r'^project/delete/(?P<project_uuid>.+?)$', 'delete', name='project-delete'),
     # view a specific project
     url(r'^project/(?P<project_uuid>.+?)$', 'view', name='project-view'),
+
+)
+
+##############
+# test angular
+##############
+urlpatterns += patterns(
+    'ids_projects.views.objects',
+    # test angular url
+    url(r'^test/test_angular/?$', 'test_angular', name='test-angular'),
+    url(r'^test/api/(?P<uuid>.+?)/$', 'call_api', name='call_api'),
 )
 
 ############
