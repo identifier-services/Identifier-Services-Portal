@@ -20,6 +20,7 @@
 		console.log("relation view controller");
 		$scope.text = 'This is relation view.';
 		$scope.entity = 'project';
+		console.log($scope.text);
 	}
 
 })();

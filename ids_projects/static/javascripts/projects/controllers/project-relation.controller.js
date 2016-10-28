@@ -1,5 +1,5 @@
 /**
-* ProejctRelationViewController
+* ProjectRelationViewController
 * @namespace idsApp.projects.controllers
 */
 
@@ -8,16 +8,25 @@
 
 	angular
 		.module('idsApp.projects.controllers')
-		.controller('ProejctRelationViewController', ProejctRelationViewController);
+		.controller('ProjectRelationViewController', ProjectRelationViewController);
 
-	ProejctRelationViewController.$inject = ['$scope'];
+	ProjectRelationViewController.$inject = ['$scope', 'djangoUrl','Relationships'];
 
 	/**
-	* @namespace ProejctRelationViewController
+	* @namespace ProjectRelationViewController
 	*/
 
-	function ProejctRelationViewController($scope) {
-		console.log("project relation view controller");		
+	function ProjectRelationViewController($scope, djangoUrl, Relationships) {
+		
+		console.log("project relation view controller");
+		Relationships.getRelatedEntities('3176432264224379366-242ac1111-0001-012').then(function(response){
+			console.log(response);
+			$scope.specimens = response.data.specimens;
+			$scope.probes = response.data.probes;
+			$scope.processes = response.data.processes;
+			$scope.data = response.data.data;
+			$scope.datasets = response.data.datasets;	
+		});		
 	}
 
 })();
