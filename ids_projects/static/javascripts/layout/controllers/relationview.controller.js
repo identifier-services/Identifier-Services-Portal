@@ -19,7 +19,7 @@
 	function RelationViewController($scope) {
 		console.log("relation view controller");
 		$scope.text = 'This is relation view.';
-		$scope.entity = 'project';
+		$scope.entity = 'dataset';
 		console.log($scope.text);
 	}
 

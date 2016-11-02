@@ -160,7 +160,10 @@ urlpatterns += patterns(
     # test angular url
     url(r'^test/test_angular/?$', 'test_angular', name='test-angular'),
     url(r'^test/api/(?P<uuid>.+?)/$', 'call_api', name='call_api'),
-    url(r'^test/project_api/(?P<project_uuid>.+?)/$', 'project_api', name='project_api'),
+    url(r'^test/project_api/(?P<project_uuid>.+?)/$', 'project_api', name='project-api'),
+    url(r'^test/specimen_api/(?P<specimen_uuid>.+?)/$', 'specimen_api', name='specimen-api'),
+    url(r'^test/process_api/(?P<process_uuid>.+?)/$', 'process_api', name='process-api'),
+    url(r'^test/dataset_api/(?P<dataset_uuid>.+?)/$', 'dataset_api', name='dataset-api'),
 )
 
 ############

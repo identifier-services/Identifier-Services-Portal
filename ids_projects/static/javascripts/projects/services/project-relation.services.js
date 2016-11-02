@@ -11,7 +11,7 @@
 		var services = {};
 
 		services.getRelatedEntities = function(uuid) {
-			return $http.get(djangoUrl.reverse('ids_projects:project_api', [uuid]), {
+			return $http.get(djangoUrl.reverse('ids_projects:project-api', [uuid]), {
 				params: {'object_id': uuid}
 			});
 		};

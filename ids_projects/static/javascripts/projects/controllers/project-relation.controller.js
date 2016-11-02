@@ -19,7 +19,8 @@
 	function ProjectRelationViewController($scope, djangoUrl, Relationships) {
 		
 		console.log("project relation view controller");
-		Relationships.getRelatedEntities('3176432264224379366-242ac1111-0001-012').then(function(response){
+		var project_uuid = '3176432264224379366-242ac1111-0001-012';
+		Relationships.getRelatedEntities(project_uuid).then(function(response){
 			console.log(response);
 			$scope.specimens = response.data.specimens;
 			$scope.probes = response.data.probes;

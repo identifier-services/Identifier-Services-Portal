@@ -63,7 +63,7 @@ class Process(BaseMetadata):
     @property
     def data(self):
         return self.inputs + self.outputs
-
+    
     def add_project(self, project):
         """ """
         self.add_container(project)
