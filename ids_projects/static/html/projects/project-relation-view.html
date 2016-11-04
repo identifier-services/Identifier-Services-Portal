@@ -1,16 +1,26 @@
 <div>
 	<p> This is project relation view </p>
 	<div class="panel panel-default">
-		<div class="panel-heading">Material Entities</div>
+		<div class="panel-heading">Specimens</div>
 		<div class="panel-body">
-			{{specimens}}
-			<p>
-			{{probes}}
+			{{specimens}}			
+		</div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">Probes</div>
+		<div class="panel-body">
+			<p>{{probes}}</p>
+
+			<ul uib-pagination total-items="pagination.totalItems" ng-model="pagination.currentPage" max-size="pagination.maxSize" class="pagination-sm" boundary-links="true" num-pages="numPages" ng-change="pageChanged()"></ul>			
+			<!-- <ul uib-pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()"></ul> -->
+			<pre>The selected page no: {{pagination.currentPage}}</pre>
+			<button type="button" class="btn btn-info" ng-click="setPage(3)">Set current page to: 3</button>
 		</div>
 	</div>
 	
 	<div class="panel panel-success">
-		<div class="panel-heading">Information Entities</div>
+		<div class="panel-heading">Data</div>
 		<div class="panel-body">
 			{{data}}
 		</div>

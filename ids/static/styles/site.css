@@ -274,3 +274,8 @@ body {
  fieldset[disabled] .navbar-inverse .btn-link:hover {
      color: #444
  }
+
+ /** remedy necessary for angular-bootstrap to work, particularly for pagination **/
+ /* http://angular-ui.github.io/bootstrap/#/pagination */
+ /*.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }*/
+

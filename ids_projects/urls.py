@@ -164,6 +164,7 @@ urlpatterns += patterns(
     url(r'^test/specimen_api/(?P<specimen_uuid>.+?)/$', 'specimen_api', name='specimen-api'),
     url(r'^test/process_api/(?P<process_uuid>.+?)/$', 'process_api', name='process-api'),
     url(r'^test/dataset_api/(?P<dataset_uuid>.+?)/$', 'dataset_api', name='dataset-api'),
+    url(r'^test/data_api/(?P<data_uuid>.+?)/$', 'data_api', name='data-api'),
 )
 
 ############

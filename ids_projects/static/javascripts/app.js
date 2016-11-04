@@ -9,7 +9,7 @@
 		'idsApp.processes',
 		'idsApp.projects',
 		'idsApp.specimens',
-		'djng.urls'
+		'djng.urls'		
 		]);
 
 	angular.module('idsApp').run(run);

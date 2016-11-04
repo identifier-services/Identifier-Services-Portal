@@ -8,14 +8,11 @@
 {% block scripts %}
     <script src="{% static 'vendor/angular/angular.min.js' %}"></script>
     <script src="{% static 'vendor/angular-sanitize/angular-sanitize.min.js' %}"></script>
-    <script src="{% static 'vendor/angular-toastr/dist/angular-toastr.tpls.min.js' %}"></script>
+    <script src="{% static 'vendor/angular-toastr/dist/angular-toastr.tpls.min.js' %}"></script>    
 
     {% addtoblock "js" %}
         <script type="text/javascript" src="{% static 'djng/js/django-angular.js' %}"></script>
-
-        <!-- <script type="text/javascript" src="{% static 'scripts/ng-modernizr/ng-modernizr.js' %}"></script> -->
-
-        <!-- <script src="{%static 'scripts/logging/logger.js' %}"></script> -->
+        
 
         <script type="text/javascript">
             (function(angular) {

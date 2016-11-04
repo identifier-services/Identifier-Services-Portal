@@ -15,6 +15,8 @@ from ..models.project import Project
 from ..models.specimen import Specimen
 from ..models.process import Process
 from ..models.dataset import Dataset
+from ..models.data import Data
+
 
 import json
 import logging
@@ -208,6 +210,45 @@ def dataset_api(request, dataset_uuid):
 		logger.error(exception_msg)
 		messages.error(request, exception_msg)
 		return HttpResponseRedirect('/projects')
+
+# /test/data_api/4322106814629932570-242ac1111-0001-012
+@login_required
+@require_http_methods(['GET'])
+def data_api(request, data_uuid):
+	print "data id: %s" % data_uuid
+	if request.user.is_anonymous():
+		api_client = get_portal_api_client()
+	else:
+		api_client = request.user.agave_oauth.api_client
+
+	data = Data(api_client=api_client, uuid=data_uuid)
+
+	try:
+		is_input_to = data.input_to_process
+		is_output_of = data.output_of_process
+
+		print is_input_to
+		print is_output_of
+
+		response = {}
+		response['is_input_to'] = []
+		response['is_output_of'] = []
+
+		for process in is_input_to:
+			response['is_input_to'].append({"title": process.title, "uuid": process.uuid})
+
+		for process in is_output_of:
+			response['is_output_of'].append({"title": process.title, "uuid": process.uuid})
+
+		return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder),
+												content_type='application/json')
+
+	except Exception as e:
+		exception_msg = 'Unable to load data related objects. %s' % e
+		logger.error(exception_msg)
+		messages.error(request, exception_msg)
+		return HttpResponseRedirect('/projects')
+
 
 	
 
