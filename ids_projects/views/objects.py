@@ -50,6 +50,47 @@ def call_api(request, uuid):
    												content_type='application/json')
 
 
+# /test/probes_api/2625065660983668250-242ac1111-0001-012/100
+# project with 800 probes: 2625065660983668250-242ac1111-0001-012
+@login_required
+@require_http_methods(['GET'])
+def probes_api(request, uuid, offset):	
+	if request.user.is_anonymous():
+		api_client = get_portal_api_client()
+	else:
+		api_client = request.user.agave_oauth.api_client	
+
+	try:		
+		query = {'name': 'idsvc.probe', 'value._relationships': {'$elemMatch': {'@id': uuid}}}			
+		response = api_client.meta.listMetadata(q=json.dumps(query), offset=offset)
+
+		# for relationship in response:
+		# 	print relationship.uuid			
+
+		return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder),
+												content_type='application/json')
+	except Exception as e:
+		exception_msg = 'Unable to load project related objects. %s' % e
+        logger.error(exception_msg)
+        messages.error(request, exception_msg)
+        return HttpResponseRedirect('/projects/')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # /test/project_api/3176432264224379366-242ac1111-0001-012
 @login_required

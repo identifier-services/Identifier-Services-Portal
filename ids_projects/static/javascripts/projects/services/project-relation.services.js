@@ -10,8 +10,8 @@
 	function Relationships($http, djangoUrl) {
 		var services = {};
 
-		services.getRelatedEntities = function(uuid) {
-			return $http.get(djangoUrl.reverse('ids_projects:project-api', [uuid]), {
+		services.getRelatedProbes = function(uuid, offset) {
+			return $http.get(djangoUrl.reverse('ids_projects:probes-api', [uuid, offset]), {
 				params: {'object_id': uuid}
 			});
 		};

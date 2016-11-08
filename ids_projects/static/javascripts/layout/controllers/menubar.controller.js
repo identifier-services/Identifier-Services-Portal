@@ -17,8 +17,7 @@
 	* @namespace MenuBarController
 	*/
 
-	function MenubarController($scope) {
-		console.log("menubar controller");
+	function MenubarController($scope) {		
 		$scope.actions = {
 			select_data: true,
 			add_data: false,
