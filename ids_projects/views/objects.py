@@ -33,6 +33,7 @@ def test_angular(request):
     return render(request, 'index.html', context)
 
 
+# get entity detail
 @login_required
 @require_http_methods(['GET'])
 def call_api(request, uuid):	
@@ -50,18 +51,18 @@ def call_api(request, uuid):
    												content_type='application/json')
 
 
-# /test/probes_api/2625065660983668250-242ac1111-0001-012/100
-# project with 800 probes: 2625065660983668250-242ac1111-0001-012
+# get project's parts
+# /test/get_parts_api/idsvc.probe/2625065660983668250-242ac1111-0001-012/0
 @login_required
 @require_http_methods(['GET'])
-def probes_api(request, uuid, offset):	
+def get_parts_api(request, name, uuid, offset):	
 	if request.user.is_anonymous():
 		api_client = get_portal_api_client()
 	else:
 		api_client = request.user.agave_oauth.api_client	
 
 	try:		
-		query = {'name': 'idsvc.probe', 'value._relationships': {'$elemMatch': {'@id': uuid}}}			
+		query = {'name': name, 'value._relationships': {'$elemMatch': {'@id': uuid, '@rel:type': 'IsPartOf'}}}			
 		response = api_client.meta.listMetadata(q=json.dumps(query), offset=offset)
 
 		# for relationship in response:
@@ -70,7 +71,85 @@ def probes_api(request, uuid, offset):
 		return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder),
 												content_type='application/json')
 	except Exception as e:
-		exception_msg = 'Unable to load project related objects. %s' % e
+		exception_msg = 'Unable to load related objects. %s' % e
+        logger.error(exception_msg)
+        messages.error(request, exception_msg)
+        return HttpResponseRedirect('/projects/')
+
+# get process inputs
+# /test/get_inputs_api/idsvc.process/8000958787788739046-242ac1111-0001-012/0
+@login_required
+@require_http_methods(['GET'])
+def get_inputs_api(request, name, uuid, offset):
+	if request.user.is_anonymous():
+		api_client = get_portal_api_client()
+	else:
+		api_client = request.user.agave_oauth.api_client
+
+	try:
+		query = {'name': name, 'value._relationships': {'$elemMatch': {'@id': uuid, '@rel:type': 'IsInputTo'}}}
+		response = api_client.meta.listMetadata(q=json.dumps(query), offset=offset)
+
+		return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder), 
+												content_type='application/json')
+
+	except Exception as e:
+		exception_msg = 'Unable to load related objects. %s' % e
+        logger.error(exception_msg)
+        messages.error(request, exception_msg)
+        return HttpResponseRedirect('/projects/')
+
+@login_required
+@require_http_methods(['GET'])
+def get_outputs_api(request, name, uuid, offset):
+	if request.user.is_anonymous():
+		api_client = get_portal_api_client()
+	else:
+		api_client = request.user.agave_oauth.api_client
+
+	try:
+		query = {'name': name, 'value._relationships': {'$elemMatch': {'@id': uuid, '@rel:type': 'IsOutputOf'}}}
+		response = api_client.meta.listMetadata(q=json.dumps(query), offset=offset)
+
+	except Exception as e:
+		exception_msg = 'Unable to load related objects. %s' % e
+        logger.error(exception_msg)
+        messages.error(request, exception_msg)
+        return HttpResponseRedirect('/projects/')		
+
+
+@login_required
+@require_http_methods(['GET'])
+def get_inputs_to_api(request, name, uuid, offset):
+	if request.user.is_anonymous():
+		api_client = get_portal_api_client()
+	else:
+		api_client = request.user.agave_oauth.api_client
+
+	try:
+		query = {'name': name, 'value._relationships': {'$elemMatch': {'@id': uuid, '@rel:type': 'IsOutputOf'}}}
+		response = api_client.meta.listMetadata(q=json.dumps(query), offset=offset)
+
+	except Exception as e:
+		exception_msg = 'Unable to load related objects. %s' % e
+        logger.error(exception_msg)
+        messages.error(request, exception_msg)
+        return HttpResponseRedirect('/projects/')
+
+@login_required
+@require_http_methods(['GET'])
+def get_outputs_of_api(request, name, uuid, offset):
+	if request.user.is_anonymous():
+		api_client = get_portal_api_client()
+	else:
+		api_client = request.user.agave_oauth.api_client
+
+	try:
+		query = {'name': name, 'value._relationships': {'$elemMatch': {'@id': uuid, '@rel:type': 'IsOutputOf'}}}
+		response = api_client.meta.listMetadata(q=json.dumps(query), offset=offset)
+
+	except Exception as e:
+		exception_msg = 'Unable to load related objects. %s' % e
         logger.error(exception_msg)
         messages.error(request, exception_msg)
         return HttpResponseRedirect('/projects/')
@@ -78,20 +157,7 @@ def probes_api(request, uuid, offset):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## LEGACY CODES
 # /test/project_api/3176432264224379366-242ac1111-0001-012
 @login_required
 @require_http_methods(['GET'])

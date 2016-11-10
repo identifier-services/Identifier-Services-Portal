@@ -53,7 +53,7 @@
 		$scope.pageChanged = function() {					    		    
 		    if ($scope.pagination.currentPage == $scope.pagination.maxPage && !$scope.pagination.end)  {
 		    	// request more data
-		    	Relationships.getRelatedProbes(project_uuid, $scope.pagination.offset).then(function(response){
+		    	Relationships.getRelatedProbes('idsvc.probe', project_uuid, $scope.pagination.offset).then(function(response){
 		    		console.log("requesting more data...");
 		    		$scope.probes = $scope.probes.concat(response.data);
 					$scope.updateTotalItems(response.data.length);
@@ -66,7 +66,7 @@
 		};			
 
 		// fist call		
-		Relationships.getRelatedProbes(project_uuid, $scope.pagination.offset).then(function(response){
+		Relationships.getRelatedProbes('idsvc.probe', project_uuid, $scope.pagination.offset).then(function(response){
     		console.log("requesting more data...");
     		$scope.probes = $scope.probes.concat(response.data);
 			$scope.updateTotalItems(response.data.length);

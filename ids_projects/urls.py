@@ -165,7 +165,12 @@ urlpatterns += patterns(
     url(r'^test/process_api/(?P<process_uuid>.+?)/$', 'process_api', name='process-api'),
     url(r'^test/dataset_api/(?P<dataset_uuid>.+?)/$', 'dataset_api', name='dataset-api'),
     url(r'^test/data_api/(?P<data_uuid>.+?)/$', 'data_api', name='data-api'),
-    url(r'^test/probes_api/(?P<uuid>.+?)/(?P<offset>.+?)$', 'probes_api', name='probes-api'),
+
+    url(r'^test/get_parts_api/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_parts_api', name='get-parts-api'),
+    url(r'^test/get_inputs_api/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_inputs_api', name='get-inputs-api'),
+    url(r'^test/get_outputs_api/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_outputs_api', name='get-outputs-api'),
+    url(r'^test/get_inputs_to_api/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_inputs_to_api', name='get-inputs-to-api'),
+    url(r'^test/get_outputs_of_api/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_outputs_of_api', name='get-outputs-of-api'),
 )
 
 ############
