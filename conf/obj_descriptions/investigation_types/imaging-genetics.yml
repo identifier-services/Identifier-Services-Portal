@@ -92,22 +92,17 @@ processes:
 
 data:
     fields:
-        - id: description
-          label: Description
-          required: False
-          form_field: True
-
-        - id: system
-          label: System
+        - id: image uri
+          label: image uri
           required: False
           form_field: False
 
-        - id: path
-          label: Path
+        - id: data uri
+          label: data uri
           required: False
-          form_field: False
+          form_field: False  
 
-        - id: file name
+        - id: name
           label: File Name
           required: False
           form_field: False

@@ -229,12 +229,14 @@ def create(request):
 
                 # meta data for process
                 meta = {'value': data}
-
+            
                 ## Single process registration
-
                 if request.FILES['file'] is None:
 
                     logger.debug("Single process registration")
+
+                if 'file' not in request.FILES:
+                    print "single process reg"
 
                     try:
                         process = Process(api_client=api_client, meta=meta)
@@ -286,7 +288,7 @@ def create(request):
                         messages.warning(request, exception_msg)
 
                         return HttpResponseRedirect(
-                                        reverse('ids-projects:project-view'),
+                                        reverse('ids_projects:project-view'),
                                                 kwargs={'project_uuid': project_uuid})
 
 
@@ -307,9 +309,6 @@ def _validate_ISH(f, project):
         meta = {}
         for field in fields:
             meta[field] = row[fields[field]]
-
-    # print meta['probe_id']
-    # print type(meta['probe_id'])
 
     ISH_meta.append(meta)
     return ISH_meta

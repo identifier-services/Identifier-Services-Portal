@@ -19,3 +19,4 @@ logfile*
 pystuff.py
 conf/agave
 ENV/
+ids/static/vendor/

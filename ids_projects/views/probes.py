@@ -50,6 +50,8 @@ def upload_option(request):
                 probes_meta = _validate_probes(request.FILES['file'], project)
                 bulk_probe_registration.apply_async(args=(probes_meta,
                                                           project_uuid), serializer='json')
+
+                success_msg = 'Your %d probes have been in the registration queue.' % len(probes_meta)
                 return HttpResponseRedirect(
                                 reverse('ids_projects:project-view',
                                         kwargs={'project_uuid': project.uuid}))

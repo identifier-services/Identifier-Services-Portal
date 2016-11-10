@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'compat',
     'djcelery',
     'djng',
+    'sekizai',
 
     'ids_auth',
     'ids_projects',
@@ -57,6 +58,7 @@ AUTHENTICATION_BACKENDS = (
 HIJACK_ALLOW_GET_REQUESTS = True
 
 MIDDLEWARE_CLASSES = [
+    'djng.middleware.AngularUrlMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -84,6 +86,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.core.context_processors.request',
+                'sekizai.context_processors.sekizai',
             ],
         },
     },

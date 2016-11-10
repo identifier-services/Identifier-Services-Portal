@@ -45,6 +45,14 @@ def view(request, project_uuid):
 
     try:
         project = Project(api_client=api_client, uuid=project_uuid)
+        
+        ## FOR DEBUG
+        print "Project uuid: %s" % project.uuid
+        print "Number of process: %d" % len(project.processes)
+        print "Number of probes: %d" % len(project.probes)
+        print "Number of specimens %d" % len(project.specimens)
+        print "Number of images/data %d" % len(project.data)
+
     except Exception as e:
         exception_msg = 'Unable to load project. %s' % e
         logger.error(exception_msg)
