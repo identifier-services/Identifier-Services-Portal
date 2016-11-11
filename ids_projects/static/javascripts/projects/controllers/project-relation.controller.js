@@ -19,7 +19,10 @@
 	function ProjectRelationViewController($scope, $log, djangoUrl, Relationships) {
 		
 		console.log("project relation view controller");
-		var project_uuid = '2625065660983668250-242ac1111-0001-012';
+
+		// project with 800 probes
+		// var project_uuid = '2625065660983668250-242ac1111-0001-012';
+		var project_uuid = '3176432264224379366-242ac1111-0001-012'
 
 		// pagination
 		// an object is necessary to avoid scope conflict
@@ -53,7 +56,7 @@
 		$scope.pageChanged = function() {					    		    
 		    if ($scope.pagination.currentPage == $scope.pagination.maxPage && !$scope.pagination.end)  {
 		    	// request more data
-		    	Relationships.getRelatedProbes('idsvc.probe', project_uuid, $scope.pagination.offset).then(function(response){
+		    	Relationships.getRelatedEntities('idsvc.probe', project_uuid, $scope.pagination.offset).then(function(response){
 		    		console.log("requesting more data...");
 		    		$scope.probes = $scope.probes.concat(response.data);
 					$scope.updateTotalItems(response.data.length);
@@ -65,8 +68,12 @@
 		    $scope.list = $scope.probes.slice(start, end);
 		};			
 
-		// fist call		
-		Relationships.getRelatedProbes('idsvc.probe', project_uuid, $scope.pagination.offset).then(function(response){
+
+		// data pagination
+		// NOTE: NEEDS TO CONSIDER BETTER WAY TO RESUE PAGINATION 
+		
+		// probes
+		Relationships.getRelatedEntities('idsvc.probe', project_uuid, $scope.pagination.offset).then(function(response){
     		console.log("requesting more data...");
     		$scope.probes = $scope.probes.concat(response.data);
 			$scope.updateTotalItems(response.data.length);
@@ -76,6 +83,29 @@
 		    console.log("start: " + start + " end: " + end);
 		    $scope.list = $scope.probes.slice(start, end);
     	});
+
+		// specimens
+		Relationships.getRelatedEntities('idsvc.specimen', project_uuid, 0).then(function(response){
+			$scope.specimens = response.data;
+			console.log($scope.specimens);
+		});
+
+		Relationships.getRelatedEntities('idsvc.process', project_uuid, 0).then(function(response){
+			$scope.processes = response.data;
+			console.log($scope.processes);
+		});
+
+		// datasets
+		Relationships.getRelatedEntities('idsvc.dataset', project_uuid, 0).then(function(response){
+			$scope.datasets = response.data;
+			console.log($scope.datasets);
+		});
+
+		// data
+		Relationships.getRelatedEntities('idsvc.data', project_uuid, 0).then(function(response){
+			$scope.data = response.data;
+			console.log($scope.data);
+		});
 
 	}
 

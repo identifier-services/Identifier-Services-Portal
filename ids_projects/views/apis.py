@@ -27,8 +27,7 @@ logger = logging.getLogger(__name__)
 
 @login_required
 @require_http_methods(['GET'])
-def test_angular(request):
-    print "in the test angular"
+def view(request):    
     context = {}
     return render(request, 'index.html', context)
 
@@ -36,9 +35,7 @@ def test_angular(request):
 # get entity detail
 @login_required
 @require_http_methods(['GET'])
-def call_api(request, uuid):	
-	print uuid
-
+def entity_detail_api(request, uuid):		
 	if request.user.is_anonymous():
 		api_client = get_portal_api_client()
 	else:
@@ -52,7 +49,11 @@ def call_api(request, uuid):
 
 
 # get project's parts
+# project with 800 probes
 # /test/get_parts_api/idsvc.probe/2625065660983668250-242ac1111-0001-012/0
+
+# project with probes, specimens, data, process
+# /test/get_parts_api/idsvc.probe/3176432264224379366-242ac1111-0001-012/0
 @login_required
 @require_http_methods(['GET'])
 def get_parts_api(request, name, uuid, offset):	
@@ -65,8 +66,7 @@ def get_parts_api(request, name, uuid, offset):
 		query = {'name': name, 'value._relationships': {'$elemMatch': {'@id': uuid, '@rel:type': 'IsPartOf'}}}			
 		response = api_client.meta.listMetadata(q=json.dumps(query), offset=offset)
 
-		# for relationship in response:
-		# 	print relationship.uuid			
+		print "number of %s: %d" % (name, len(response))
 
 		return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder),
 												content_type='application/json')

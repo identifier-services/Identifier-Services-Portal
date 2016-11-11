@@ -11,7 +11,7 @@
 		var services = {};
 
 		services.get = function(uuid) {
-			return $http.get(djangoUrl.reverse('ids_projects:call_api', [uuid]), {
+			return $http.get(djangoUrl.reverse('ids_projects:entity-detail-api', [uuid]), {
 				params: {'object_id': uuid}
 			});
 		};

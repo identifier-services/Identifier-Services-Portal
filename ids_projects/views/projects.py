@@ -53,26 +53,20 @@ def view(request, project_uuid):
         print "Number of specimens %d" % len(project.specimens)
         print "Number of images/data %d" % len(project.data)
 
-    except Exception as e:
-        exception_msg = 'Unable to load project. %s' % e
-        logger.error(exception_msg)
-        messages.error(request, exception_msg)
-        return HttpResponseRedirect('/projects/')
-
-    try:
         process_types = get_process_type_keys(project)        
         project_fields = get_project_form_fields()        
         project.set_fields(project_fields)
         investigation_type = get_investigation_type(project)
+
+        context = {'project': project, 'investigation_type': investigation_type, 'process_types': process_types}    
+        return render(request, 'ids_projects/projects/detail.html', context)
+
     except Exception as e:
         exception_msg = 'Unable to load config values. %s' % e
         logger.warning(exception_msg)
-
-    context = {'project': project, 'investigation_type': investigation_type, 'process_types': process_types}    
-
-    return render(request, 'ids_projects/projects/detail.html', context)
-
-
+        messages.error(request, exception_msg)
+        return HttpResponseRedirect('/projects/')
+    
 @login_required
 @require_http_methods(['GET', 'POST'])
 def create(request):

@@ -3,7 +3,9 @@
 	<div class="panel panel-default">
 		<div class="panel-heading">Specimens</div>
 		<div class="panel-body">
-			
+			<div ng-repeat="specimen in specimens">
+				<li><a href="#">{{specimen.value.name}}</a></li>
+			</div>
 		</div>
 	</div>
 
@@ -21,6 +23,9 @@
 	<div class="panel panel-success">
 		<div class="panel-heading">Data</div>
 		<div class="panel-body">
+			<div ng-repeat="dat in data">
+				<li><a href="#">{{dat.value.name}}</a></li>
+			</div>
 			
 		</div>
 	</div>
@@ -28,14 +33,18 @@
 	<div class="panel panel-info">
 		<div class="panel-heading">Processes</div>
 		<div class="panel-body">
-			
+			<div ng-repeat="process in processes">
+				<li><a href="#">{{process.value.name}}</a></li>
+			</div>			
 		</div>
 	</div>
 
 	<div class="panel panel-warning">
 		<div class="panel-heading">Datasets</div>
 		<div class="panel-body">
-			
+			<div ng-repeat="dataset in datasets">
+				<li><a href="#">{{dataset.value.name}}</a></li>
+			</div>			
 		</div>
 	</div>
 
