@@ -16,9 +16,10 @@
 	* @namespace RelationViewController
 	*/
 
-	function RelationViewController($scope) {		
-		$scope.text = 'This is relation view.';
-		$scope.entity = 'project';		
+	function RelationViewController($scope) {				
+		$scope.$watch('entity', function () {			
+			console.log("Entity type: " + $scope.entity);					
+		});		
 	}
 
 })();

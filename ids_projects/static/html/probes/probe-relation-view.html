@@ -3,7 +3,9 @@
 	<div class="panel panel-default">
 		<div class="panel-heading">Is input to</div>
 		<div class="panel-body">
-			{{is_input_to}}
+			<div ng-repeat="item in is_input_to">
+				<li><a href="#">{{item.value.title}}</a></li>
+			</div>			
 		</div>
 	</div>
 

@@ -10,12 +10,16 @@
 	function DataRelations($http, djangoUrl) {
 		var services = {};
 
-		services.getRelatedEntities = function(uuid) {
-			console.log("in the data services");
-			return $http.get(djangoUrl.reverse('ids_projects:data-api', [uuid]), {
+		services.getRelatedInputsTo = function(uuid, offset) {			
+			return $http.get(djangoUrl.reverse('ids_projects:get-inputs-to-api', [uuid, offset]), {
 				params: {'object_id': uuid}
 			});
+		};
 
+		services.getRelatedOutputsOf = function(uuid, offset) {
+			return $http.get(djangoUrl.reverse('ids_projects:get-outputs-of-api', [uuid, offset]), {
+				params: {'object_id': uuid}
+			});
 		};
 
 		return services;

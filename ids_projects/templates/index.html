@@ -5,7 +5,8 @@
 
 <div class="container" role="main" ng-app="idsApp" id="ids_project">
  	<div ng-controller="DetailPanelController"
- 		 ng-include="'{% static "html/layout/detailpanel.html" %}'">
+ 		 ng-include="'{% static "html/layout/detailpanel.html" %}'"
+ 		 ng-init="uuid='{{uuid}}'">
 	</div>
  	<div class="row">
  		<div class="col-sm-3">
@@ -13,38 +14,44 @@
 	 			 ng-include="'{% static "html/layout/menubar.html" %}'"> 			
 	 		</div>
 	 	</div>
-	 	<div class="col-sm-9">
-	 		<div ng-controller="RelationViewController">
+	 	<div class="col-sm-9">	 		
+	 		<div ng-controller="RelationViewController" ng-init="entity='{{entityType}}'">	 				 			
 				<div>					
 					<div ng-switch="entity">
 						<div ng-switch-when="project">							
 							<div ng-controller="ProjectRelationViewController"
-					 			 ng-include="'{% static "html/projects/project-relation-view.html" %}'">	 			 	
+					 			 ng-include="'{% static "html/projects/project-relation-view.html" %}'"
+					 			 ng-init="project_uuid='{{uuid}}'">	 			 	
 					 		</div>
 						</div>
 						<div ng-switch-when="process">							
 							<div ng-controller="ProcessRelationViewController"
-					 			 ng-include="'{% static "html/processes/process-relation-view.html" %}'">	 			 	
+					 			 ng-include="'{% static "html/processes/process-relation-view.html" %}'"
+					 			 ng-init="process_uuid='{{uuid}}'">	 			 	
 					 		</div>
 						</div>
 						<div ng-switch-when="specimen">							
 							<div ng-controller="SpecimenRelationViewController"
-					 			 ng-include="'{% static "html/specimens/specimen-relation-view.html" %}'">	 			 	
+					 			 ng-include="'{% static "html/specimens/specimen-relation-view.html" %}'"
+					 			 ng-init="specimen_uuid='{{uuid}}'">	 			 	
 					 		</div>
 						</div>
 						<div ng-switch-when="data">							
 							<div ng-controller="DataRelationViewController"
-					 			 ng-include="'{% static "html/data/data-relation-view.html" %}'">	 			 	
+					 			 ng-include="'{% static "html/data/data-relation-view.html" %}'"
+					 			 ng-init="data_uuid='{{uuid}}'">	 			 	
 					 		</div>
 						</div>						
 						<div ng-switch-when="dataset">							
 							<div ng-controller="DatasetRelationViewController"
-					 			 ng-include="'{% static "html/datasets/dataset-relation-view.html" %}'">	 			 	
+					 			 ng-include="'{% static "html/datasets/dataset-relation-view.html" %}'"
+					 			 ng-init="dataset_uuid='{{uuid}}'">	 			 	
 					 		</div>
 						</div>						
 						<div ng-switch-when="probe">							
 							<div ng-controller="ProbeRelationViewController"
-					 			 ng-include="'{% static "html/probes/probe-relation-view.html" %}'">	 			 	
+					 			 ng-include="'{% static "html/probes/probe-relation-view.html" %}'"
+					 			 ng-init="probe_uuid='{{uuid}}'">	 			 	
 					 		</div>
 						</div>						
 					</div>

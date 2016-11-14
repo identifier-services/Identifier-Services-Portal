@@ -10,12 +10,17 @@
 	function ProcessRelations($http, djangoUrl) {
 		var services = {};
 
-		services.getRelatedEntities = function(uuid) {
-			console.log('in the process services');
-			return $http.get(djangoUrl.reverse('ids_projects:process-api', [uuid]), {
+		services.getRelatedInputs = function(uuid, offset) {			
+			return $http.get(djangoUrl.reverse('ids_projects:get-inputs-api', [uuid, offset]), {
 				params: {'object_id': uuid}
 			});
 		};
+
+		services.getRelatedOutputs = function(uuid, offset) {
+			return $http.get(djangoUrl.reverse('ids_projects:get-outputs-api', [uuid, offset]), {
+				params: {'object_id': uuid}
+			});
+		}
 
 		return services;
 	}

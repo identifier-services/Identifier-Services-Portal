@@ -10,10 +10,8 @@
 	function DatasetRelations($http, djangoUrl) {
 		var services = {};
 
-		services.getRelatedEntities = function(uuid) {
-			console.log('in the dataset services');
-
-			return $http.get(djangoUrl.reverse('ids_projects:dataset-api', [uuid]), {
+		services.getRelatedParts = function(name, uuid, offset) {			
+			return $http.get(djangoUrl.reverse('ids_projects:get-parts-api', [name, uuid, offset]), {
 				params: {'object_id': uuid}
 			});
 		};

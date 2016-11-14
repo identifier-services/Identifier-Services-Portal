@@ -11,12 +11,17 @@
 	function SpecimenRelations($http, djangoUrl) {
 		var services = {};
 
-		services.getRelatedEntities = function(uuid) {
-			console.log('in the specimen service');
-			return $http.get(djangoUrl.reverse('ids_projects:specimen-api', [uuid]), {
+		services.getRelatedInputsTo = function(uuid, offset) {			
+			return $http.get(djangoUrl.reverse('ids_projects:get-inputs-to-api', [uuid, offset]), {
 				params: {'object_id': uuid}
 			});
 		};
+
+		services.getRelatedOutputsOf = function(uuid, offset) {
+			return $http.get(djangoUrl.reverse('ids_projects:get-outputs-of-api', [uuid, offset]), {
+				params: {'object_id': uuid}
+			});
+		}
 
 		return services;
 	}

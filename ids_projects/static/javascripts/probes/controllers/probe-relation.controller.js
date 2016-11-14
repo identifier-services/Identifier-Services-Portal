@@ -18,12 +18,14 @@
 
 	function ProbeRelationViewController($scope, djangoUrl, ProbeRelations) {
 		console.log("probe relation view controller");		
-		var probe_uuid = '2842383520227267046-242ac1111-0001-012';
+		// var probe_uuid = '2842383520227267046-242ac1111-0001-012';
 
-		ProbeRelations.getRelatedEntities(probe_uuid).then(function(response) {
-			console.log(response);
-			$scope.is_input_to = response.data.is_input_to;
-		});
+		$scope.$watch('probe_uuid', function (){
+			ProbeRelations.getRelatedInputsTo($scope.probe_uuid, 0).then(function(response) {			
+				console.log(response);
+				$scope.is_input_to = response.data;
+			});
+		});		
 	}
 
 })();

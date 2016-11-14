@@ -11,17 +11,25 @@
 	* @namespace DetailPanelController
 	*/
 	function DetailPanelController($scope, djangoUrl, Details) {
-		$scope.title = "this is a test title";		
+		
+		// $scope.title = "Specimen";
 		$scope.object = {};
 		
-		Details.get('1862119081942979046-242ac1111-0001-012').then(function(response){			
-			for (var key in response.data) {
-				var leading = key.substring(0,1);
-				if (leading != '_') {
-					$scope.object[key] = response.data[key];					
-				}
-			}			
-		});				
+		$scope.$watch('uuid', function (){
+			Details.get($scope.uuid).then(function(response){
+				console.log(response);
+				$scope.title = response.data.name;
+				
+				for (var key in response.data.value) {
+					var leading = key.substring(0,1);
+					if (leading != '_') {
+						$scope.object[key] = response.data.value[key];					
+					}
+				}			
+			});				
+		});
+
+		
 	}
 
 })();

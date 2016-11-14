@@ -190,7 +190,7 @@ urlpatterns += patterns(
 ##############
 urlpatterns += patterns(
     'ids_projects.views.apis',    
-    url(r'^angular/?$', 'view', name='view'),
+    url(r'^angular/(?P<entity>.+?)/(?P<uuid>.+?)/$', 'view', name='view'),
     url(r'^api/entity_detail/(?P<uuid>.+?)/$', 'entity_detail_api', name='entity-detail-api'),
 
     # url(r'^api/project_api/(?P<project_uuid>.+?)/$', 'project_api', name='project-api'),
@@ -199,11 +199,11 @@ urlpatterns += patterns(
     # url(r'^api/dataset_api/(?P<dataset_uuid>.+?)/$', 'dataset_api', name='dataset-api'),
     # url(r'^api/data_api/(?P<data_uuid>.+?)/$', 'data_api', name='data-api'),
 
-    url(r'^api/get_parts_api/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_parts_api', name='get-parts-api'),
-    url(r'^api/get_inputs_api/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_inputs_api', name='get-inputs-api'),
-    url(r'^api/get_outputs_api/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_outputs_api', name='get-outputs-api'),
-    url(r'^api/get_inputs_to_api/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_inputs_to_api', name='get-inputs-to-api'),
-    url(r'^api/get_outputs_of_api/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_outputs_of_api', name='get-outputs-of-api'),
+    url(r'^api/get_parts/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_parts_api', name='get-parts-api'),
+    url(r'^api/get_inputs/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_inputs_api', name='get-inputs-api'),
+    url(r'^api/get_outputs/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_outputs_api', name='get-outputs-api'),
+    url(r'^api/get_inputs_to/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_inputs_to_api', name='get-inputs-to-api'),
+    url(r'^api/get_outputs_of/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_outputs_of_api', name='get-outputs-of-api'),
 )
 
 ############

@@ -19,12 +19,18 @@
 	function DataRelationViewController($scope, djangoUrl, DataRelations) {
 		console.log("Data relation view controller");
 
-		var data_uuid = '4322106814629932570-242ac1111-0001-012';
-		DataRelations.getRelatedEntities(data_uuid).then(function(response) {
-			console.log(response);
-			$scope.is_input_to = response.data.is_input_to;
-			$scope.is_output_of = response.data.is_output_of;
-		});
+		// var data_uuid = '4322106814629932570-242ac1111-0001-012';
+		$scope.$watch('data_uuid', function () {			
+			DataRelations.getRelatedInputsTo($scope.data_uuid, 0).then(function(response) {			
+				$scope.is_input_to = response.data;			
+			});
+
+			DataRelations.getRelatedOutputsOf($scope.data_uuid, 0).then(function(response) {
+				$scope.is_output_of = response.data;
+			});
+		});		
+		
+		
 	}
 
 })();
