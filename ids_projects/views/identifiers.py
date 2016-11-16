@@ -58,17 +58,16 @@ def meta_for_doi(dataset, form_data=None):
     """ constructing json for build xml object """
     project = dataset.project
 
-    # dates = []
-    # date = form_data.get('date', None)
-    #
-    # formats = []
-    # format = form_data.get('format', None)
-    #
-    # versions = []
-    # version = form_data.get('version', None)
-    #
-    # rights = []
-    # right = form_data.get('right', None)
+    dates = []
+    formats = []
+    versions = []
+    rights = []
+
+    if form_data:
+        date = form_data.get('date', None)
+        format = form_data.get('format', None)
+        version = form_data.get('version', None)
+        right = form_data.get('right', None)
 
     metadata = {}
     creators = []

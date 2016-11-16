@@ -590,8 +590,8 @@ class MetadataRelationshipMixin(object):
         if type(relationship) is not dict or \
                 not all(key in ['@rel:type', '@id'] for key in relationship.keys()):
             raise Exception('Invalid relationship format.')
-        
-        self.relationships.append(relationship)        
+
+        self.relationships.append(relationship)
 
     def remove_relationship(self, relationship):
         """
@@ -621,7 +621,7 @@ class MetadataRelationshipMixin(object):
     def _query_related_meta(self, query):
         if not self.uuid:
             raise Exception('Missing UUID, cannot look up relationships without UUID.')
-        
+
         queried_meta = self._api_client.meta.listMetadata(q=json.dumps(query))
 
         return queried_meta
@@ -643,9 +643,3 @@ class MetadataRelationshipMixin(object):
                 logger.exception(e)
 
         return queried_objects
-
-
-
-
-
-

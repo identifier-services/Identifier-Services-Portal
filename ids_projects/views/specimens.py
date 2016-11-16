@@ -51,7 +51,7 @@ def list(request):
 
 @login_required
 @require_http_methods(['GET'])
-def view(request, specimen_uuid):    
+def view(request, specimen_uuid):
     """ """
     if request.user.is_anonymous():
         api_client = get_portal_api_client()
@@ -87,7 +87,7 @@ def view(request, specimen_uuid):
 
 @login_required
 @require_http_methods(['GET','POST'])
-def upload_option(request):    
+def upload_option(request):
     project_uuid = request.GET.get('project_uuid', False)
 
     if not project_uuid:
@@ -99,24 +99,25 @@ def upload_option(request):
     else:
         api_client = request.user.agave_oauth.api_client
 
-    project = Project(api_client=api_client, uuid=project_uuid)    
+    project = Project(api_client=api_client, uuid=project_uuid)
 
     # POST
     if request.method == 'POST':
-        context = {'project': project}            
+        context = {'project': project}
 
         if request.POST.get('upload_option', None) == 'Single':
-            # Single Specimen               
-            url = "%s?project_uuid=%s" % (reverse('ids_projects:specimen-create'), project_uuid)            
+            # Single Specimen
+            url = "%s?project_uuid=%s" % (reverse('ids_projects:specimen-create'), project_uuid)
             return HttpResponseRedirect(url)
 
 
         elif request.POST.get('upload_option', None) == 'Bulk':
-            
-            try:                
-                specimens_meta = _validate_specimens(request.FILES['file'], project)                
+
+            try:
+                specimens_meta = _validate_specimens(request.FILES['file'], project)
                 bulk_specimen_registration.apply_async(args=(specimens_meta,
-                                                             project_uuid), serilizer='json')                        
+                                                             project_uuid,
+                                                             request.user.username), serilizer='json')                        
 
                 success_msg = 'Your %d specimens have been in the registration queue.' % len(specimens_meta)
                 logger.info(success_msg)
@@ -124,20 +125,20 @@ def upload_option(request):
                 return HttpResponseRedirect(
                                 reverse('ids_projects:project-view',
                                         kwargs={'project_uuid': project.uuid}))
-                  
+
             except Exception as e:
                 traceback.print_exc()
                 exception_msg = repr(e)
-                logger.error(exception_msg) 
-                messages.warning(request, exception_msg)            
-                
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+
                 return HttpResponseRedirect(
                                 reverse('ids_projects:project-view',
                                         kwargs={'project_uuid': project.uuid}))
 
     # GET
     else:
-        context = {'project': project}        
+        context = {'project': project}
         context['form_upload_file'] = UploadFileForm()
         context['form_upload_option'] = UploadOptionForm()
         return render(request, 'ids_projects/specimens/upload_option.html', context)
@@ -147,9 +148,9 @@ def _validate_specimens(f, project):
     # NEED TO ADD VALIDATION
 
     header = True
-    
-    specimen_fields = get_specimen_fields(project)                
-    
+
+    specimen_fields = get_specimen_fields(project)
+
     print specimen_fields
 
     reader = csv.reader(f)
@@ -159,18 +160,18 @@ def _validate_specimens(f, project):
     if header:
         row = next(reader, None)
         for index in range(len(row)):
-            if row[index].lower() != specimen_fields[index]['id']:             
+            if row[index].lower() != specimen_fields[index]['id']:
                 raise Exception("Fields does not match!")
             else:
                 print "Field match OK: %s" % row[index]
 
     # reading metadata
-    for row in reader:        
+    for row in reader:
         meta = {}
         col_num = 0
-        
+
         for field in specimen_fields[:-1]:
-            meta[field['id']] = row[col_num]            
+            meta[field['id']] = row[col_num]
             col_num = col_num + 1
 
         specimens_meta.append(meta)
@@ -179,12 +180,12 @@ def _validate_specimens(f, project):
     print specimens_meta
 
     return specimens_meta
-                  
+
 
 @login_required
 @require_http_methods(['GET', 'POST'])
 def create(request):
-    print "in the specimen create view" 
+    print "in the specimen create view"
     """Create a new specimen related to a project"""
     project_uuid = request.GET.get('project_uuid', False)
 
@@ -347,8 +348,3 @@ def delete(request, specimen_uuid):
         logger.exception(exception_msg)
         messages.warning(request, exception_msg)
         return HttpResponseRedirect('/project/{}/'.format(project.uuid))
-
-
-
-
-
