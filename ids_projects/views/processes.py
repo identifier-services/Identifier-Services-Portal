@@ -185,11 +185,11 @@ def create(request):
             context['form_process_fields'] = form_process_fields
             context['process_type'] = process_type
 
-            context['form_upload_file'] = UploadFileForm()            
-        
-        if request.is_ajax():                        
+            context['form_upload_file'] = UploadFileForm()
+
+        if request.is_ajax():
             return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
-        else:                       
+        else:
             return render(request, 'ids_projects/processes/create.html', context)
 
     ########
@@ -231,7 +231,8 @@ def create(request):
                 meta = {'value': data}
 
                 ## Single process registration
-                if request.FILES['file'] == None:
+
+                if not request.FILES.get('file'):
                     print "single process reg"
                     try:
                         process = Process(api_client=api_client, meta=meta)
@@ -266,7 +267,7 @@ def create(request):
 
                 ## Bulk ISH process registration
                 else:
-                    print "bulk process reg"                     
+                    print "bulk process reg"
 
                     try:
                         ISH_meta = _validate_ISH(request.FILES['file'], project)
@@ -294,7 +295,7 @@ def _validate_ISH(f, project):
 
     reader = csv.reader(f)
     fields = {}
-    
+
     if header:
         row = next(reader, None)
         for i in range(len(row)):

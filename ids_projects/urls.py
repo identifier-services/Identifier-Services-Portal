@@ -164,5 +164,8 @@ urlpatterns += patterns(
 ###############
 urlpatterns += patterns(
     'ids_projects.views.identifiers',
+    # create a datasets related to a specimen
+    url(r'^identifier/create/(?P<dataset_uuid>.+?)$', 'create', name='identifier-request-doi'),
+    # detail
     url(r'^identifier/(?P<identifier_uuid>.+?)$', 'view', name='identifier-view'),
 )

@@ -17,12 +17,12 @@
                 <a href="{% url 'ids_projects:data-type' %}?relationship=output&process_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Output Data</a>
             {% elif object_type == 'dataset' %}
                 <a href="{% url 'ids_projects:dataset-select-data'  dataset.uuid%}" class="btn btn-primary btn-block">Select Data</a>
-                <a href="{% url 'ids_projects:dataset-request-doi' dataset.uuid%}" class="btn btn-primary btn-block">Request DOI</a>
+                <a href="{% url 'ids_projects:identifier-request-doi' dataset.uuid%}" class="btn btn-primary btn-block">Request DOI</a>
                 <a href="{% url 'ids_projects:dataset-request-ark' dataset.uuid%}" class="btn btn-primary btn-block">Request ARK</a>
             {% elif object_type == 'project' %}
                 {% if investigation_type == 'imaging-genetics' %}
                     <a href="{% url 'ids_projects:add-images' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Images</a>
-                {% endif %}    
+                {% endif %}
             {% elif object_type != 'data' %}
                 <a href="{% url 'ids_projects:data-type' %}?{{ object_type }}_uuid={{ object.uuid }}" class="btn btn-primary btn-block">Add Data</a>
             {% elif object_type == 'data' %}
@@ -39,10 +39,10 @@
             {% if object_type == 'project' %}
                 <!-- <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Define Specimen</a> -->
                 <a href="{% url 'ids_projects:specimen-upload-option' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Define Specimen</a>
-                {% if investigation_type == 'imaging-genetics' %}                
+                {% if investigation_type == 'imaging-genetics' %}
                     <a href="{% url 'ids_projects:probe-upload-option' %}?project_uuid={{ object.uuid }}" class="btn btn-default btn-block">Define Probe</a>
                 {% endif %}
-            {% else %}                
+            {% else %}
                 <!-- <a href="{% url 'ids_projects:specimen-create' %}?project_uuid={{ object.project.uuid }}" class="btn btn-default btn-block">Define Specimen</a> -->
                 <!-- <a href="{% url 'ids_projects:specimen-upload-option' %}?project_uuid={{ object.project.uuid }}" class="btn btn-default btn-block">Define Specimen</a> -->
             {% endif %}

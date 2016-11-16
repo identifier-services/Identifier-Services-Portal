@@ -376,9 +376,6 @@ def edit(request, dataset_uuid):
 def add_data(request, dataset_uuid):
     api_client = request.user.agave_oauth.api_client
 
-    import pdb;
-    pdb.set_trace()
-
     try:
         dataset = Dataset(api_client=api_client, uuid=dataset_uuid)
         project = dataset.project
@@ -415,7 +412,7 @@ def make_private(request, dataset_uuid):
 
 # @login_required
 @require_http_methods(['GET', 'POST'])
-def request_doi(request, dataset_uuid):    
+def request_doi(request, dataset_uuid):
     if request.method == 'GET':
         context = {}
         if request.user.is_anonymous():
@@ -428,54 +425,55 @@ def request_doi(request, dataset_uuid):
             associated_ids = dataset.identifiers
             if _has_identifier(associated_ids, 'doi'):
                 messages.warning(request, "Dataset alread has a DOI identifier.")
-                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                                    
+                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
             essential = meta_for_doi(dataset)
+
             builder = identifierBuilder()
             builder.buildXML(essential)
             xmlObject = builder.getXML()
 
             # requesting doi
-            client = ezidClient('apitest', 'apitest')            
+            client = ezidClient('apitest', 'apitest')
             metadata = {}
-            metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")                       
+            metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")
             response = client.Mint('doi:10.5072/FK2', metadata)
             if "success" in response.keys():
                 res = response['success']
                 doi = res.split('|')[0].strip()
-                ark = res.split('|')[1].strip()   
+                ark = res.split('|')[1].strip()
 
                 # update generated ARK as alternative identifier
                 essential_new = update_alternateIdentifier(essential, ark)
                 builder.setAlternateIdentifiers(essential_new)
                 xmlObject = builder.getXML()
-                metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")            
-                response = client.Update(doi, metadata)            
-                
+                metadata["datacite"] = ET.tostring(xmlObject, encoding = "UTF-8", method = "xml")
+                response = client.Update(doi, metadata)
+
                 # save identifier objects
-                identifier = Identifier(api_client=api_client, type='doi', uid=doi, dataset=dataset)                                                
-                identifier.save()                        
+                identifier = Identifier(api_client=api_client, type='doi', uid=doi, dataset=dataset)
+                identifier.save()
                 dataset = _add_identifier_to_dataset(dataset, identifier)
-                
+
                 # NOTES:
-                # It seems due to network delay, results are not printed immediately. 
-                # However, the metadata were successfully updated in agave            
+                # It seems due to network delay, results are not printed immediately.
+                # However, the metadata were successfully updated in agave
                 # for elem in dataset.identifiers:
                 #     print elem.title, elem.uid
-                
+
             else:
                 logger.error("Failed to mint a DOI identifier!")
                 messages.warning(request, "Error in requesting DOI!")
-                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                    
+                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
-            
+
             return render(request, 'ids_projects/datasets/request_doi.html', context)
 
         except Exception as e:
             exception_msg = 'Unable to load process. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                    
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
 # @login_required
 @require_http_methods(['GET'])
@@ -492,10 +490,10 @@ def request_ark(request, dataset_uuid):
             associated_ids = dataset.identifiers
             if _has_identifier(associated_ids, 'ark'):
                 messages.warning(request, "Dataset alread has an ARK identifier.")
-                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                                    
+                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
             metadata = meta_for_ark(dataset)
-            client = ezidClient('apitest', 'apitest')                        
+            client = ezidClient('apitest', 'apitest')
             response = client.Mint('ark:/99999/fk4', metadata)
 
             if "success" in response.keys():
@@ -507,7 +505,7 @@ def request_ark(request, dataset_uuid):
             else:
                 logger.error("Failed to mint an ARK identifier!")
                 messages.warning(request, "Error in requesting ARK!")
-                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))                                    
+                return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
             return render(request, 'ids_projects/datasets/request_doi.html', context)
 
@@ -515,11 +513,11 @@ def request_ark(request, dataset_uuid):
             exception_msg = 'Unable to load process. %s' % e
             logger.error(exception_msg)
             messages.warning(request, exception_msg)
-            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))            
+            return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
 
 def _has_identifier(associated_ids, target_type='doi'):
     for identifier in associated_ids:
-        if identifier.type == target_type:            
+        if identifier.type == target_type:
             return True
     return False
 
@@ -528,7 +526,7 @@ def _add_identifier_to_dataset(dataset, identifier):
     if (dataset != None):
         identifier.add_to_dataset(dataset)
         identifier.save()
-        dataset.add_identifier(identifier)        
+        dataset.add_identifier(identifier)
         dataset.save()
     return dataset
 
@@ -539,7 +537,7 @@ def meta_for_ark(dataset):
     metadata = {}
     metadata['erc.who'] = project.value.get('creator', None)
     metadata['erc.what'] = dataset.title
-    metadata['erc.when'] = datetime.date.today().strftime("%B %d, %Y")    
+    metadata['erc.when'] = datetime.date.today().strftime("%B %d, %Y")
 
     return metadata
 
@@ -552,20 +550,20 @@ def meta_for_doi(dataset):
     creator = {}
     creator['creatorName'] = {}
     creator['creatorName']['text'] = project.value.get('creator', None)
-    creators.append(creator)    
+    creators.append(creator)
 
     titles = []
-    title = {}      
+    title = {}
     title['xml:lang'] = "en-us"
     title['text'] = dataset.title
     titles.append(title)
 
     subjects = []
     subject = {}
-    subject['xml:lang'] = "en-us"    
+    subject['xml:lang'] = "en-us"
     subject['text'] = project.value.get('investigation_type', '(:unas)')
     subjects.append(subject)
-    
+
     resourceType = {}
     resourceType['resourceTypeGeneral'] = "Dataset"
     resourceType['text'] = dataset.value.get('name', '(:unas)')
@@ -573,13 +571,13 @@ def meta_for_doi(dataset):
     descriptions = []
     description = {}
     description['xml:lang'] = "en-us"
-    description['descriptionType'] = "Abstract"    
+    description['descriptionType'] = "Abstract"
     description['text'] = dataset.value.get('description', '(:unas)')
     descriptions.append(description)
-    
+
     metadata['creators'] = creators
-    metadata['titles'] = titles        
-    metadata['subjects'] = subjects    
+    metadata['titles'] = titles
+    metadata['subjects'] = subjects
     metadata['descriptions'] = descriptions
 
     # TODO: Add dates, sizes, formats, version, rghtsList, description, if necessary
