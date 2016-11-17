@@ -80,6 +80,14 @@ class Data(BaseMetadata):
     def datasets(self):
         return [x for x in self.containers if x.name == 'idsvc.datasets']
 
+    @property
+    def input_to_process(self):
+        return [x for x in self.is_input_to if x.name == 'idsvc.process']
+
+    @property
+    def output_of_process(self):
+        return [x for x in self.is_output_of if x.name == 'idsvc.process']
+
     def add_project(self, project):
         """ """ 
         self.add_container(project)

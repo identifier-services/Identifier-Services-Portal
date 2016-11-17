@@ -46,7 +46,6 @@ def view(request, project_uuid):
 
     try:
         project = Project(api_client=api_client, uuid=project_uuid)
-
     except Exception as e:
         exception_msg = 'Unable to load project. %s' % e
         logger.error(exception_msg)

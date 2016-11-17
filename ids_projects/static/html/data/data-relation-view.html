@@ -1,0 +1,21 @@
+<div>
+	<p> This is data relation view </p>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">Is input to</div>
+		<div class="panel-body">
+			<div ng-repeat="item in is_input_to">
+				<li><a href="#">{{item.value.name}}</a></li>
+			</div>			
+		</div>
+	</div>
+
+	<div class="panel panel-info">
+		<div class="panel-heading">Is output of</div>
+		<div class="panel-body">
+			<div ng-repeat="item in is_output_of">
+				<li><a href="#">{{item.value.name}}</a></li>
+			</div>			
+		</div>
+	</div>
+</div>

@@ -191,6 +191,28 @@ urlpatterns += patterns(
     url(r'^project/delete/(?P<project_uuid>.+?)$', 'delete', name='project-delete'),
     # view a specific project
     url(r'^project/(?P<project_uuid>.+?)$', 'view', name='project-view'),
+
+)
+
+##############
+# APIs for angular
+##############
+urlpatterns += patterns(
+    'ids_projects.views.apis',    
+    url(r'^angular/(?P<entity>.+?)/(?P<uuid>.+?)/$', 'view', name='view'),
+    url(r'^api/entity_detail/(?P<uuid>.+?)/$', 'entity_detail_api', name='entity-detail-api'),
+
+    # url(r'^api/project_api/(?P<project_uuid>.+?)/$', 'project_api', name='project-api'),
+    # url(r'^api/specimen_api/(?P<specimen_uuid>.+?)/$', 'specimen_api', name='specimen-api'),
+    # url(r'^api/process_api/(?P<process_uuid>.+?)/$', 'process_api', name='process-api'),
+    # url(r'^api/dataset_api/(?P<dataset_uuid>.+?)/$', 'dataset_api', name='dataset-api'),
+    # url(r'^api/data_api/(?P<data_uuid>.+?)/$', 'data_api', name='data-api'),
+
+    url(r'^api/get_parts/(?P<name>.+?)/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_parts_api', name='get-parts-api'),
+    url(r'^api/get_inputs/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_inputs_api', name='get-inputs-api'),
+    url(r'^api/get_outputs/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_outputs_api', name='get-outputs-api'),
+    url(r'^api/get_inputs_to/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_inputs_to_api', name='get-inputs-to-api'),
+    url(r'^api/get_outputs_of/(?P<uuid>.+?)/(?P<offset>.+?)$', 'get_outputs_of_api', name='get-outputs-of-api'),
 )
 
 ############

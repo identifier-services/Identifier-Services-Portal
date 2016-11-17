@@ -1,4 +1,4 @@
-{% load staticfiles %}
+{% load staticfiles sekizai_tags %}
 {% load hijack_tags %}
 <!DOCTYPE html>
 <html>
@@ -10,11 +10,10 @@
       <meta name="description" content="{{ site.description }}">
       <link rel="icon" href="{% static 'favicon.ico' %}">
       <link rel="canonical" href="{{request.get_full_path}}">
-      <!-- styles -->
-      <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">-->
+      
       <link rel="stylesheet" href="{% static 'styles/bootstrap/dist/css/bootstrap.min.css' %}"/>
       <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
-      <link rel="stylesheet" href="/static/styles/site.css">
+      <link rel="stylesheet" href="/static/styles/site.css">      
   </head>
   <body>
     {% include 'includes/header.html' %}
@@ -42,17 +41,17 @@
             </div>
             {% endif %}
         </div>
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </div>
 
     {% include 'includes/footer.html' %}
     <!-- scripts -->
-    <!--<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>-->
-    <script src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}"></script>
-    <!--<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>-->
-    <script src="{% static 'styles/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    
+    <script src="{% static 'vendor/jquery/dist/jquery.min.js' %}"></script>
+    <script stc = "{% static 'vendor/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+
     {% block scripts %}{% endblock %}
+    {% render_block "js" %}
     {% include 'includes/analytics.html' %}
   </body>
 </html>

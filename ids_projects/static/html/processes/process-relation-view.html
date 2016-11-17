@@ -1,0 +1,20 @@
+<div>
+	<p> This is process relation view </p>
+	<div class="panel panel-default">
+		<div class="panel-heading">Inputs</div>
+		<div class="panel-body">
+			<div ng-repeat="input in inputs">
+				<li><a href="#">{{input.value.name}}</a></li>
+			</div>			
+		</div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">Outputs</div>
+		<div class="panel-body">
+			<div ng-repeat="output in outputs">
+				<li><a href="#">{{output.value.name}}</a></li>
+			</div>
+		</div>
+	</div>
+</div>

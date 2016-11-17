@@ -231,10 +231,12 @@ def create(request):
                 meta = {'value': data}
 
                 ## Single process registration
-
                 if request.FILES['file'] is None:
 
                     logger.debug("Single process registration")
+
+                if 'file' not in request.FILES:
+                    print "single process reg"
 
                     try:
                         process = Process(api_client=api_client, meta=meta)

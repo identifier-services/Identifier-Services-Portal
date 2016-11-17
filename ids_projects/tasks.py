@@ -36,7 +36,7 @@ def bulk_specimen_registration(self, specimens_meta, project_uuid, username=None
         specimen = Specimen(api_client=api_client, meta=meta)
         specimen.save()
 
-        logger.debug("Specimen UUID: {}".format(specimen.uuid))
+        # logger.debug("Specimen UUID: {}".format(specimen.uuid))
 
         # add_part: specimen
         project.add_specimen(specimen)
@@ -140,7 +140,7 @@ def bulk_ISH_registration(self, ISH_meta, process_meta, project_uuid, username=N
             process.save()
             image.save()
 
-        logger.debug("Process ID: {}".format(process.uuid))
+        # logger.debug("Process ID: {}".format(process.uuid))
 
 @shared_task(bind=True)
 def bulk_images_registration(self, images_meta, project_uuid, username=None):

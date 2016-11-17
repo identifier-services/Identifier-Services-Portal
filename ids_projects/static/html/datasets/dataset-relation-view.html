@@ -1,0 +1,20 @@
+<div>
+	<p> This is dataset relation view </p>
+	<div class="panel panel-default">
+		<div class="panel-heading">Identifiers</div>
+		<div class="panel-body">
+			<div ng-repeat="item in identifiers">
+				<li><a href="#">{{item.value.uid}}</a></li>
+			</div>			
+		</div>
+	</div>
+
+	<div class="panel panel-info">
+		<div class="panel-heading">data</div>
+		<div class="panel-body">
+			<div ng-repeat="item in data">
+				<li><a href="#">{{item.value.name}}</a></li>
+			</div>			
+		</div>
+	</div>
+</div>

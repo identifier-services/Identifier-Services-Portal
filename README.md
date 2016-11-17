@@ -54,3 +54,12 @@
 2. Open in browser
 
    Navigate to [http://localhost:8000](http://localhost:8000) in your browser.
+
+
+
+
+## Additional steps for setting up Angular
+* `$ pip install -r requirements.txt`
+* `$ npm install -g bower`
+* `$ npm install`
+* `$ bower install`
