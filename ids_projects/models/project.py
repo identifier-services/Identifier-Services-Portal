@@ -28,6 +28,10 @@ class Project(BaseMetadata):
         return self.value.get('title')
 
     @property
+    def investigation_type(self):
+        return self.value.get('investigation_type')
+
+    @property
     def specimens(self):
         return [x for x in self.parts if x.name == 'idsvc.specimen']
 
@@ -89,11 +93,11 @@ class Project(BaseMetadata):
 
         self.uuid = None
 
-    def query_probes_by_id(self, probe_ids):        
+    def query_probes_by_id(self, probe_ids):
         probes = []
 
         for probe_id in probe_ids:
-                           
+
             # '{"name": "idsvc.probe", "value.probe_id": "R5001", "value._relationships": {"$elemMatch": {"@id": "1952466296496067046-242ac1111-0001-012"}}}'
             query = {}
             query['value._relationships'] =  {'$elemMatch': {'@id': self.uuid}}
@@ -145,6 +149,3 @@ class Project(BaseMetadata):
             images.extend(results)
 
         return images
-
-
-

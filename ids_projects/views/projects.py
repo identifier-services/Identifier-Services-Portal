@@ -59,13 +59,17 @@ def view(request, project_uuid):
         project.set_fields(project_fields)
         investigation_type = get_investigation_type(project)
 
+        context = {'project': project,
+                   'investigation_type': investigation_type,
+                   'process_types': process_types}
+
+        return render(request, 'ids_projects/projects/detail.html', context)
     except Exception as e:
         exception_msg = 'Unable to load config values. %s' % e
         logger.warning(exception_msg)
-
-    context = {'project': project, 'investigation_type': investigation_type, 'process_types': process_types}
-
-    return render(request, 'ids_projects/projects/detail.html', context)
+        messages.warning(request, exception_msg)
+        return HttpResponseRedirect(
+                    reverse('ids_projects:project-list-private'))
 
 
 @login_required

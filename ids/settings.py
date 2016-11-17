@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 # -*- coding: utf-8 -*-
-
 import os, read_conf
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -234,4 +233,3 @@ CELERY_RESULT_BACKEND = 'rpc://'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-
