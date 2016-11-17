@@ -12,19 +12,12 @@ from django.contrib.auth import get_user_model
 @shared_task(bind=True)
 def bulk_specimen_registration(self, specimens_meta, project_uuid, username=None):
 
-    print "!!!!!!!!! DEBUG username %s !!!!!!!!" % username
-
     if username:
         UserModel = get_user_model()
         user = UserModel.objects.get(username=username)
         api_client = user.agave_oauth.api_client
-
-        print "!!!!!!!!! DEBUG A %s !!!!!!!!" % user
-
     else:
         api_client = get_portal_api_client()
-
-        print "!!!!!!!!! DEBUG B !!!!!!!!"
 
     project = Project(api_client=api_client, uuid=project_uuid)
 
@@ -52,8 +45,15 @@ def bulk_specimen_registration(self, specimens_meta, project_uuid, username=None
         specimen.save()
 
 @shared_task(bind=True)
-def bulk_probe_registration(self, probes_meta, project_uuid):
-    api_client = get_portal_api_client()
+def bulk_probe_registration(self, probes_meta, project_uuid, username=None):
+
+    if username:
+        UserModel = get_user_model()
+        user = UserModel.objects.get(username=username)
+        api_client = user.agave_oauth.api_client
+    else:
+        api_client = get_portal_api_client()
+
     project = Project(api_client, uuid=project_uuid)
 
     ## check if the probe is already registered by the project
@@ -73,8 +73,15 @@ def bulk_probe_registration(self, probes_meta, project_uuid):
 
 
 @shared_task(bind=True)
-def bulk_ISH_registration(self, ISH_meta, process_meta, project_uuid):
-    api_client = get_portal_api_client()
+def bulk_ISH_registration(self, ISH_meta, process_meta, project_uuid, username=None):
+
+    if username:
+        UserModel = get_user_model()
+        user = UserModel.objects.get(username=username)
+        api_client = user.agave_oauth.api_client
+    else:
+        api_client = get_portal_api_client()
+
     project = Project(api_client, uuid=project_uuid)
 
     for ISH_link in ISH_meta:
@@ -123,8 +130,15 @@ def bulk_ISH_registration(self, ISH_meta, process_meta, project_uuid):
         print "Process id: %s" % process.uuid
 
 @shared_task(bind=True)
-def bulk_images_registration(self, images_meta, project_uuid):
-    api_client = get_portal_api_client()
+def bulk_images_registration(self, images_meta, project_uuid, username=None):
+
+    if username:
+        UserModel = get_user_model()
+        user = UserModel.objects.get(username=username)
+        api_client = user.agave_oauth.api_client
+    else:
+        api_client = get_portal_api_client()
+
     project = Project(api_client, uuid=project_uuid)
 
     for image_meta in images_meta:

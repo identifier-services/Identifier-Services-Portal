@@ -271,7 +271,7 @@ def create(request):
 
                     try:
                         ISH_meta = _validate_ISH(request.FILES['file'], project)
-                        bulk_ISH_registration.apply_async(args=(ISH_meta, meta, project.uuid), serializer='json')
+                        bulk_ISH_registration.apply_async(args=(ISH_meta, meta, project.uuid, request.user.username), serializer='json')
 
                         return HttpResponseRedirect(
                                     reverse('ids_projects:project-view',

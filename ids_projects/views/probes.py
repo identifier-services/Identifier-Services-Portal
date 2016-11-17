@@ -49,7 +49,7 @@ def upload_option(request):
             try:
                 print request.POST.get('upload_option', None)
                 probes_meta = _validate_probes(request.FILES['file'], project)
-                bulk_probe_registration.apply_async(args=(probes_meta, project_uuid), serializer='json')
+                bulk_probe_registration.apply_async(args=(probes_meta, project_uuid, request.user.username), serializer='json')
 
                 success_msg = 'Your %d specimens have been in the registration queue.' % len(probes_meta)
                 logger.info(success_msg)

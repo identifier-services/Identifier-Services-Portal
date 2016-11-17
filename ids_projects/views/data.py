@@ -562,14 +562,14 @@ def add_images(request):
     else:
         api_client = request.user.agave_oauth.api_client
 
-    project = Project(api_client=api_client, uuid=project_uuid)    
+    project = Project(api_client=api_client, uuid=project_uuid)
 
     if request.method == 'POST':
 
         if request.FILES['file'] != None:
             try:
                 images_meta = _image_process(request.FILES['file'], project)
-                bulk_images_registration.apply_async(args=(images_meta, project_uuid), serilizer = 'json')
+                bulk_images_registration.apply_async(args=(images_meta, project_uuid, request.user.username), serilizer = 'json')
                 return HttpResponseRedirect(
                                     reverse('ids_projects:project-view',
                                             kwargs={'project_uuid': project.uuid}))
@@ -588,13 +588,13 @@ def add_images(request):
     # GET
     else:
         print "GET request"
-        context = {'project': project}        
-        context['form_upload_file'] = UploadFileForm()        
+        context = {'project': project}
+        context['form_upload_file'] = UploadFileForm()
         return render(request, 'ids_projects/data/add_images.html', context)
 
 def _image_process(f, project):
     header = True
-    reader = csv.reader(f)    
+    reader = csv.reader(f)
     fields = get_data_fields(project)
     images_meta = []
 
@@ -609,21 +609,21 @@ def _image_process(f, project):
         image_url = row[0]
         data_url = re.sub(r'image_service', "data_service", image_url)
         xmlString = _get_image_meta_by_url(data_url)
-        
+
         meta['image_uri'] = image_url
         meta['data_uri'] = data_url
 
         match = re.search(r'.* name=\"(.*)\" owner.*', xmlString, re.I)
-        if match:            
+        if match:
             meta['name'] = match.group(1)
 
-        images_meta.append(meta)        
+        images_meta.append(meta)
 
     return images_meta
 
 def _get_image_meta_by_url(url):
-    response = requests.get(url)    
-    if response.status_code == 200:                 
+    response = requests.get(url)
+    if response.status_code == 200:
         return response.text
     else:
         return None
