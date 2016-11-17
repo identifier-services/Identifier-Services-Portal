@@ -355,7 +355,7 @@ def edit(request, dataset_uuid):
                     reverse('ids_projects:dataset-view',
                             kwargs={'dataset_uuid': dataset.uuid}))
             except Exception as e:
-                exception_msg = 'Unable to edit specimen. %s' % e
+                exception_msg = 'Unable to edit dataset. %s' % e
                 logger.error(exception_msg)
                 messages.error(request, exception_msg)
                 return HttpResponseRedirect(

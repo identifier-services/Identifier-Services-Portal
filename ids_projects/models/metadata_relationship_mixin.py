@@ -591,7 +591,8 @@ class MetadataRelationshipMixin(object):
                 not all(key in ['@rel:type', '@id'] for key in relationship.keys()):
             raise Exception('Invalid relationship format.')
 
-        self.relationships.append(relationship)
+        if relationship not in self.relationships:
+            self.relationships.append(relationship)
 
     def remove_relationship(self, relationship):
         """
