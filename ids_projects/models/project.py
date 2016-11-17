@@ -127,5 +127,24 @@ class Project(BaseMetadata):
 
         return specimens
 
+    # metadata-list -Q '{"name": "idsvc.data", "value.image_uri": "http://bisque.iplantcollaborative.org/image_service/image/00-dVBFqURuD4eFS4r92SJazN", "value._relationships": {"$elemMatch": {"@id": "6036595910977580570-242ac1111-0001-012"}}}'
+    def query_images_by_url(self, image_urls):
+        images = []
+
+        for image_url in image_urls:
+            query = {}
+            query['value._relationships'] = {'$elemMatch': {'@id': self.uuid}}
+            query['name'] = "idsvc.data"
+            query['value.image_uri'] = image_url
+
+            results = self.query_related_objects(query)
+
+            if len(results) > 1:
+                raise Exception('More than one image is returned for given image url %s' % image_url)
+
+            images.extend(results)
+
+        return images
+
 
 

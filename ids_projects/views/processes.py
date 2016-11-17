@@ -184,11 +184,11 @@ def create(request):
             context['form_process_fields'] = form_process_fields
             context['process_type'] = process_type
 
-            context['form_upload_file'] = UploadFileForm()            
-        
-        if request.is_ajax():                        
+            context['form_upload_file'] = UploadFileForm()
+
+        if request.is_ajax():
             return render(request, 'ids_projects/processes/get_fields_ajax.html', context)
-        else:                       
+        else:
             return render(request, 'ids_projects/processes/create.html', context)
 
     ########
@@ -273,7 +273,7 @@ def create(request):
 
                     try:
                         ISH_meta = _validate_ISH(request.FILES['file'], project)
-                        bulk_ISH_registration.apply_async(args=(ISH_meta, meta, project.uuid), serializer='json')
+                        bulk_ISH_registration.apply_async(args=(ISH_meta, meta, project.uuid, request.user.username), serializer='json')
 
                         return HttpResponseRedirect(
                                     reverse('ids_projects:project-view',
@@ -286,7 +286,7 @@ def create(request):
                         messages.warning(request, exception_msg)
 
                         return HttpResponseRedirect(
-                                        reverse('ids-projects:project-view'),
+                                        reverse('ids_projects:project-view'),
                                                 kwargs={'project_uuid': project_uuid})
 
 
@@ -297,7 +297,7 @@ def _validate_ISH(f, project):
 
     reader = csv.reader(f)
     fields = {}
-    
+
     if header:
         row = next(reader, None)
         for i in range(len(row)):
@@ -307,9 +307,6 @@ def _validate_ISH(f, project):
         meta = {}
         for field in fields:
             meta[field] = row[fields[field]]
-
-    # print meta['probe_id']
-    # print type(meta['probe_id'])
 
     ISH_meta.append(meta)
     return ISH_meta

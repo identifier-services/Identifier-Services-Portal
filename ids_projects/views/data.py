@@ -12,8 +12,17 @@ from ..models import Project, Specimen, Process, System, Data
 from ids.utils import (get_portal_api_client,
                        get_process_type_keys,
                        get_data_fields)
+
+from ..forms.upload_option import UploadOptionForm, UploadFileForm
+from ids_projects.tasks import bulk_images_registration
+
+import traceback
+import csv
 import logging
 import urllib
+import json
+import re
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -537,6 +546,87 @@ def add_sra(request, relationship):
         reverse('ids_projects:data-view',
                 kwargs={'data_uuid': data.uuid}))
 
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def add_images(request):
+    print "In the add images"
+    project_uuid = request.GET.get('project_uuid', False)
+
+    if not project_uuid:
+        messages.warning(request, 'Missing project UUID, cannot create specimen.')
+        return HttpResponseRedirect(reverse('ids_projects:project-list-private'))
+
+    if request.user.is_anonymous():
+        api_client = get_portal_api_client()
+    else:
+        api_client = request.user.agave_oauth.api_client
+
+    project = Project(api_client=api_client, uuid=project_uuid)
+
+    if request.method == 'POST':
+
+        if request.FILES['file'] != None:
+            try:
+                images_meta = _image_process(request.FILES['file'], project)
+                bulk_images_registration.apply_async(args=(images_meta, project_uuid, request.user.username), serilizer = 'json')
+                return HttpResponseRedirect(
+                                    reverse('ids_projects:project-view',
+                                            kwargs={'project_uuid': project.uuid}))
+
+
+            except Exception as e:
+                traceback.print_exc()
+                exception_msg = repr(e)
+                logger.error(exception_msg)
+                messages.warning(request, exception_msg)
+
+                return HttpResponseRedirect(
+                                    reverse('ids_projects:project-view',
+                                            kwargs={'project_uuid': project.uuid}))
+
+    # GET
+    else:
+        print "GET request"
+        context = {'project': project}
+        context['form_upload_file'] = UploadFileForm()
+        return render(request, 'ids_projects/data/add_images.html', context)
+
+def _image_process(f, project):
+    header = True
+    reader = csv.reader(f)
+    fields = get_data_fields(project)
+    images_meta = []
+
+    if header:
+        next(reader, None)
+
+    for row in reader:
+        meta = {}
+        # for field in fields:
+        #     meta[field['id']] = None
+
+        image_url = row[0]
+        data_url = re.sub(r'image_service', "data_service", image_url)
+        xmlString = _get_image_meta_by_url(data_url)
+
+        meta['image_uri'] = image_url
+        meta['data_uri'] = data_url
+
+        match = re.search(r'.* name=\"(.*)\" owner.*', xmlString, re.I)
+        if match:
+            meta['name'] = match.group(1)
+
+        images_meta.append(meta)
+
+    return images_meta
+
+def _get_image_meta_by_url(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.text
+    else:
+        return None
 
 @login_required
 @require_http_methods(['GET', 'POST'])

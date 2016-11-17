@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 staticfiles %}
+
+{% block title %}Probe{% endblock %}
+
+{% block content %}
+
+    {% with probe as object %}
+        {% include 'includes/generic_super_page.html' %}
+    {% endwith %}
+
+{% endblock %}

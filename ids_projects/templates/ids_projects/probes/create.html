@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}Create Probe{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+
+    <hr>
+
+    {% if form_probe_create %}
+        {% bootstrap_form form_probe_create %}
+    {% elif form_probe_edit %}
+        {% bootstrap_form form_probe_edit %}
+    {% endif %}
+
+    <input type="hidden" id="id_project_uuid" name="project_uuid" value="{{project.uuid}}">
+
+    <div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        {% if probe %} {# probe exists if we are editing #}
+            <a href="{% url 'ids_projects:probe-view' probe_uuid=probe.uuid %}" class="btn btn-warning">Cancel</a>
+            <a href="{% url 'ids_projects:probe-delete' probe_uuid=probe.uuid %}" class="btn btn-danger pull-right">Delete</a>
+        {% elif project %}
+            <a href="{% url 'ids_projects:project-view' project_uuid=project.uuid %}" class="btn btn-warning pull-right">Cancel</a>
+        {% else %}
+            <a href="{% url 'ids_projects:project-list-private' %}" class="btn btn-warning pull-right">Cancel</a>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}

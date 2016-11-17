@@ -37,6 +37,20 @@
         {% breadcrumb "Define Specimen" "ids_projects:specimen-create" %}
     {% endif %}
 
+    {#### Probe ####}
+
+    {% if probe %}
+        {% breadcrumb "Probe" "ids_projects:probe-view" probe.uuid %}
+
+        {% if form_probe_edit %}
+            {% breadcrumb "Edit Probe" "ids_projects:probe-edit" probe.uuid %}
+        {% endif %}
+    {% endif %}
+
+    {% if form_probe_create %}
+        {% breadcrumb "Define Probe" "ids_projects:probe-create" %}
+    {% endif %}
+
     {#### Process ####}
 
     {% if process %}

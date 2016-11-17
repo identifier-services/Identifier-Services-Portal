@@ -17,7 +17,7 @@ def handle_webhook(request, hook_type, *args, **kwargs):
         checksum            Calculated checksum value
 
     Testing from command line:
-        curl -k --data '{"UUID":"4544798190901268966-242ac1111-0001-012","checksum":"060a735c8f6240949ae7ac9fd8d22129"}' http://localhost:8000/webhook/update_checksum/
+        curl -k --data 'UUID=2483901498122179046-242ac1111-0001-012&checksum=060a735c8f6240949ae7ac9fd8d22129' http://localhost:8000/webhook/update_checksum/
     """
 
     if hook_type == 'update_checksum':
@@ -31,21 +31,24 @@ def handle_webhook(request, hook_type, *args, **kwargs):
         logger.debug('Webhook request type: %s, body: %s' % (hook_type, request.body))
 
         if request.GET:
+            print "GET"
             uuid = request.GET.get('UUID', None)
             checksum = request.GET.get('checksum', None)
             # last_checksum_update = request.GET.get('lastChecksumUpdated', None)
         elif request.POST:
+            print "POST"
+            logger.debug(request.POST)
             uuid = request.POST.get('UUID', None)
             checksum = request.POST.get('checksum', None)
             # last_checksum_update = request.POST.get('lastChecksumUpdated', None)
 
         if uuid is None:
             logger.exception('Missing UUID.')
-            return HttpResponse("Error")
+            return HttpResponse("Error\n")
 
         if checksum is None:
             logger.exception('Missing checksum.')
-            return HttpResponse("Error")
+            return HttpResponse("Error\n")
 
         try:
             data = Data(api_client=api_client, uuid=uuid)

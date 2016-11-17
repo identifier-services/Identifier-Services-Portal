@@ -1,5 +1,7 @@
 from base_metadata import BaseMetadata
+from probe import Probe
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +66,43 @@ class Dataset(BaseMetadata):
 
     def add_identifier(self, identifier):
         self.add_part(identifier)
+
+
+    def save(self):
+
+        grouping = self.value.get('grouping', None)
+        if grouping is not None:
+            # (1) query probes with gene symbol == grouping
+
+            query = {'name': 'idsvc.probe', 'value.gene_symbol': grouping}
+            probes = self._api_client.meta.listMetadata(q=json.dumps(query))
+
+            # (2) we want to get processes that those probes are input to
+
+            processes = list()
+
+            for probe_meta in probes:
+                probe = Probe(api_client=self._api_client, meta=probe_meta)
+                processes.extend(probe.processes)
+
+            # (3) get data that is output of those processes
+
+            grouped_data = list()
+
+            for process in processes:
+                grouped_data.extend(process.outputs)
+
+            # (4) relate data to dataset (part)
+
+            for data in grouped_data:
+                self.add_part(data)
+                super(Dataset, self).save()
+
+                data.add_container(self)
+                data.save()
+
+        super(Dataset, self).save()
+
 
     def delete(self):
         """Delete the dataset and erase relationships"""

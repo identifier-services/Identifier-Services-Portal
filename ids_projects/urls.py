@@ -26,6 +26,8 @@ urlpatterns = patterns(
     url(r'^data/request/(?P<id_type>.+?)/(?P<data_uuid>.+?)$', 'request_id', name='data-request-id'),
     # list data for project
     url(r'^data/list/?$', 'list', name='data-list'),
+    # add image under imaging-genetics project
+    url(r'^data/add_images/?$', 'add_images', name='add-images'),
     # view data info
     url(r'^data/(?P<data_uuid>.+?)$', 'view', name='data-view'),
 )
@@ -159,7 +161,16 @@ urlpatterns += patterns(
 #############
 urlpatterns += patterns(
     'ids_projects.views.probes',
+    # choose upload option for probes
     url(r'probes/upload_option/?$', 'upload_option', name='probe-upload-option'),
+    # create a probe
+    url(r'^probes/create/?$', 'create', name='probe-create'),
+    # edit a specimen
+    url(r'^probes/edit/(?P<probe_uuid>.+?)$', 'edit', name='probe-edit'),
+    # delete a specimen
+    url(r'^probe/delete/(?P<probe_uuid>.+?)$', 'delete', name='probe-delete'),
+    # view a probe
+    url(r'^probe/(?P<probe_uuid>.+?)$', 'view', name='probe-view'),
 )
 
 
@@ -195,5 +206,8 @@ urlpatterns += patterns(
 ###############
 urlpatterns += patterns(
     'ids_projects.views.identifiers',
+    # create a datasets related to a specimen
+    url(r'^identifier/create/(?P<dataset_uuid>.+?)$', 'create', name='identifier-request-doi'),
+    # detail
     url(r'^identifier/(?P<identifier_uuid>.+?)$', 'view', name='identifier-view'),
 )

@@ -36,15 +36,17 @@ def list_private(request):
 
 @login_required
 @require_http_methods(['GET'])
-def view(request, project_uuid):    
+def view(request, project_uuid):
     """Queries project metadata and all associated metadata"""
     if request.user.is_anonymous():
         api_client = get_portal_api_client()
     else:
+        # api_client = get_portal_api_client()
         api_client = request.user.agave_oauth.api_client
 
     try:
         project = Project(api_client=api_client, uuid=project_uuid)
+
     except Exception as e:
         exception_msg = 'Unable to load project. %s' % e
         logger.error(exception_msg)
@@ -52,15 +54,16 @@ def view(request, project_uuid):
         return HttpResponseRedirect('/projects/')
 
     try:
-        process_types = get_process_type_keys(project)        
-        project_fields = get_project_form_fields()        
+        process_types = get_process_type_keys(project)
+        project_fields = get_project_form_fields()
         project.set_fields(project_fields)
         investigation_type = get_investigation_type(project)
+
     except Exception as e:
         exception_msg = 'Unable to load config values. %s' % e
         logger.warning(exception_msg)
 
-    context = {'project': project, 'investigation_type': investigation_type, 'process_types': process_types}    
+    context = {'project': project, 'investigation_type': investigation_type, 'process_types': process_types}
 
     return render(request, 'ids_projects/projects/detail.html', context)
 
