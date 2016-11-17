@@ -128,7 +128,16 @@ urlpatterns += patterns(
 #############
 urlpatterns += patterns(
     'ids_projects.views.probes',
+    # choose upload option for probes
     url(r'probes/upload_option/?$', 'upload_option', name='probe-upload-option'),
+    # create a probe
+    url(r'^probes/create/?$', 'create', name='probe-create'),
+    # edit a specimen
+    url(r'^probes/edit/(?P<probe_uuid>.+?)$', 'edit', name='probe-edit'),
+    # delete a specimen
+    url(r'^probe/delete/(?P<probe_uuid>.+?)$', 'delete', name='probe-delete'),
+    # view a probe
+    url(r'^probe/(?P<probe_uuid>.+?)$', 'view', name='probe-view'),
 )
 
 

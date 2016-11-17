@@ -65,6 +65,11 @@ class Dataset(BaseMetadata):
     def add_identifier(self, identifier):
         self.add_part(identifier)
 
+
+    # def save(self):
+    #     super(Dataset, self).save()
+
+
     def delete(self):
         """Delete the dataset and erase relationships"""
         if self.uuid is None:
