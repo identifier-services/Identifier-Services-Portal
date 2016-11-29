@@ -233,3 +233,11 @@ urlpatterns += patterns(
     # detail
     url(r'^identifier/(?P<identifier_uuid>.+?)$', 'view', name='identifier-view'),
 )
+
+##############
+# Scheduler ##
+##############
+urlpatterns += patterns(
+    'ids_projects.views.scheduler',
+    url(r'^check/?$', 'check', name='location-check'),
+)
