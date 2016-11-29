@@ -42,7 +42,7 @@
 			else {				
 				$scope.pagination.maxPage = $scope.pagination.totalItems / 10 + 1;
 			}
-
+	
 			$scope.pagination.offset += increment;
 		};
 
