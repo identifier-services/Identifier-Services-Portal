@@ -166,3 +166,20 @@ def bulk_images_registration(self, images_meta, project_uuid, username=None):
 
         data.add_project(project)
         data.save()
+
+@shared_task(bind=True)
+def bulk_checksum_verification(self, dataset_uuid, username=None):
+
+    if usename:
+        UserModel = get_user_model()
+        user = UserModel.objects.get(username=username)
+        api_client = user.agave_oauth.api_client
+    else:
+        api_client = get_portal_api_client()
+
+    dataset = Dataset(api_client, uuid=dataset_uuid)
+
+    for dat in dataset.data:
+        response = dat.calculate_checksum()
+        print response
+
