@@ -1,0 +1,100 @@
+name: specimen
+description: tissue from mouse
+element category: material entity
+display fields: SpecimenID, Sex, Age
+fields:
+- name: EmbeddingSource
+- name: Genotype
+- name: PreparationMethod
+- name: Species
+- name: Strain
+- name: TotalSets
+- name: Sex
+  description: gender of the specimen
+  value type: choice
+  choices:
+  - male
+  - female
+- name: TissueType
+- name: Age
+- name: DissectionTime
+- name: SpecimenID
+rels:
+- type: is origin of
+  cardinality: zero one or many
+  target: chunk   
+
+---
+
+name: chunk   
+description: slice of lung tissue from specimen
+element category: material entity
+display fields: Set, Slide, Section
+fields: 
+- name: DirectionSection
+- name: SectionThickness
+- name: TotalSets   
+- name: Highlight   
+- name: Rotate  
+- name: Section 
+- name: Slide   
+- name: Set 
+rels:
+- type: is part of
+  cardinality: one
+  target: specimen
+- type: is input to
+  cardinality: zero one or many
+  target: process
+
+---
+
+name: probe
+description: gene marker
+element category: material entity
+display fields: ProbeID, GeneSymbol
+fields: 
+- name: AccessionNumber
+- name: GeneSymbol
+- name: PrimerForward
+- name: PrimerReverse
+- name: TemplateSequence
+- name: ProbeID
+rels:
+- type: is input to
+  cardinality: zero one or many
+  target: process
+ 
+---
+
+name: process
+description: application of probe to chunk
+element category: process
+display fields: Protocol
+fields: 
+- name: Protocol
+rels:
+- type: has input
+  cardinality: one
+  target: probe
+- type: has input
+  cardinality: one
+  target: chunk
+- type: has output
+  cardinality: one
+  target: image
+ 
+---
+
+name: image
+description: image of chunk after application of probe
+display fields: FileName
+element category: data
+fields: 
+- name: URL
+- name: FileName
+- name: FilePath
+rels:
+- type: is output of
+  cardinality: one
+  target: process

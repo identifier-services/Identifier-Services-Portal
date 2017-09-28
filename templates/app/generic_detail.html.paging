@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ verbose_name }} Detail</h2>
+
+    {% if object.get_parent_relations %}
+        <hr/>
+        <h3>From:</h3>
+        <ul>
+            {% for parent_rel in object.get_parent_relations %}
+                <li><b>{{ parent_rel.verbose_name|title }}:</b> 
+                    <a href="{{ parent_rel.object.get_absolute_url }}">
+                        {{ parent_rel.object }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <hr/>
+    <h3>Attributes:</h3>
+    <ul>
+        {% for field in object.get_fields %}
+
+            {% if field.url %}
+                <li><b>{{ field.label }}:</b> {{ field.url }}</li>
+            {% else %}
+                {% if field.label == 'element category' %}
+                    <li><b>{{ field.label }}:</b> {{ object.verbose_element_category }}</li>
+                {% else %}
+                    <li><b>{{ field.label }}:</b> {{ field.value }}</li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    {% if object.get_child_relations %}
+        <hr/>
+        <h3>Related:</h3>
+        <ul>
+            {% for child_rel in object.get_child_relations %}
+                <li><b>{{ child_rel.type_name|title }}s:</b>
+                    <ul>
+                        {% if child_rel.objects %}
+                            {% for child in child_rel.objects %}
+                                <li><a href="{{ child.get_absolute_url }}">{{ child }}</a></li>
+                            {% endfor %}
+                        {% else %}
+                            <p>There are no {{ child_rel.type_name }}s for this {{ type_name }}.</p>
+                        {% endif %}
+                    </ul>
+                    <p>
+                        <a href="{{ child_rel.create_url }}?parent={{ type_name}}:{{ object.id }}">
+                            Add {{ child_rel.type_name|title }}
+                        </a>
+                    </p>
+                </li>
+            {% endfor %}
+
+        <p>
+            {% if is_paginated  %}
+                {% if page_obj.has_previous  %}
+                    <a href="?page=1">first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                {% else %}
+                    <span>first</span>
+                    <span>previous</span>
+                {% endif %}
+                    <span class="">
+                        [ {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} ]
+                    </span>
+                {% if page_obj.has_next  %}
+                    <a href="?page={{ page_obj.next_page_number }}">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">last</a>
+                {% else %}
+                    <span>next</span>
+                    <span>last</span>
+                {% endif %}
+            {% endif %}
+        </p>
+
+        </ul>
+        <hr/>
+    {% endif %}
+
+    <a href="{{ object.get_absolute_url }}/update">Edit {{ verbose_name }}</a>
+    <a href="{{ object.get_absolute_url }}/delete">Delete {{ verbose_name }}</a>
+{% endblock %}

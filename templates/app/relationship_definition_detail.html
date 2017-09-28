@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Relationship Definition</h2>
+
+    <hr/>
+    <ul>
+        <li><b>source object: </b> <a href="{{ object.source.get_absolute_url }}">{{ object.source }}</a></li>
+        <li><b>target object: </b> <a href="{{ object.target.get_absolute_url }}">{{ object.target }}</a></li>
+        <li><b>relationship type: </b> {{ rel_type}}</li>
+        <li><b>cardinality: </b> {{ card }}</li>
+        <li><b>description: </b> {{ object }}</li>
+    </ul>
+
+    <a href="{{ object.get_absolute_url }}/update">Edit</a>
+    <a href="{{ object.get_absolute_url }}/delete">Delete</a>
+{% endblock %}

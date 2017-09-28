@@ -1,0 +1,52 @@
+body,html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+body {
+    font-family: Helvetica,sans-serif;
+}
+
+*,:after,:before {
+    box-sizing: border-box;
+}
+
+hr {
+    height: 1px;
+    background-color: #efefef;
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    padding: 5px;
+}
+
+header {
+    padding: 10px;
+}
+
+main {
+    padding: 20px;
+}
+
+main>ul {
+    padding-left: 10px;
+    margin: 10px 0;
+}
+
+main>p:first-of-type {
+    margin-top: 0;
+}
+
+main>p:last-of-type {
+    margin-bottom: 0;
+}
+
+footer {
+    padding: 10px;
+    text-align: center;
+}

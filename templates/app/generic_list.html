@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <strong>{{ verbose_name }} List</strong>
+
+    <ul>
+        {% if object_list %}
+            {% for object in object_list %}
+                <li>
+                    [<a href="{{ object.get_absolute_url }}/delete" style="color:#c00">x</a>]
+                    <a href="{{ object.get_absolute_url }}">{{ object }}</a>
+                    {% if object.get_parent_relations %}
+                        {% for parent_rel in object.get_parent_relations %}
+                            {{ parent_rel.verbose_name|title }}: 
+                            <a href="{{ parent_rel.object.get_absolute_url }}">
+                                {{ parent_rel.object }}
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        {% else %}
+            <p>There are no {{ verbose_name }}s.</p>
+        {% endif %}
+
+        <p>
+            {% if is_paginated  %}
+                {% if page_obj.has_previous  %}
+                    <a href="?page=1">first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                {% else %}
+                    <span>first</span>
+                    <span>previous</span>
+                {% endif %}
+                    <span class="">
+                        [ {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} ]
+                    </span>
+                {% if page_obj.has_next  %}
+                    <a href="?page={{ page_obj.next_page_number }}">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">last</a>
+                {% else %}
+                    <span>next</span>
+                    <span>last</span>
+                {% endif %}
+            {% endif %}
+        </p>
+
+        <p><a href="{{ create_url }}">Add new {{ verbose_name }}</a></p>
+    </ul>
+
+{% endblock %}
+

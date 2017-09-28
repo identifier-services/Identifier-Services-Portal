@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>{{ verbose_name }}</h2>
+
+<form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <hr/>
+    <table>
+    {{ form.as_table }}
+    </table>
+    <hr/>
+    <input type="submit" value="Submit" />
+    <input type="submit" name="Cancel" value="Cancel" />
+</form>
+
+{% endblock %}

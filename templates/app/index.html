@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<strong>Identifier Services Portal</strong>
+<p>
+The Identifier Services Portal provides a single place for researchers to manage global unique identifiers and track distributed datasets throughout the project lifecycle. Data entry is simplified by a context sensitive interface that recalls relevant information related to existing project entities. Managing post-publication events is made easier by automated integrity and identity verification that will track registered data over time. The portal intends to save you time and effort while encouraging data reuse and replication; browse public datasets, or log in with your CyVerse account to get started.
+</p>
+<a href="{% url 'app:project_list' %}">Browse Public Datasets</a>
+
+{% endblock %}

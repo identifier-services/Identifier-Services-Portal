@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ verbose_name}} Detail</h2>
+
+    {{ object }}
+
+    <p>
+    {% if object.root %}
+        project owner:
+        {{ object.root.owner }}
+    {% endif %}
+    </p>
+
+    <img src="../static/lungmap_graph.png" alt="project graph" style="height: 70%; width: 70%;"></img>
+
+    {% if object.get_parent_relations %}
+        <hr/>
+        <h3>Parents:</h3>
+        <ul>
+            {% for parent_rel in object.get_parent_relations %}
+                <li><b>{{ parent_rel.verbose_name|title }}:</b> 
+                    <a href="{{ parent_rel.object.get_absolute_url }}">
+                        {{ parent_rel.object.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <hr/>
+    <h3>Attributes:</h3>
+    <ul>
+        {% for field in object.get_fields %}
+            <li><b>{{ field.label }}:</b> {{ field.value }}</li>
+        {% endfor %}
+    </ul>
+
+    <hr/>
+    <h3>Values:</h3>
+    <ul>
+        {% for value in values %}
+            <li><b>{{ value.label }}:</b> 
+                {% if value.field_value %}
+                    {{ value.field_value }}
+                {% endif %}
+        
+                <a href={{ value.action_url }}> {{ value.action }}</a> 
+                {% if value.help_text  %}
+                ({{ value.help_text }})
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <hr/>
+    <h3>Siblings:</h3>
+    <ul>
+        <!--<h4>Forward:</h4>-->
+        {% for sib in object.forward_relationships.all %}
+            <li><a href="{{ sib.target.get_absolute_url}}">{{ sib.target }}</a></li>
+        {% endfor %}
+        <!--<h4>Reverse:</h4>-->
+        {% for sib in object.reverse_relationships.all %}
+            <li><a href="{{ sib.source.get_absolute_url}}">{{ sib.source }}</a></li>
+        {% endfor %}
+    </ul>
+
+    
+    {% if object.element_category == 'D' %}
+    <hr/>
+    <h3>Datasets:</h3>
+    <ul>
+        {% for dataset_link in object.datasetlink_set.all %}
+            <li><a href="{{ dataset_link.dataset.get_absolute_url}}">{{ dataset_link.dataset }}</a></li>
+        {% endfor %}
+        {% if not object.datasetlink_set.all %}
+            <p>This data element does not belong to a dataset.</p>
+        {% endif %}
+    </ul>
+    {% endif %}
+
+    <a href="{{ object.get_absolute_url }}/update">Edit {{ verbose_name }}</a>
+    <a href="{{ object.get_absolute_url }}/delete">Delete {{ verbose_name }}</a>
+{% endblock %}

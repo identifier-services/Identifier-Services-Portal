@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Element Field Descriptor Detail</h2>
+
+    {% if object.get_parent_relations %}
+        <hr/>
+        <h3>From:</h3>
+        <ul>
+            {% for parent_rel in object.get_parent_relations %}
+                <li><b>{{ parent_rel.verbose_name|title }}:</b> 
+                    <a href="{{ parent_rel.object.get_absolute_url }}">
+                        {{ parent_rel.object.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <hr/>
+    <h3>Attributes:</h3>
+    <ul>
+        {% for field in object.get_fields %}
+            {% if field.label == 'value type' %}
+                <li><b>{{ field.label }}:</b> {{ value_type }}</li>
+            {% else %}
+                <li><b>{{ field.label }}:</b> {{ field.value }}</li>
+            {% endif%}
+        {% endfor %}
+    </ul>
+
+    <hr/>
+
+    <a href="{{ object.get_absolute_url }}/update">Edit</a>
+    <a href="{{ object.get_absolute_url }}/delete">Delete</a>
+{% endblock %}
