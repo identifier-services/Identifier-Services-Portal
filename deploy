@@ -1,2 +1,0 @@
-ansible-playbook playbooks/prod.yml -i playbooks/hosts
-

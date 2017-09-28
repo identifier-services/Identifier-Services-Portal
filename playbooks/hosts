@@ -1,2 +1,0 @@
-[prod]
-identifierservices.org  ansible_connection=ssh      ansible_user=rodeo

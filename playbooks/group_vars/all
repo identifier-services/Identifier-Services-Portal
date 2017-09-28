@@ -1,8 +1,0 @@
-server_hostname: identifierservices.org
-
-django_debug: False
-django_secret_key:
-agave_client_key:
-agave_client_secret:
-agave_super_token:
-agave_tenant_baseurl: https://agave.iplantc.org
