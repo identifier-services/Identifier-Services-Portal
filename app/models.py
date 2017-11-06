@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from agavepy.agave import Agave
+
+from django.conf import settings
 from django.db import models, transaction
 from django.urls import reverse
+from django.utils import timezone
 
 from collections import namedtuple
 
@@ -22,6 +26,12 @@ logger = logging.getLogger(__name__)
 # TODO: * maybe user should be able to clone project as well
 # TODO: * i think we also need a public / private flag
 # TODO: * all other things will inherit from project or inv type
+
+
+portal_agave_client = Agave(
+    api_server=settings.AGAVE_TENANT_BASEURL,
+    token=settings.AGAVE_SUPER_TOKEN
+)
 
 def snake(name):
     """
@@ -758,11 +768,98 @@ class RelationshipDefinition(Base, models.Model):
         )
 
 
+class Path(models.Model):
+    """
+    Collection of all elements with some immediate or distant
+    relationship to another element or dataset.
+    """
+    # TODO: Do we need to inherit from base?
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+
+class PathMember(Base, models.Model):
+    """Provides a link from an element to a path."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    path = models.ForeignKey(Path, on_delete=models.CASCADE, editable=False)
+    element = models.ForeignKey('Element', on_delete=models.CASCADE)
+
+
+class Checksum(Base, models.Model):
+    """Relates two elements"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # TODO: should i change this to a field? like url, maybe sra?
+    data = models.ForeignKey('Element', on_delete=models.CASCADE)
+
+    REQ = 'REQ'
+    ERR = 'ERR'
+    CMP = 'CMP' 
+
+    STATUS_TYPES = (
+        (REQ, 'requested'),
+        (ERR, 'failed'),
+        (CMP, 'completed'),
+    )
+
+    status = models.CharField(
+        "status",
+        max_length = 3,
+        choices = STATUS_TYPES,
+        default=REQ,
+    )
+
+    WEB = 'WEB'
+    SRA = 'SRA'
+    AGV = 'AGV' 
+
+    RESOURCE_TYPES = (
+        (WEB, 'url'),
+        (SRA, 'sra'),
+        (AGV, 'agave'),
+    )
+
+    resource_type = models.CharField(
+        "resource type",
+        max_length = 3,
+        choices = RESOURCE_TYPES,
+        default=WEB,
+    )
+
+    jobid = models.CharField(max_length=40, 
+        help_text="Checksum job id",blank=True)
+    value = models.CharField(max_length=200, 
+        help_text="Checksum value",blank=True)
+    error_message = models.CharField(max_length=512, 
+        help_text="Error message",blank=True)
+    initiated = models.DateTimeField(auto_now_add=True)
+    completed = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # TODO set completed date when value is set
+        if self.id:
+            if not self.completed:
+                self.completed = timezone.now()
+        return super(Checksum, self).save(*args, **kwargs)
+
+    def __str__(self):
+        s = ''
+        if self.status == self.ERR:
+            s = 'checksum failed at: %s (%s)' % (
+                str(self.completed), self.error_message)
+        elif self.status == self.CMP:
+            s = 'checksum completed at: %s (%s)' % (
+                str(self.completed), self.value)
+        else:
+            s = 'checksum requested at: %s' % str(self.initiated)
+        return s
+
+
 class Element(AbstractModel):
     """Model representing an individual element."""
 
     element_type = models.ForeignKey(ElementType, on_delete=models.CASCADE) 
     project = models.ForeignKey(Project, on_delete=models.CASCADE) 
+    path = models.OneToOneField(Path, on_delete=models.CASCADE, 
+        null=True, blank=True)
 
     @property
     def element_category(self):
@@ -821,11 +918,78 @@ class Element(AbstractModel):
                 ','.join(display_items))
             self.save()
 
+    def initiate_checksum(self):
+        if not self.id:
+            logger.error('Checksum attempted on unsaved data element.')
+            return
+
+        # this is super hacky, i'd like to just mark fields in the
+        # yaml as containing the location to checksum, and then
+        # checksum would be associated directly with the field values
+        url = next(iter(
+                [field.value for field in self.elementurlfieldvalue_set.all()]
+            ),None)
+        path = next(iter(
+                [field.value for field in self.elementcharfieldvalue_set.all()\
+                    if 'path' in field.element_field_descriptor.label.lower() \
+                    and 'agave://' in field.value]
+            ),None)
+        sra = next(iter(
+                [field.value for field in self.elementcharfieldvalue_set.all()\
+            if 'sra' in field.element_field_descriptor.label.lower()]),None)
+
+        inputs = {}
+        parameters = {}
+        resource_type = None
+        if url:
+            parameters.update({'URL': url})
+            resource_type = 'WEB'
+        elif sra:
+            parameters.update({'SRA': sra})
+            resource_type = 'SRA'
+        elif path:
+            inputs.update({'AGAVE_URL': path})
+            resource_type = 'AGV'
+        else:
+            logger.debug(
+                'Could not initiate checksum, no location information found.')
+            return
+
+        checksum = Checksum(data=self, resource_type=resource_type)
+
+        parameters.update({'UUID': str(checksum.id)})
+
+        body = {
+            'name': 'checksum',
+            'appId': 'idsvc_checksum-0.1',
+            'inputs': inputs,
+            'parameters': parameters,
+            'archive': True,
+            'archivePath': 'idsvc_user/archive/jobs/${JOB_NAME}=${JOB_ID}'
+        }
+
+        try:
+            response = portal_agave_client.jobs.submit(body=body)
+            checksum.jobid = response['id']
+            checksum.save()
+            logger.debug(
+                'Checksum job id: %s' % response['id']
+            )
+        except Exception as e:
+            error_msg = 'Checksum job was not successfully initated.'
+            logger.error('%s -- %s' % (error_msg, e))
+
     def save(self, *args, **kwargs):
+        # make sure each dataset has a path
+        path, created = Path.objects.get_or_create(element=self)
+        if created:
+            self.path = path
+
         super(Element, self).save(*args, **kwargs)
 
         if self.element_category == ElementType.DAT:
             #TODO trigger checksum app
+            # self.initiate_checksum()
             pass
 
     def __str__(self):
@@ -839,10 +1003,10 @@ class Relationship(Base, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     source = models.ForeignKey(Element, on_delete=models.CASCADE, 
-        related_name='forward_relationships')
+        related_name='incoming_relationships')
 
     target = models.ForeignKey(Element, on_delete=models.CASCADE, 
-        related_name='reverse_relationships')
+        related_name='outgoing_relationships')
 
     relationship_definition = models.ForeignKey(RelationshipDefinition, 
         on_delete=models.CASCADE, related_name='definition')
@@ -874,7 +1038,22 @@ class Dataset(AbstractModel):
     status = models.CharField(max_length=200, blank=True, null=True,
         default='', editable=False)
 
+    path = models.OneToOneField(Path, on_delete=models.CASCADE,
+        null=True, blank=True, editable=False)
+
+    def request_doi(self):
+        logger.debug('requesting doi')
+        pass
+
     def save(self, *args, **kwargs):
+        path, created = Path.objects.get_or_create(dataset=self)
+
+        if created:
+            self.path = path
+
+        # remove any previously existing path members
+        PathMember.objects.filter(path=self.path).delete()
+
         # delete any previous links to this dataset
         DatasetLink.objects.filter(dataset=self).delete()
 
@@ -939,47 +1118,66 @@ class Dataset(AbstractModel):
             value = term.value
             equality_operator = term.operator
 
-            # get the descriptor for this field on this element_type
-            # (we're going to take the first one because why would you have
-            # the same field twice on one element? you might though so that's
-            # why i'm using filter rather than get)
-            descriptors = ElementFieldDescriptor.objects.filter(
-                element_type__name=element_type_name,
-                label=field_name
-            )
-            descriptor = next(iter(descriptors), None)
-            if not descriptor:
-                self.status = 'element or field not found'
-                super(Dataset, self).save(*args, **kwargs)
-                return
+            standard_field = field_name.lower() in ['id','name']
 
-            # query this project's value_types (e.g. ElementCharFieldValue)
-            # for the given value
-            value_type = descriptor.value_type
+            if standard_field:
+                # if equality operator is: equal
+                if equality_operator == '=':
+                    values = Element.objects.filter(
+                        project=self.project, **{field_name:value})
 
-            # if equality operator is: equal
-            if equality_operator == '=':
-                values = value_type.objects.filter(value=value, 
-                    element_field_descriptor=descriptor, 
-                    element__project=self.project)
+                # if equality operator is: not equal
+                elif equality_operator == '#':
+                    values = Element.objects.filter( 
+                        project=self.project).exclude(
+                            **{field_name:value})
 
-            # if equality operator is: not equal
-            elif equality_operator == '#':
-                values = value_type.objects.filter( 
-                    element_field_descriptor=descriptor, 
-                    element__project=self.project).exclude(value=value)
-
-            # if equality operator is: in
-            elif equality_operator == '^':
-
-                values = value_type.objects.filter(value__in=value,
-                    element_field_descriptor=descriptor, 
-                    element__project=self.project)
+                # if equality operator is: in
+                elif equality_operator == '^':
+                    values = Element.objects.filter(
+                        project=self.project, **{field_name:value})
 
             else:
-                self.status = 'query syntax error'
-                super(Dataset, self).save(*args, **kwargs)
-                return
+                # get the descriptor for this field on this element_type
+                # (we're going to take the first one because why would you have
+                # the same field twice on one element? you might though so that's
+                # why i'm using filter rather than get)
+                descriptors = ElementFieldDescriptor.objects.filter(
+                    element_type__name=element_type_name,
+                    label=field_name
+                )
+                descriptor = next(iter(descriptors), None)
+                if not descriptor:
+                    self.status = 'element or field not found'
+                    super(Dataset, self).save(*args, **kwargs)
+                    return
+
+                # query this project's value_types (e.g. ElementCharFieldValue)
+                # for the given value
+                value_type = descriptor.value_type
+
+                # if equality operator is: equal
+                if equality_operator == '=':
+                    values = value_type.objects.filter(value=value, 
+                        element_field_descriptor=descriptor, 
+                        element__project=self.project)
+
+                # if equality operator is: not equal
+                elif equality_operator == '#':
+                    values = value_type.objects.filter( 
+                        element_field_descriptor=descriptor, 
+                        element__project=self.project).exclude(value=value)
+
+                # if equality operator is: in
+                elif equality_operator == '^':
+                    values = value_type.objects.filter(value__in=value,
+                        element_field_descriptor=descriptor, 
+                        element__project=self.project)
+
+                else:
+                    self.status = 'query syntax error'
+                    super(Dataset, self).save(*args, **kwargs)
+                    return
 
             if not values:
                 self.status = 'value not found.'
@@ -988,7 +1186,10 @@ class Dataset(AbstractModel):
 
             # grab the elements from the queried field values
             # put the elements in a queue (a set, we want only unique elements)
-            element_queue = set([x.element for x in values])
+            if standard_field:
+                element_queue = set(values)
+            else:
+                element_queue = set([x.element for x in values])
             visited = set()
             self.status = '%s elements found' % len(element_queue)
 
@@ -1009,7 +1210,7 @@ class Dataset(AbstractModel):
                 # else if it is a process type, add it's output to the queue
                 elif element.element_type.element_category == 'P':
                     unvisited = set([x.target for x in \
-                        element.forward_relationships.filter(
+                        element.incoming_relationships.filter(
                             relationship_definition__rel_type_abbr__in=\
                             ['HASO']) \
                         if x not in visited and \
@@ -1021,14 +1222,14 @@ class Dataset(AbstractModel):
                 # add them to the queue
                 else:
                     unvisited = set([x.source for x in \
-                        element.reverse_relationships.filter(
+                        element.outgoing_relationships.filter(
                             relationship_definition__rel_type_abbr__in=['HASI']) \
                         if x not in visited and \
                         x not in data])
                     element_queue.update(unvisited)
 
                     unvisited = set([x.target for x in \
-                        element.forward_relationships.filter(
+                        element.incoming_relationships.filter(
                             relationship_definition__rel_type_abbr__in=\
                             ['CONT','ORIG']) \
                         if x not in visited and \
@@ -1064,6 +1265,111 @@ class Dataset(AbstractModel):
 
         # save the dataset
         super(Dataset, self).save(*args, **kwargs)
+
+        ## add elements to path ##
+
+        # add contents of dataset to a queue
+        path_queue = set(ds)
+        # clear visisted set
+        visited.clear()
+
+        path_members = set()
+
+        ### hurts my brain
+
+        # so we start with the data elements (images in james's case)
+        # the images are contained by this dataset
+        # connected by a DatasetLink: Dataset<-DatasetLink->Data
+        # for each image we want to know what process created it
+        # and we want to know the inputs to those processes
+        # and we want to know the 'parents' of those inputs
+
+        # the image has a fk to the process
+        # from the image perspective, the process is a...
+        # 
+
+        ###
+
+
+        # while the queue is not empty
+        while path_queue:
+            # pop an element off
+            element = path_queue.pop()
+            # and add it to the set of element which we've already seen
+            visited.add(element)
+            ###
+            if element in path_members:
+                continue
+
+            if element.element_type.element_category == 'D':
+                if element in ds:
+                    path_members.add(element)
+            elif element.element_type.element_category == 'P':
+                path_members.add(element)
+            else:
+                path_members.add(element)
+
+            unvisited = set([x.source for x in \
+                element.outgoing_relationships.all()
+                if x not in visited and \
+                x not in path_members])
+            path_queue.update(unvisited)
+
+            print "\nincoming unvisited: %s\n" % (unvisited)
+            print element.incoming_relationships.all()
+
+            unvisited = set([x.target for x in \
+                element.incoming_relationships.all()
+                if x not in visited and \
+                x not in path_members])
+            path_queue.update(unvisited)
+
+            print "\noutgoing unvisited: %s\n" % (unvisited)
+            print element.outgoing_relationships.all()
+
+            # # if the element is a data type, add to our list of data
+            # if element.element_type.element_category == 'D':
+            #     unvisited = set([x.target for x in \
+            #         element.outgoing_relationships.filter(
+            #             relationship_definition__rel_type_abbr__in=\
+            #             ['HASI']) \
+            #         if x not in visited and \
+            #         x not in path_members])
+            #     path_queue.update(unvisited)
+            # 
+            #     print unvisited
+            #
+            # # else if it is a process type, add it's output to the queue
+            # elif element.element_type.element_category == 'P':
+            #     unvisited = set([x.target for x in \
+            #         element.incoming_relationships.filter(
+            #             relationship_definition__rel_type_abbr__in=\
+            #             ['HASI']) \
+            #         if x not in visited and \
+            #         x not in path_members])
+            #     path_queue.update(unvisited)
+            # 
+            # # else if it is a material entity, find elements to which
+            # # it is input, or elements that originated from it, and
+            # # add them to the queue
+            # else:
+            #     unvisited = set([x.source for x in \
+            #         element.outgoing_relationships.filter(
+            #             relationship_definition__rel_type_abbr__in=['PART']) \
+            #         if x not in visited and \
+            #         x not in path_members])
+            #     path_queue_queue.update(unvisited)
+            # 
+                # unvisited = set([x.target for x in \
+                #     element.incoming_relationships.filter(
+                #         relationship_definition__rel_type_abbr__in=\
+                #         ['CONT','ORIG']) \
+                #     if x not in visited and \
+                #     x not in path_members])
+                # path_queue.update(unvisited)
+
+        for element in path_members:
+            PathMember.objects.create(path=self.path, element=element)
 
     def __str__(self):
         if not self.name == '':
@@ -1170,4 +1476,3 @@ class ElementUrlFieldValue(AbstractElementFieldValue):
 # 
 #     class Meta:
 #         verbose_name = 'url'
-

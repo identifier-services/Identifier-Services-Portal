@@ -5,13 +5,6 @@
 
     {{ object }}
 
-    <p>
-    {% if object.root %}
-        project owner:
-        {{ object.root.owner }}
-    {% endif %}
-    </p>
-
     {% if object.get_parent_relations %}
         <hr/>
         <h3>From:</h3>

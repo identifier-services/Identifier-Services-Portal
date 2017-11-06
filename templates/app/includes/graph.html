@@ -1,0 +1,46 @@
+    {% if graph %}
+    <svg viewBox="-20 -20 {{ graph.height}} {{ graph.width }}" 
+        version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+        <defs>
+            <marker id="right_arrow" markerWidth="6" markerHeight="6" 
+                viewBox="0 -5 10 10" refX="0" refY="0" 
+                orient="auto" markerUnits="strokeWidth">
+                <path d="M0,-5L10,0L0,5 z" fill="#000" />
+            </marker>
+
+            <line id="right" x1="1" y1="0" x2="84" y2="0" stroke="#000" 
+                stroke-width="3" marker-end="url(#right_arrow)" />
+            <line id="left" x1="1" y1="0" x2="84" y2="0" stroke="#000" 
+                stroke-width="3" transform="rotate(180, 51, 0)" 
+                marker-end="url(#right_arrow)" />
+            <line id="down" x1="1" y1="0" x2="84" y2="0" stroke="#000" 
+                stroke-width="3" transform="rotate(90, 0, 0)" 
+                marker-end="url(#right_arrow)" />
+            <line id="up" x1="1" y1="0" x2="84" y2="0" stroke="#000" 
+                stroke-width="3" transform="rotate(270, 51, 0)" 
+                marker-end="url(#right_arrow)" />
+        </defs>
+
+        {% for node in graph.nodes %}
+        <svg x="{{ node.x }}" y="{{ node.y }}" width="103" height="103">
+            <clipPath id="nodeMask">
+                <circle cx="50%" cy="50%" r="48"/>
+            </clipPath>
+            <a href="{{ node.url }}">
+                <circle cx="50%" cy="50%" r="49"/>
+                <text x="50%" y="72%" class="itemCount" 
+                    clip-path="url(#nodeMask)">
+                    {{ node.element_count }}
+                </text>
+                <text x="50%" y="55%" clip-path="url(#nodeMask)">
+                    {{ node.element_type_name }}
+                </text>
+            </a>
+        </svg>
+        {% endfor %}
+        {% for edge in graph.edges %}
+            <use x="{{ edge.x }}" y="{{ edge.y }}" href="#{{ edge.direction }}"/>
+        {% endfor %}
+    </svg>
+    {% endif %}

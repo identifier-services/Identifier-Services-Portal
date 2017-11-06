@@ -5,15 +5,6 @@
 
     {{ object }}
 
-    <p>
-    {% if object.root %}
-        project owner:
-        {{ object.root.owner }}
-    {% endif %}
-    </p>
-
-    <img src="../static/lungmap_graph.png" alt="project graph" style="height: 70%; width: 70%;"></img>
-
     {% if object.get_parent_relations %}
         <hr/>
         <h3>Parents:</h3>
@@ -57,17 +48,18 @@
     <h3>Siblings:</h3>
     <ul>
         <!--<h4>Forward:</h4>-->
-        {% for sib in object.forward_relationships.all %}
+        {% for sib in object.incoming_relationships.all %}
             <li><a href="{{ sib.target.get_absolute_url}}">{{ sib.target }}</a></li>
         {% endfor %}
         <!--<h4>Reverse:</h4>-->
-        {% for sib in object.reverse_relationships.all %}
+        {% for sib in object.outgoing_relationships.all %}
             <li><a href="{{ sib.source.get_absolute_url}}">{{ sib.source }}</a></li>
         {% endfor %}
     </ul>
 
     
     {% if object.element_category == 'D' %}
+
     <hr/>
     <h3>Datasets:</h3>
     <ul>
@@ -78,6 +70,53 @@
             <p>This data element does not belong to a dataset.</p>
         {% endif %}
     </ul>
+
+    <hr/>
+    <h3>Checksum:</h3>
+    {% if checksums %}
+        <ul>
+            <p>Status of last <a href="{{ checksums.0.link }}">checksum</a>: 
+            {% if checksums.0.status == 'good' %}
+            <span class="good">good</span>
+            {% elif checksums.0.status == 'conflict' %}
+            <span class="bad">conflict</span>
+            {% elif checksums.0.status == 'failed' %}
+            <span class="bad">failed</span>
+                    {% if checksums.0.message %}
+                    Error messsage: {{ checksums.0.message }}
+                    {% endif %}
+            {% else %}
+            <span>in progress</span>
+            {% endif %}
+            </p>
+
+            {% for checksum in checksums %}
+                <li>
+                <span>Status: <a href="{{ checksum.link }}">
+                    {% if checksum.status == 'good' %}
+                    <span class="good">good</span>
+                    {% elif checksum.status == 'conflict' %}
+                    <span class="bad">conflict</span>
+                    {% elif checksum.status == 'failed' %}
+                    <span class="bad">failed</span>
+                            {% if checksum.message %}
+                            Error messsage: {{ checksum.message }}
+                            {% endif %}
+                    {% else %}
+                    <span>in progress</span>
+                    {% endif %}
+                    </a>
+                </span>
+                <span>Date: {{ checksum.date }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    
+    {% else %}
+        <p>No checksum verifications have been requested on this data element.</p>
+    {% endif %}
+
+    <a href="{{ object.get_absolute_url}}/verify">Verify Location</a>
     {% endif %}
 
     <a href="{{ object.get_absolute_url }}/update">Edit {{ verbose_name }}</a>

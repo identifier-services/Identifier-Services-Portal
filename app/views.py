@@ -2,10 +2,11 @@
 from __future__ import unicode_literals
 
 from django.core import paginator
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
 
 import logging
 
@@ -13,7 +14,7 @@ from zipfile import ZipFile
 import csv
 
 from .models import (InvestigationType, Project, ElementType,
-    RelationshipDefinition, ElementFieldDescriptor, Element, Dataset,
+    RelationshipDefinition, ElementFieldDescriptor, Element, Checksum, Dataset,
     ElementCharFieldValue, ElementTextFieldValue, ElementIntFieldValue,
     ElementFloatFieldValue, ElementDateFieldValue, ElementUrlFieldValue)
 
@@ -136,7 +137,7 @@ class BaseGenericDeleteView(generic.DeleteView):
             parent_rel = next(iter(parent_rels))
 
             try:
-                success_url = reverse('%s_detail' % parent_rel['field_name'])
+                success_url = reverse_lazy('%s_detail' % parent_rel['field_name'])
             except Exception as e:
                 logger.debug(e)
 
@@ -146,7 +147,7 @@ class BaseGenericDeleteView(generic.DeleteView):
         if "Cancel" in request.POST:
             url = self.success_url
             if not url:
-                url = reverse('app:project_list')
+                url = reverse_lazy('app:project_list')
             return HttpResponseRedirect(url) 
         else:
             return super(BaseGenericDeleteView, self).post(
@@ -183,7 +184,6 @@ class InvestigationTypeUpdateView(BaseGenericUpdateView):
 
 class InvestigationTypeDeleteView(BaseGenericDeleteView):
     model = InvestigationType
-    # success_url = reverse('app:index')
 
 ###########
 # Project #
@@ -315,6 +315,19 @@ class RelationshipDefinitionDeleteView(BaseGenericDeleteView):
 # Element #
 ###########
 
+
+def element_init_checksum(request, pk):
+    try:
+        element = Element.objects.get(id=pk)
+        element.initiate_checksum()
+    except Exception as e:
+        logger.error(e)
+        return HttpResponseRedirect(reverse_lazy('app:project_list'))
+
+    return HttpResponseRedirect(reverse_lazy(
+            'app:element_detail',kwargs={'pk': pk}))
+
+
 class ElementListView(BaseGenericListView):
     model = Element
 
@@ -379,7 +392,53 @@ class ElementDetailView(generic.DetailView):
             })
         context['values'] = values
 
-        # import pdb; pdb.set_trace()
+        ordered_sums = Checksum.objects.filter(
+            data=context_object.id).order_by('initiated')
+
+        sums = []
+
+        standard = None
+        for checksum in ordered_sums:
+            if checksum.status == Checksum.CMP and checksum.value:
+                standard = {
+                    'value': checksum.value, 
+                }
+                break
+
+        ordered_sums.reverse()
+
+        if standard:
+            for checksum in ordered_sums:
+                status = 'in progress'
+                if checksum.value == standard.value:
+                    status = 'good'
+                elif checksum.error_message:
+                    status = 'failed'
+                elif checksum.status == Checksum.CMP:
+                    status = 'conflict'
+                    
+                sums.append({
+                    'status':status,
+                    'link':checksum.get_absolute_url(),
+                    'message':checksum.error_message,
+                    'date':checksum.initiated
+                })
+        else:
+            for checksum in ordered_sums:
+                status = 'in progress'
+                if checksum.error_message:
+                    status = 'failed'
+                elif checksum.status == Checksum.CMP:
+                    status = 'conflict'
+
+                sums.append({
+                    'status':status,
+                    'link':checksum.get_absolute_url(),
+                    'message':checksum.error_message,
+                    'date':checksum.initiated
+                })
+
+        context['checksums'] = sums
 
         return context
 
@@ -394,6 +453,18 @@ class ElementDeleteView(BaseGenericDeleteView):
 ###########
 # Dataset #
 ###########
+
+def request_doi(request, pk):
+    try:
+        dataset = Dataset.objects.get(id=pk)
+        dataset.request_doi()
+    except Exception as e:
+        logger.error(e)
+        return HttpResponseRedirect(reverse_lazy('app:project_list'))
+
+    return HttpResponseRedirect(reverse_lazy(
+            'app:dataset_detail',kwargs={'pk': pk}))
+
 
 class DatasetListView(BaseGenericListView):
     model = Dataset
@@ -413,9 +484,107 @@ class DatasetDetailView(BaseGenericDetailView):
         context['verbose_name'] = verbose_name.title() 
         context['type_name'] = verbose_name.replace(' ', '_')
 
-        context_object = context['object']
+        # context_object = context['object']
+
+        graph = {
+            'height': '740',
+            'width': '740',
+            'nodes': [
+                {
+                    'x': '0',
+                    'y': '0',
+                    'element_count': '1',
+                    'element_type_name': 'Lungmap',
+                    'url': reverse_lazy('app:investigation_type_list'),
+                },
+                {
+                    'x': '200',
+                    'y': '0',
+                    'element_count': '1',
+                    'element_type_name': 'Project',
+                    'url': reverse_lazy('app:project_list'),
+                },
+                {
+                    'x': '200',
+                    'y': '200',
+                    'element_count': '10',
+                    'element_type_name': 'Specimen',
+                    'url': reverse_lazy('app:element_list'),
+                },
+                {
+                    'x': '400',
+                    'y': '200',
+                    'element_count': '30',
+                    'element_type_name': 'Chunk',
+                    'url': reverse_lazy('app:element_list'),
+                },
+                {
+                    'x': '200',
+                    'y': '400',
+                    'element_count': '1',
+                    'element_type_name': 'Probe',
+                    'url': reverse_lazy('app:element_list'),
+                },
+                {
+                    'x': '400',
+                    'y': '400',
+                    'element_count': '30',
+                    'element_type_name': 'Process',
+                    'url': reverse_lazy('app:element_list'),
+                },
+                {
+                    'x': '400',
+                    'y': '600',
+                    'element_count': '30',
+                    'element_type_name': 'Image',
+                    'url': reverse_lazy('app:element_list'),
+                },
+                {
+                    'x': '600',
+                    'y': '600',
+                    'element_count': '1',
+                    'element_type_name': 'Dataset',
+                    'url': reverse_lazy('app:dataset_list'),
+                },
+            ],
+            'edges': [                                                          
+                {
+                    'x': '100',
+                    'y': '50',
+                    'direction': 'right',
+                },
+                {
+                    'x': '300',
+                    'y': '250',
+                    'direction': 'right',
+                },
+                {
+                    'x': '450',
+                    'y': '300',
+                    'direction': 'down',
+                },
+                {
+                    'x': '300',
+                    'y': '450',
+                    'direction': 'right',
+                },
+                {
+                    'x': '450',
+                    'y': '500',
+                    'direction': 'down',
+                },
+                {
+                    'x': '500',
+                    'y': '650',
+                    'direction': 'right',
+                },
+            ]
+        }
+
+        context['graph'] = graph
 
         return context
+
 
 class DatasetUpdateView(BaseGenericUpdateView):
     model = Dataset
@@ -562,3 +731,50 @@ class ElementUrlFieldValueUpdateView(BaseGenericUpdateView):
 
 class ElementUrlFieldValueDeleteView(BaseGenericDeleteView):
     model = ElementUrlFieldValue
+
+############
+# Checksum #
+############
+
+class ChecksumListView(BaseGenericListView):
+    model = Checksum
+
+
+class ChecksumCreateView(BaseGenericCreateView):
+    model = Checksum
+
+
+class ChecksumDetailView(BaseGenericDetailView):
+    model = Checksum
+
+
+#class ChecksumUpdateView(BaseGenericUpdateView):
+#    model = Checksum
+
+@csrf_exempt
+def checksum_update(request, pk, *args, **kwargs):
+    data_id = None
+    try:
+        checksum = Checksum.objects.get(id=pk)
+        value = request.POST.get('checksum', None)
+        err_msg = request.POST.get('error', None)
+
+        if value:
+            checksum.value = value
+            checksum.status = 'CMP'
+        if err_msg:
+            checksum.error_message = err_msg
+            checksum.status = 'ERR'
+
+        if value or err_msg:
+            checksum.save()
+    except Exception as e:
+        logger.error(e)
+        return HttpResponse('Error: %s' % e)
+
+    return HttpResponse('OK')
+
+
+class ChecksumDeleteView(BaseGenericDeleteView):
+    model = Checksum
+

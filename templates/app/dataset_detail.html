@@ -3,14 +3,7 @@
 {% block content %}
     <h2>{{ verbose_name}} Detail</h2>
 
-    <p>
-    {% if object.root %}
-        project owner:
-        {{ object.root.owner }}
-    {% endif %}
-    </p>
-
-    <img src="../static/lungmap_graph.png" alt="project graph" style="height: 70%; width: 70%;"></img>
+    {% include "app/includes/graph.html" %}
 
     {% if object.get_parent_relations %}
         <hr/>
@@ -42,6 +35,15 @@
         {% endfor %}
     </ul>
 
+    <hr/>
+    <h3>Path Members:</h3>
+    <ul>
+        {% for member in object.path.pathmember_set.all %}
+            <li><a href="{{ member.element.get_absolute_url}}">{{ member.element }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ object.get_absolute_url }}/publish">Request DOI</a>
     <a href="{{ object.get_absolute_url }}/update">Edit {{ verbose_name }}</a>
     <a href="{{ object.get_absolute_url }}/delete">Delete {{ verbose_name }}</a>
 {% endblock %}

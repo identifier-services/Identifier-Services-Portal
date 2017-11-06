@@ -1,16 +1,41 @@
-body,html {
-    height: 100%;
+/* alternate background color ideas:
+rgb(85,26,139) # purple */
+
+* {
     margin: 0;
     padding: 0;
-    width: 100%;
+    list-style: none;
+    /* font-family: inherit; */
+    /* font-size: inherit; */
+    /* font-weight: inherit; */
 }
 
 body {
-    font-family: Helvetica,sans-serif;
+    font-family: 'Nunito Sans', Helvetica, sans-serif;
+    font-size: 18px;
+    margin: 0px !important;
+    background-image: url('../images/background-5px.gif');
+    background-repeat: repeat-x;
 }
 
-*,:after,:before {
-    box-sizing: border-box;
+@media (max-width: 980px) {
+    body {
+        /*
+        background: linear-gradient(
+            180deg,
+            #ec502e 37px,
+            rgba(255, 255, 255, 1.0) 37px
+        ), no-repeat 0 0 !important;
+        */
+    }
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 hr {
@@ -22,7 +47,7 @@ hr {
 }
 
 li {
-    padding: 5px;
+    padding-right: 5px;
 }
 
 header {
@@ -30,7 +55,7 @@ header {
 }
 
 main {
-    padding: 20px;
+    /* padding: 20px; */
 }
 
 main>ul {
@@ -46,7 +71,279 @@ main>p:last-of-type {
     margin-bottom: 0;
 }
 
+#container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+@media screen and (min-width: 801px) and (max-width: 1100px) {
+    #container {
+        margin: 0px 20px 0px 20px;
+    }
+}
+
+#nav-mobile {
+    display: none;
+}
+
+@media (max-width: 980px) {
+    #nav-mobile {
+        display: block;
+        position: relative;
+        z-index: 200;
+    }
+}
+
+#nav-mobile-hamburger {
+    color: #fff;
+    float: left;
+    margin-top: 10px;
+    margin-left: 10px;
+    text-decoration: none !important;
+}
+
+#nav-mobile div.menu {
+    position: absolute;
+    top: 37px;
+    left: 0px;
+    width: 100%;
+    background: #ec502e;
+    padding-bottom: 20px;
+    display: none;
+}
+
+#nav-mobile ul {
+
+}
+
+#nav-mobile ul.sub {
+    margin-top: 20px;
+}
+
+#nav-mobile ul li {
+    padding: 0;
+    padding-left: 20px;
+}
+
+#nav-mobile ul.main li {
+    border-bottom: 1px solid #fff;
+}
+
+#nav-mobile ul.main li:first-child {
+    border-top: 1px solid #fff;
+}
+
+#nav-mobile ul li a {
+    color: #fff;
+    /* font-size: 16px; */
+    display: block;
+}
+
+#nav-mobile ul.main li a {
+    /* font-size: 24px; */
+    line-height: 60px;
+}
+
+#nav-mobile ul.sub li a {
+    line-height: 40px;
+}
+
+#search-container {
+    height: 34px;
+    margin-bottom: 25px;
+}
+
+#search-container .menu {
+    font-family: 'Ramabhadra', 'Overlock SC', sans-serif;
+    font-size: 22px;
+}
+
+#search {
+    float: right;
+    margin-top: 8px;
+    border-bottom: 1px solid #fff;
+}
+
+@media (max-width: 980px) {
+    #search {
+        display: none;
+    }
+}
+
+#search input, #search button {
+    float: left;
+}
+
+#search input {
+    background: none;
+    border: 0px;
+    height: 22px;
+    width: 333px;
+    font-family: serif;
+    font-size: 14px;
+    color: #fff;
+    outline: none;
+    margin-bottom: -2px;
+}
+
+#search button {
+    background: none;
+    border: 0;
+    color: #fff;
+    transform: scaleX(-1) rotate(180deg);
+    /* font-size: 22px; */
+    font-size: 20px;
+    line-height: 20px;
+}
+
+#bigtime {
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+#bigtime #logo {
+    width: 66%;
+    max-width: 663px;
+    padding-bottom: 16px;
+    font-family: 'Ramabhadra', Helvetica, sans-serif;
+    font-size: 45px;
+    letter-spacing: 1.2px;
+    line-height: 40px;
+    text-decoration: none;
+    color: #ec502e;
+}
+
+@media screen and (min-width: 981px) and (max-width:1086px) {
+    #bigtime #logo {
+        width: 60%;
+        max-width: 625px;
+        font-size: 42px;
+    }
+}
+
+@media screen and (min-width: 801px) and (max-width:980px) {
+    #bigtime #logo {
+        width: 60%;
+        max-width: 625px;
+        padding-bottom: 2px;
+        font-size: 36px;
+    }
+}
+
+@media (min-width: 801px) {
+    #bigtime #logo-mobile {
+        display: none;
+    }
+}
+
+@media (max-width: 800px) {
+    #bigtime #logo {
+        display: none;
+    }
+    #bigtime #logo-mobile {
+        width: 50%;
+        max-width: 220px;
+        margin-left: 20px;
+        font-family: 'Ramabhadra', Helvetica, sans-serif;
+        font-size: 39px;
+        letter-spacing: 1.3px;
+        text-decoration: none;
+        line-height: 28px;
+        color: #ec502e;
+    }
+}
+
+#nav-highlights {
+    float: left;
+    clear: left;
+    font-family: 'Ramabhadra', Arial, sans-serif;
+    font-size: 16px;
+}
+
+@media screen and (min-width: 981px) and (max-width: 1050px) {
+    #nav-highlights {
+        font-size: 14px;
+        line-height: 22px;
+    }
+}
+
+/* this is suplerfuous */
+@media screen and (min-width: 801px) and (max-width: 980px) {
+    #nav-highlights {
+        display: none;
+    }
+}
+
+@media (max-width: 800px) {
+    #nav-highlights {
+        display: none;
+    }
+}
+
+#nav-highlights li {
+    float: left;
+    margin-right: 25px;
+}
+
+#nav-highlights li a {
+    color: black;
+}
+
+#nav-highlights li a:hover {
+    text-decoration: underline;
+}
+
 footer {
     padding: 10px;
     text-align: center;
+}
+
+/* checksum */
+.good {
+    color: green;
+}
+
+.bad { 
+    color: red;
+}
+
+/* ## SVG ## */
+
+/* these media queries are super hacky */
+
+@media (min-width: 496px) {
+    svg {
+        width: 480px;
+    }
+}
+
+@media (max-width: 495px) {
+    svg {
+        width: 100%;
+    }
+}
+
+svg circle {
+    fill: #F7FCFF;
+    stroke: black;
+    stroke-width: 2px;
+}
+
+svg a:hover {
+    text-decoration: none;
+}
+
+svg text {
+    font-family: 'Nunito Sans', Helvetica;
+    font-size: 16px;
+    font-weight: bold;
+    fill: #555;
+    text-anchor: middle;
+}
+
+svg text.itemCount {
+    font-size: 65px;
+    alignment-baseline: baseline;
+    font-weight: bold;
+    fill: #DFDFDF;
 }

@@ -1,30 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% block title %}<title>App Name</title>{% endblock %}
-    <meta charset="utf-8">
+
+    <title>{% block title %}Identifier Services{% endblock %}</title>
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--
-    <link rel=stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    -->
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Hind+Siliguri|Nunito+Sans|Overlock+SC|Palanquin+Dark|Ramabhadra" rel="stylesheet">
+
     {% load static %}
+
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/IDS.png' %}"/>
+
+    <script src="{% static 'js/base/utils.js' %}"></script>
+
     <link rel="stylesheet" href="{% static 'css/styles.css' %}"
 </head>
 <body>
-    <div>
-    {% if user.is_authenticated %}
-        {% include "includes/authenticated_header.html" %}
-    {% else %}
-        {% include "includes/anonymous_header.html" %}
-    {% endif %}
+    <div id="container">
+        {% include "includes/header.html" %}
 	<hr/>
 	<main>
             {% block content %}{% endblock %}
 	</main>
-	<footer>
-	</footer>
+        {% include "includes/footer.html" %}
     </div>
 </body>
 </html>

@@ -1,0 +1,39 @@
+<div id="search-container">
+    <div id="nav-mobile">
+        <a href="#" id="nav-mobile-hamburger" class="fa fa-bars"></a>
+        <div class="menu">
+            <ul class="main">
+                <li><strong><a href="/dashboard">Dashboard</a></strong></li>
+                <li><strong><a href="/users">Users</a></strong></li>
+                <li><strong><a href="/public">Public Projects</a></strong></li>
+            </ul>
+            <ul class="sub">
+                <li><a href="/about/">About</a></li>
+                <li><a href="/contact/">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+    <form id="search" action="/search">
+        <input type="text" class="text" defaultvalue=" " name="q" value=" Search" onFocus="if (this.value==' Search') this.value='';" />
+        <button>&#9740;</button>
+    </form>
+</div>
+
+<div id="bigtime">
+    <a id="logo" href="/">
+            <strong>Identifier Services Portal</strong>
+    </p>
+    <p><a id="logo-mobile" href="/"><strong>Identifier</strong><p><strong>Services</strong></p><p><strong>Portal</strong></a></p>
+    <ul id="nav-highlights">
+        <li><a href="/projects">Projects</a></li>
+        <li><a href="/projects">Datasets</a></li>
+        <li><a href="/projects">Notifications</a></li>
+    </ul>
+</div>
+
+{% if user.is_authenticated %}
+    {% include "includes/authenticated_header.html" %}
+{% else %}
+    {% include "includes/anonymous_header.html" %}
+{% endif %}
+

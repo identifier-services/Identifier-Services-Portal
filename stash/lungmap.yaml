@@ -92,6 +92,7 @@ display fields: FileName
 element category: data
 fields: 
 - name: URL
+  value type: url
 - name: FileName
 - name: FilePath
 rels:

@@ -172,6 +172,16 @@ urlpatterns = [
         views.ElementUpdateView.as_view(), 
         name='element_update'),
     
+    # verify
+    url(r'^element/(?P<pk>[0-9a-f-]+)/verify/$',
+        views.element_init_checksum, 
+        name='element_init_checksum'),
+    
+    # publish
+    url(r'^element/(?P<pk>[0-9a-f-]+)/publish/$',
+        views.request_doi, 
+        name='request_doi'),
+    
     # delete
     url(r'^element/(?P<pk>[0-9a-f-]+)/delete/$', 
         views.ElementDeleteView.as_view(), 
@@ -205,6 +215,10 @@ urlpatterns = [
     url(r'^dataset/(?P<pk>[0-9a-f-]+)/delete/$', 
         views.DatasetDeleteView.as_view(), 
         name='dataset_delete'),
+
+    ################
+    # dataset link #
+    ################
 
     ############################
     # element char field value #
@@ -352,7 +366,7 @@ urlpatterns = [
         name='element_date_field_value_delete'),
 
     ############################
-    # element url field value #
+    # element url field value  #
     ############################
 
     # list
@@ -379,4 +393,56 @@ urlpatterns = [
     url(r'^element-url-field-value/(?P<pk>[0-9a-f-]+)/delete/$', 
         views.ElementUrlFieldValueDeleteView.as_view(), 
         name='element_url_field_value_delete'),
+
+    
+    ########
+    # path #
+    ########
+
+    # # list
+    # url(r'^paths/$', 
+    #     views.PathListView.as_view(), 
+    #     name='path_list'),
+
+    # # detail
+    # url(r'^path/(?P<pk>[0-9a-f-]+)$', 
+    #     views.PathDetailView.as_view(), 
+    #     name='path_detail'),
+
+    ###############
+    # path member #
+    ###############
+
+    ############
+    # checksum #
+    ############
+
+    # list
+    url(r'^checksums/$', 
+        views.ChecksumListView.as_view(), 
+        name='checksum_list'),
+    
+    # create
+    url(r'^checksum/create/$', 
+        views.ChecksumCreateView.as_view(), 
+        name='checksum_create'),
+    
+    # detail
+    url(r'^checksum/(?P<pk>[0-9a-f-]+)$', 
+        views.ChecksumDetailView.as_view(), 
+        name='checksum_detail'),
+    
+    # update
+    #url(r'^checksum/(?P<pk>[0-9a-f-]+)/update/$', 
+    #    views.ChecksumUpdateView.as_view(), 
+    #    name='checksum_update'),
+
+    url(r'^checksum/(?P<pk>[0-9a-f-]+)/update/$', 
+        views.checksum_update, 
+        name='checksum_update'),
+    
+    # delete
+    url(r'^checksum/(?P<pk>[0-9a-f-]+)/delete/$', 
+        views.ChecksumDeleteView.as_view(), 
+        name='checksum_delete'),
 ]
